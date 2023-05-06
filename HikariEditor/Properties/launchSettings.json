@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "HikariEditor (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "HikariEditor (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
