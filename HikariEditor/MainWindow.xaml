@@ -14,21 +14,24 @@
         <Grid Grid.Row="0">
             <Grid ColumnDefinitions="Auto, *">
                 <MenuBar Grid.Column="0">
-                    <MenuBarItem Title="File">
-                        <MenuFlyoutItem Text="New"/>
-                        <MenuFlyoutItem Text="Open..."/>
-                        <MenuFlyoutItem Text="Save"/>
-                        <MenuFlyoutItem Text="Exit"/>
+                    <MenuBarItem Title="File" x:Uid="File">
+                        <MenuFlyoutItem Text="New" x:Uid="New"/>
+                        <MenuFlyoutItem Text="Open..." x:Uid="Open"/>
+                        <MenuFlyoutItem Text="Save" x:Uid="Save"/>
+                        <MenuFlyoutSeparator />
+                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave"/>
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem Text="Exit" x:Uid="Exit" Click="ExitClick"/>
                     </MenuBarItem>
 
-                    <MenuBarItem Title="Edit">
+                    <MenuBarItem Title="Edit" x:Uid="Edit">
                         <MenuFlyoutItem Text="Undo"/>
                         <MenuFlyoutItem Text="Cut"/>
                         <MenuFlyoutItem Text="Copy"/>
                         <MenuFlyoutItem Text="Paste"/>
                     </MenuBarItem>
 
-                    <MenuBarItem Title="Help">
+                    <MenuBarItem Title="Help" x:Uid="Help">
                         <MenuFlyoutItem Text="About"/>
                     </MenuBarItem>
                 </MenuBar>
@@ -39,7 +42,9 @@
                Width="16" Height="16" 
                Margin="8,0"/>
                     -->
-                    <TextBlock x:Name="AppTitleTextBlock" Text="Editor"
+                    <TextBlock x:Name="AppTitleTextBlock" 
+                        x:Uid="AppTitleText"
+                        Text="Editor"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center" />
                 </Grid>

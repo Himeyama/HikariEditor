@@ -11,7 +11,10 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <TreeView x:Name="ExplorerTree" />
+    <Grid RowDefinitions="Auto, *">
+        <StackPanel Margin="16, 8, 16, 8" Grid.Row="0">
+            <TextBlock Text="Explorer" x:Uid="Explorer"/>
+        </StackPanel>
+        <TreeView x:Name="ExplorerTree" Grid.Row="1" />
     </Grid>
 </Page>

@@ -1,4 +1,4 @@
-<!-- Copyright (c) Microsoft Corporation and Contributors. -->
+﻿<!-- Copyright (c) Microsoft Corporation and Contributors. -->
 <!-- Licensed under the MIT License. -->
 
 <Page
@@ -11,7 +11,18 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
-        <TextBlock Text="Test" x:Name="text" />
+    <Grid RowDefinitions="*">
+        <TabView 
+            x:Name="Tabs"
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0"
+            AddTabButtonClick="TabView_AddTabButtonClick"
+            TabCloseRequested="TabView_TabCloseRequested">
+            <TabView.TabStripHeader>
+                <Grid x:Name="ShellTitlebarInset" Background="Transparent" />
+            </TabView.TabStripHeader>
+            <TabView.TabStripFooter>
+                <Grid x:Name="CustomDragRegion" Background="Transparent" />
+            </TabView.TabStripFooter>
+        </TabView>
     </Grid>
 </Page>

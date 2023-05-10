@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33627.172
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HikariEditor", "HikariEditor\HikariEditor.csproj", "{AC662F15-3428-4B8A-9E67-A5EB936322DD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HikariEditor", "HikariEditor\HikariEditor.csproj", "{AC662F15-3428-4B8A-9E67-A5EB936322DD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -18,9 +18,9 @@ Global
 		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|ARM64.ActiveCfg = Debug|ARM64
 		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|ARM64.Build.0 = Debug|ARM64
 		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|ARM64.Deploy.0 = Debug|ARM64
-		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x64.ActiveCfg = Debug|x64
-		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x64.Build.0 = Debug|x64
-		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x64.Deploy.0 = Debug|x64
+		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x64.ActiveCfg = Debug|x86
+		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x64.Build.0 = Debug|x86
+		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x64.Deploy.0 = Debug|x86
 		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x86.ActiveCfg = Debug|x86
 		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x86.Build.0 = Debug|x86
 		{AC662F15-3428-4B8A-9E67-A5EB936322DD}.Debug|x86.Deploy.0 = Debug|x86

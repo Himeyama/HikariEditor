@@ -5,7 +5,9 @@ using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.Win32;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.Graphics;
 using WinRT;
@@ -27,6 +29,9 @@ namespace HikariEditor
         public MainWindow()
         {
             InitializeComponent();
+
+            regSetup();
+
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
             TrySetSystemBackdrop();
@@ -34,11 +39,33 @@ namespace HikariEditor
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WindowId myWndId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
             AppWindow appWindow = AppWindow.GetFromWindowId(myWndId);
-            appWindow.Resize(new SizeInt32(1200, 800));
-
+            appWindow.Resize(new SizeInt32(1920, 1080));
             editorFrame.Navigate(typeof(Editor));
         }
 
+        void regSetup()
+        {
+            string keyPath = @"Software\HikariEditor";
+            RegistryKey key = Registry.CurrentUser.OpenSubKey(keyPath, true);
+            Debug.WriteLine(keyPath);
+            Debug.WriteLine(key);
+            if (key == null)
+            {
+                key = Registry.CurrentUser.CreateSubKey(keyPath);
+                Debug.WriteLine("Create OK");
+            }
+            key.SetValue("i", 0);
+            key.SetValue("b", true);
+            key.SetValue("s", "text");
+            Debug.WriteLine(key.GetValue("i"));
+            Debug.WriteLine("Close OK");
+            key.Close();
+        }
+
+        void ExitClick(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
 
         void MenuChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
@@ -116,6 +143,11 @@ namespace HikariEditor
                 case ElementTheme.Light: m_configurationSource.Theme = SystemBackdropTheme.Light; break;
                 case ElementTheme.Default: m_configurationSource.Theme = SystemBackdropTheme.Default; break;
             }
+        }
+
+        private void MenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

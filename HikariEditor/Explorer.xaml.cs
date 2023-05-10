@@ -2,9 +2,13 @@
 // Licensed under the MIT License.
 
 using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Text;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -21,7 +25,7 @@ namespace HikariEditor
         public Explorer()
         {
             InitializeComponent();
-            fullFile = "C:\\Users\\minan\\source";
+            fullFile = "C:\\Users\\minan\\ruby";
             string file = "";
             addChildFiles(file, fullFile, null, ExplorerTree);
             ExplorerTree.ItemInvoked += fileClick;
@@ -38,11 +42,24 @@ namespace HikariEditor
                 path = string.IsNullOrEmpty(path) ? (string)parent.Content : $"{(string)parent.Content}\\{path}";
                 parent = parent.Parent;
             }
-            string fileFullPath = fullFile + path;
-            //var mw = MainWindow;
-            var mainWindow = this.Parent;
-            //var a = NavigationService.Find("Page2");
-            //((HikariEditor.App)a).m_window.Title
+            string fileFullPath = $"{fullFile}{path}\\{fileName}";
+            Debug.WriteLine(fileFullPath);
+
+            try
+            {
+                string message = $"open {fileFullPath}";
+                string server = "127.0.0.1";
+                Int32 port = 8086;
+                using (TcpClient client = new TcpClient(server, port))
+                {
+                    Byte[] data = Encoding.UTF8.GetBytes(message);
+                    using (NetworkStream stream = client.GetStream())
+                    {
+                        stream.Write(data, 0, data.Length);
+                    }
+                }
+            }
+            catch { }
         }
 
         void addChildFiles(string file, string fFile, TreeViewNode parent, TreeView root)
@@ -58,7 +75,6 @@ namespace HikariEditor
             catch
             {
             }
-
 
             // 子ファイル一覧
             List<string> chFiles = new List<string>();
