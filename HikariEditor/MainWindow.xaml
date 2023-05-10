@@ -19,7 +19,7 @@
                         <MenuFlyoutItem Text="Open..." x:Uid="Open"/>
                         <MenuFlyoutItem Text="Save" x:Uid="Save"/>
                         <MenuFlyoutSeparator />
-                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave"/>
+                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" Click="EnableAutoSave" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutItem Text="Exit" x:Uid="Exit" Click="ExitClick"/>
                     </MenuBarItem>

@@ -5,11 +5,10 @@ using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.Win32;
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.Graphics;
+using Windows.Storage;
 using WinRT;
 
 namespace HikariEditor
@@ -26,11 +25,13 @@ namespace HikariEditor
         [DllImport("uxtheme.dll", EntryPoint = "#132")]
         private static extern bool ShouldAppsUseDarkMode();
 
+        ApplicationDataContainer config;
+
         public MainWindow()
         {
             InitializeComponent();
-
-            regSetup();
+            configSetup();
+            loadConfig();
 
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
@@ -43,23 +44,24 @@ namespace HikariEditor
             editorFrame.Navigate(typeof(Editor));
         }
 
-        void regSetup()
+        void configSetup()
         {
-            string keyPath = @"Software\HikariEditor";
-            RegistryKey key = Registry.CurrentUser.OpenSubKey(keyPath, true);
-            Debug.WriteLine(keyPath);
-            Debug.WriteLine(key);
-            if (key == null)
+            config = ApplicationData.Current.LocalSettings;
+            if (config.Values["AutoSave"] == null)
             {
-                key = Registry.CurrentUser.CreateSubKey(keyPath);
-                Debug.WriteLine("Create OK");
-            }
-            key.SetValue("i", 0);
-            key.SetValue("b", true);
-            key.SetValue("s", "text");
-            Debug.WriteLine(key.GetValue("i"));
-            Debug.WriteLine("Close OK");
-            key.Close();
+                config.Values["AutoSave"] = false;
+            };
+            //Debug.WriteLine(config.Values["AutoSave"]);
+        }
+
+        void loadConfig()
+        {
+            AutoSave.IsChecked = (bool)config.Values["AutoSave"];
+        }
+
+        void EnableAutoSave(object sender, RoutedEventArgs e)
+        {
+            config.Values["AutoSave"] = AutoSave.IsChecked;
         }
 
         void ExitClick(object sender, RoutedEventArgs e)
