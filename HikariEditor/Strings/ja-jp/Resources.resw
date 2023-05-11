@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AppTitleText.Text" xml:space="preserve">
-    <value>エディタ</value>
+    <value>自作エディタ</value>
   </data>
   <data name="AutoSave.Text" xml:space="preserve">
     <value>自動保存</value>
@@ -142,7 +142,13 @@
     <value>新規</value>
   </data>
   <data name="Open.Text" xml:space="preserve">
-    <value>開く...</value>
+    <value>ディレクトリを開く...</value>
+  </data>
+  <data name="OpenBtn.Content" xml:space="preserve">
+    <value>開く</value>
+  </data>
+  <data name="OpenPageTitle.Text" xml:space="preserve">
+    <value>ディレクトリを開く</value>
   </data>
   <data name="Save.Text" xml:space="preserve">
     <value>保存</value>

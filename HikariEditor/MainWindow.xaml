@@ -16,7 +16,11 @@
                 <MenuBar Grid.Column="0">
                     <MenuBarItem Title="File" x:Uid="File">
                         <MenuFlyoutItem Text="New" x:Uid="New"/>
-                        <MenuFlyoutItem Text="Open..." x:Uid="Open"/>
+                        <MenuFlyoutItem Text="Open Directory..." x:Uid="Open" x:Name="Open" Click="OpenClick">
+                            <MenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Control" Key="O"/>
+                            </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem>
                         <MenuFlyoutItem Text="Save" x:Uid="Save"/>
                         <MenuFlyoutSeparator />
                         <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" Click="EnableAutoSave" />

@@ -44,14 +44,16 @@ namespace HikariEditor
             editorFrame.Navigate(typeof(Editor));
         }
 
+        // 開くをクリック
+        void OpenClick(object sender, RoutedEventArgs e)
+        {
+            editorFrame.Navigate(typeof(Open));
+        }
+
         void configSetup()
         {
             config = ApplicationData.Current.LocalSettings;
-            if (config.Values["AutoSave"] == null)
-            {
-                config.Values["AutoSave"] = false;
-            };
-            //Debug.WriteLine(config.Values["AutoSave"]);
+            config.Values["AutoSave"] ??= false;
         }
 
         void loadConfig()

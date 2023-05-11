@@ -1,0 +1,45 @@
+﻿<!-- Copyright (c) Microsoft Corporation and Contributors. -->
+<!-- Licensed under the MIT License. -->
+
+<Page
+    x:Class="HikariEditor.Open"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HikariEditor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local1="using:ABI.Windows.ApplicationModel.Contacts"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <DataTemplate x:Key="ContactListViewTemplate" x:DataType="local:Directories">
+            <TextBlock Text="{x:Bind Path}" Margin="0,8,0,8"/>
+        </DataTemplate>
+    </Page.Resources>
+    <Grid RowDefinitions="Auto, Auto, *, Auto">
+        <TextBlock Grid.Row="0" Text="Open Directory" x:Uid="OpenPageTitle" Margin="8, 8, 8, 8" FontSize="32" />
+        <Grid Grid.Row="1" Margin="8, 8, 8, 8" ColumnDefinitions="Auto, Auto, Auto, *">
+            <Button Grid.Column="0" Margin="8, 0, 0, 0" Click="DirOpenParentClick" x:Name="DirOpenParentBtn">
+                <FontIcon Glyph="&#xE110;" FontFamily="Segoe Fluent Icons" />
+            </Button>
+            <Button Grid.Column="1" Margin="8, 0, 0, 0" Click="DirOpenComputerClick">
+                <FontIcon Glyph="&#xE7F4;" FontFamily="Segoe Fluent Icons" />
+            </Button>
+            <Button Grid.Column="2" Margin="8, 0, 8, 0" Click="DirOpenHomeBtnClick">
+                <FontIcon Glyph="&#xE10F;" FontFamily="Segoe Fluent Icons" />
+            </Button>
+            <TextBox Grid.Column="3" x:Name="DirPath"/>
+        </Grid>
+        <Grid Grid.Row="2" ColumnDefinitions="*">
+            <ScrollViewer Grid.Column="0" >
+                <ListView
+                    x:Name="Directories"
+                    ItemTemplate="{StaticResource ContactListViewTemplate}"
+                    BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
+                    DoubleTapped="Directories_DoubleTapped">
+                </ListView>
+            </ScrollViewer>
+        </Grid>
+        <Button HorizontalAlignment="Right" Margin="8, 8, 8, 8" Grid.Row="3" Content="Open" x:Name="OpenBtn" x:Uid="OpenBtn" />
+    </Grid>
+
+</Page>
