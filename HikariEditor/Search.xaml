@@ -8,8 +8,7 @@
     xmlns:local="using:HikariEditor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
     <StackPanel>
         <StackPanel Margin="16, 8, 16, 8">

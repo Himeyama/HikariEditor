@@ -9,7 +9,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    NavigationCacheMode="Enabled">
 
     <Grid RowDefinitions="*">
         <TabView 
@@ -17,12 +17,6 @@
             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0"
             AddTabButtonClick="TabView_AddTabButtonClick"
             TabCloseRequested="TabView_TabCloseRequested">
-            <TabView.TabStripHeader>
-                <Grid x:Name="ShellTitlebarInset" Background="Transparent" />
-            </TabView.TabStripHeader>
-            <TabView.TabStripFooter>
-                <Grid x:Name="CustomDragRegion" Background="Transparent" />
-            </TabView.TabStripFooter>
         </TabView>
     </Grid>
 </Page>

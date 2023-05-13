@@ -2,13 +2,13 @@
 // Licensed under the MIT License.
 
 using Microsoft.UI.Xaml.Controls;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using Windows.Storage;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -21,11 +21,15 @@ namespace HikariEditor
     public sealed partial class Explorer : Page
     {
         string fullFile;
+        ApplicationDataContainer config;
+
 
         public Explorer()
         {
+            config = ApplicationData.Current.LocalSettings;
             InitializeComponent();
-            fullFile = "C:\\Users\\minan\\ruby";
+            fullFile = config == null ? "C:\\Users\\minan" : (string)config.Values["openDirPath"];
+
             string file = "";
             addChildFiles(file, fullFile, null, ExplorerTree);
             ExplorerTree.ItemInvoked += fileClick;
@@ -49,15 +53,11 @@ namespace HikariEditor
             {
                 string message = $"open {fileFullPath}";
                 string server = "127.0.0.1";
-                Int32 port = 8086;
-                using (TcpClient client = new TcpClient(server, port))
-                {
-                    Byte[] data = Encoding.UTF8.GetBytes(message);
-                    using (NetworkStream stream = client.GetStream())
-                    {
-                        stream.Write(data, 0, data.Length);
-                    }
-                }
+                int port = 8086;
+                using TcpClient client = new(server, port);
+                byte[] data = Encoding.UTF8.GetBytes(message);
+                using NetworkStream stream = client.GetStream();
+                stream.Write(data, 0, data.Length);
             }
             catch { }
         }
@@ -77,7 +77,7 @@ namespace HikariEditor
             }
 
             // 子ファイル一覧
-            List<string> chFiles = new List<string>();
+            List<string> chFiles = new();
             foreach (string f in fileList)
             {
                 string[] fs = f.Split("\\");

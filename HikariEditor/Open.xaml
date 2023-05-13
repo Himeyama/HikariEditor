@@ -9,10 +9,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:local1="using:ABI.Windows.ApplicationModel.Contacts"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    >
     <Page.Resources>
         <DataTemplate x:Key="ContactListViewTemplate" x:DataType="local:Directories">
-            <TextBlock Text="{x:Bind Path}" Margin="0,8,0,8"/>
+            <TextBlock Text="{x:Bind Name}" Margin="0,8,0,8"/>
         </DataTemplate>
     </Page.Resources>
     <Grid RowDefinitions="Auto, Auto, *, Auto">
@@ -35,11 +35,11 @@
                     x:Name="Directories"
                     ItemTemplate="{StaticResource ContactListViewTemplate}"
                     BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
-                    DoubleTapped="Directories_DoubleTapped">
+                    DoubleTapped="Directories_DoubleTapped"
+                    Tapped="Directories_Tapped">
                 </ListView>
             </ScrollViewer>
         </Grid>
-        <Button HorizontalAlignment="Right" Margin="8, 8, 8, 8" Grid.Row="3" Content="Open" x:Name="OpenBtn" x:Uid="OpenBtn" />
+        <Button HorizontalAlignment="Right" Margin="8, 8, 8, 8" Grid.Row="3" Content="Open" x:Name="OpenBtn" x:Uid="OpenBtn" Click="OpenBtn_Click" />
     </Grid>
-
 </Page>

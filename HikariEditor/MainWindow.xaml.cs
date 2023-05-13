@@ -20,15 +20,17 @@ namespace HikariEditor
     {
         // Mica
         WindowsSystemDispatcherQueueHelper m_wsdqHelper; // See below for implementation.
-        MicaController m_backdropController;
+        //MicaController m_backdropController;
+        DesktopAcrylicController m_backdropController;
         SystemBackdropConfiguration m_configurationSource;
         [DllImport("uxtheme.dll", EntryPoint = "#132")]
         private static extern bool ShouldAppsUseDarkMode();
-
+        //Editor editor;
         ApplicationDataContainer config;
 
         public MainWindow()
         {
+            //editor = new Editor();
             InitializeComponent();
             configSetup();
             loadConfig();
@@ -37,6 +39,8 @@ namespace HikariEditor
             SetTitleBar(AppTitleBar);
             TrySetSystemBackdrop();
 
+            Manager.mainWindow = this;
+            Manager.contentFrame = contentFrame;
             IntPtr hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
             WindowId myWndId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
             AppWindow appWindow = AppWindow.GetFromWindowId(myWndId);
@@ -47,7 +51,7 @@ namespace HikariEditor
         // 開くをクリック
         void OpenClick(object sender, RoutedEventArgs e)
         {
-            editorFrame.Navigate(typeof(Open));
+            editorFrame.Navigate(typeof(Open), this);
         }
 
         void configSetup()
@@ -77,7 +81,7 @@ namespace HikariEditor
             switch (selectedItem.Tag)
             {
                 case "Explorer":
-                    contentFrame.Navigate(typeof(Explorer), this);
+                    contentFrame.Navigate(typeof(Explorer), "hogehogehogehoge");
                     break;
                 case "Search":
                     contentFrame.Navigate(typeof(Search));
@@ -102,8 +106,8 @@ namespace HikariEditor
                 m_configurationSource.IsInputActive = true;
                 SetConfigurationSourceTheme();
 
-                m_backdropController = new MicaController();
-                //m_backdropController = new DesktopAcrylicController();
+                //m_backdropController = new MicaController();
+                m_backdropController = new();
 
                 m_backdropController.AddSystemBackdropTarget(this.As<Microsoft.UI.Composition.ICompositionSupportsSystemBackdrop>());
                 m_backdropController.SetSystemBackdropConfiguration(m_configurationSource);

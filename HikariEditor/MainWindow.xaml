@@ -1,7 +1,4 @@
-﻿<!-- Copyright (c) Microsoft Corporation and Contributors. -->
-<!-- Licensed under the MIT License. -->
-
-<Window
+﻿<Window
     x:Class="HikariEditor.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -60,19 +57,20 @@
                 SelectionChanged="MenuChanged"
                 x:Name="Menu" PaneDisplayMode="LeftCompact"
                 IsBackButtonVisible="Collapsed" IsBackEnabled="False"
-                IsPaneToggleButtonVisible="False">
+                IsPaneToggleButtonVisible="False"
+                x:FieldModifier="Public">
                 <NavigationView.MenuItems>
-                    <NavigationViewItem Tag="Explorer" >
+                    <NavigationViewItem Tag="Explorer" x:FieldModifier="Public" x:Name="ItemExplorer">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xF56E;" FontFamily="Segoe Fluent Icons"></FontIcon>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
                     <NavigationViewItem Icon="Find" Tag="Search" />
                 </NavigationView.MenuItems>
-                <Frame x:Name="contentFrame"/>
+                <Frame x:Name="contentFrame" x:FieldModifier="Public" />
             </NavigationView>
             <Grid Grid.Column="1">
-                <Frame x:Name="editorFrame"/>
+                <Frame x:Name="editorFrame" x:FieldModifier="Public" />
             </Grid>
         </Grid>
     </Grid>

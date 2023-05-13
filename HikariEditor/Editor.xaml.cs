@@ -22,7 +22,7 @@ namespace HikariEditor
     /// </summary>
     public sealed partial class Editor : Page
     {
-        List<string> tabs = new List<string> { };
+        List<string> tabs = new() { };
 
         public Editor()
         {
@@ -63,7 +63,7 @@ namespace HikariEditor
             TabViewItem newTab = new();
             newTab.IconSource = new SymbolIconSource() { Symbol = Symbol.Document };
             newTab.Header = "Untitled";
-            Frame frame = new Frame();
+            Frame frame = new();
             newTab.Content = frame;
             newTab.IsSelected = true;
             sender.TabItems.Add(newTab);
@@ -93,8 +93,6 @@ namespace HikariEditor
                 return;
             }
             tabListAdd(fileName);
-
-            Debug.WriteLine(fileName);
             if (!File.Exists(fileName)) return;
             TabViewItem newTab = new();
             newTab.IconSource = new SymbolIconSource() { Symbol = Symbol.Document };
@@ -124,90 +122,88 @@ namespace HikariEditor
                 using TcpClient handler = await listener.AcceptTcpClientAsync();
 
                 byte[] buffer = new byte[1024];
-                using (NetworkStream stream = handler.GetStream())
+                using NetworkStream stream = handler.GetStream();
+                stream.Read(buffer, 0, buffer.Length);
+                string commands = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                // HTTP リクエストの場合
+
+                if (commands[0..3] == "GET")
                 {
-                    stream.Read(buffer, 0, buffer.Length);
-                    string commands = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-                    // HTTP リクエストの場合
+                    string[] data = commands.Split(' ');
 
-                    if (commands[0..3] == "GET")
+                    // 保存処理
+                    string parameter = data[1];
+                    string pattern = @"^/\?data=(.*)$";
+                    Match match = Regex.Match(parameter, pattern);
+                    if (match.Success)
                     {
-                        string[] data = commands.Split(' ');
+                        string b64Command = match.Groups[1].Value;
+                        string httpCommand = b642str(b64Command);
+                        //byte[] b64bytes = Convert.FromBase64String(b64Command);
+                        //string httpCommand = Encoding.UTF8.GetString(b64bytes);
 
-                        // 保存処理
-                        string parameter = data[1];
-                        string pattern = @"^/\?data=(.*)$";
-                        Match match = Regex.Match(parameter, pattern);
-                        if (match.Success)
+                        /*
+                        data=(base64)
+                        ===
+                        save FileName(base64)
+                        src...
+                        ===
+                        ex: http://127.0.0.1:8086/?data=c2F2ZSBRenBjCnB1dHMgIkhlbGxvISI=
+                        */
+                        if (httpCommand.Length >= 4 && httpCommand[0..4] == "save")
                         {
-                            string b64Command = match.Groups[1].Value;
-                            string httpCommand = b642str(b64Command);
-                            //byte[] b64bytes = Convert.FromBase64String(b64Command);
-                            //string httpCommand = Encoding.UTF8.GetString(b64bytes);
+                            string src = httpCommand[0..4];
+                            string[] srcs = httpCommand[5..^0].Split('\n');
+                            string fileName = b642str(srcs[0]);
+                            string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
 
-                            /*
-                            data=(base64)
-                            ===
-                            save FileName(base64)
-                            src...
-                            ===
-                            ex: http://127.0.0.1:8086/?data=c2F2ZSBRenBjCnB1dHMgIkhlbGxvISI=
-                            */
-                            if (httpCommand.Length >= 4 && httpCommand[0..4] == "save")
-                            {
-                                string src = httpCommand[0..4];
-                                string[] srcs = httpCommand[5..^0].Split('\n');
-                                string fileName = b642str(srcs[0]);
-                                string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
-
-                                Debug.WriteLine($"=== {fileName} ===\n{srcCode}\n===");
-                            }
-                        }
-
-                        // ファイルを開く処理
-                        pattern = @"^/\?open=(.*)$";
-                        match = Regex.Match(parameter, pattern);
-                        if (match.Success)
-                        {
-                            string b64file = match.Groups[1].Value;
-                            string fileName = b642str(b64file);
-                            string src = "";
-                            try
-                            {
-                                src = File.ReadAllText(fileName);
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.WriteLine(fileName);
-                                Debug.WriteLine("ファイルを読み込めませんでした。");
-                                Debug.WriteLine(e.Message);
-                                return;
-                            }
-                            /*
-                            open=filename(base64)
-                            ex: http://127.0.0.1:8086?open=QzpcVXNlcnNcbWluYW5ccm9vdFxEb2N1bWVudHNcdW50aXRsZWQxLnJi
-                            */
-                            string log = $"=== {fileName} ===\n";
-                            log += src;
-                            log += "\n======";
-                            Debug.WriteLine(log);
-                            string b64src = str2b64(src);
-                            byte[] responseBytes = Encoding.UTF8.GetBytes($"HTTP/1.1 200 OK\r\nContent-Length: {b64src.Length}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{b64src}");
-                            stream.Write(responseBytes, 0, responseBytes.Length);
-                            byte[] bufferB64src = Encoding.UTF8.GetBytes(b64src);
-                            stream.Write(bufferB64src, 0, bufferB64src.Length);
+                            Debug.WriteLine($"=== {fileName} ===\n{srcCode}\n===");
                         }
                     }
 
-                    //スペース区切り
-                    string[] sCommands = commands.Split(' ');
-                    string command = sCommands[0];
-                    if (command == "open")
+                    // ファイルを開く処理
+                    pattern = @"^/\?open=(.*)$";
+                    match = Regex.Match(parameter, pattern);
+                    if (match.Success)
                     {
-                        string fileName = string.Join(" ", sCommands[1..^0]).TrimEnd('\0');
-                        string shortFileName = Path.GetFileName(fileName).TrimEnd('\0');
-                        addTab(fileName, shortFileName);
+                        string b64file = match.Groups[1].Value;
+                        string fileName = b642str(b64file);
+                        string src = "";
+                        try
+                        {
+                            src = File.ReadAllText(fileName);
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.WriteLine(fileName);
+                            Debug.WriteLine("ファイルを読み込めませんでした。");
+                            Debug.WriteLine(e.Message);
+                            return;
+                        }
+                        /*
+                        open=filename(base64)
+                        ex: http://127.0.0.1:8086?open=QzpcVXNlcnNcbWluYW5ccm9vdFxEb2N1bWVudHNcdW50aXRsZWQxLnJi
+                        */
+                        string log = $"=== {fileName} ===\n";
+                        log += src;
+                        log += "\n======";
+                        Debug.WriteLine(log);
+                        string b64src = str2b64(src);
+                        byte[] responseBytes = Encoding.UTF8.GetBytes($"HTTP/1.1 200 OK\r\nContent-Length: {b64src.Length}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{b64src}");
+                        stream.Write(responseBytes, 0, responseBytes.Length);
+                        byte[] bufferB64src = Encoding.UTF8.GetBytes(b64src);
+                        stream.Write(bufferB64src, 0, bufferB64src.Length);
                     }
+                }
+
+                //スペース区切り
+                string[] sCommands = commands.Split(' ');
+                string command = sCommands[0];
+                if (command == "open")
+                {
+                    string fileName = string.Join(" ", sCommands[1..^0]).TrimEnd('\0');
+                    string shortFileName = Path.GetFileName(fileName).TrimEnd('\0');
+                    addTab(fileName, shortFileName);
                 }
             }
             finally
