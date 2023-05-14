@@ -7,20 +7,30 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:ABI.Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
     <Grid
-        RowDefinitions="40, *" x:Name="Window">
+        RowDefinitions="40, *, 24" x:Name="Window">
         <Grid Grid.Row="0">
-            <Grid ColumnDefinitions="Auto, *">
-                <MenuBar Grid.Column="0">
+            <Grid ColumnDefinitions="Auto, Auto, *">
+                <StackPanel Padding="16, 0, 0, 0" Grid.Column="0" Orientation="Horizontal" Width="114">
+                    <TextBlock Padding="0, 0, 0, 0" Text="Auto Save" x:Uid="AutoSave" VerticalAlignment="Center" FontSize="12" />
+                    <StackPanel Padding="8, 1, 0, 0">
+                        <ToggleSwitch AutomationProperties.Name="AutoSaveToggleSwitch"
+                                  OffContent="" OnContent=""
+                                  IsOn="{x:Bind AutoSave.IsChecked, Mode=TwoWay}"
+                                  Toggled="ToggleSwitch_Toggled"
+                                  x:Name="AutoSaveToggleSwitch" />
+                    </StackPanel>
+                </StackPanel>
+                
+                <MenuBar Grid.Column="1">
                     <MenuBarItem Title="File" x:Uid="File">
-                        <MenuFlyoutItem Text="New" x:Uid="New"/>
+                        <!--<MenuFlyoutItem Text="New" x:Uid="New" />-->
                         <MenuFlyoutItem Text="Open Directory..." x:Uid="Open" x:Name="Open" Click="OpenClick">
                             <MenuFlyoutItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Control" Key="O"/>
                             </MenuFlyoutItem.KeyboardAccelerators>
                         </MenuFlyoutItem>
-                        <MenuFlyoutItem Text="Save" x:Uid="Save"/>
                         <MenuFlyoutSeparator />
-                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" Click="EnableAutoSave" />
+                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" Click="EnableAutoSave" x:FieldModifier="Public" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutItem Text="Exit" x:Uid="Exit" Click="ExitClick"/>
                     </MenuBarItem>
@@ -36,7 +46,8 @@
                         <MenuFlyoutItem Text="About"/>
                     </MenuBarItem>
                 </MenuBar>
-                <Grid x:Name="AppTitleBar" Grid.Column="1">
+
+                <Grid x:Name="AppTitleBar" Grid.Column="2">
                     <!--
                     <Image Source="Images/WindowIcon.png"
                HorizontalAlignment="Left" 
@@ -65,13 +76,16 @@
                             <FontIcon Glyph="&#xF56E;" FontFamily="Segoe Fluent Icons"></FontIcon>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <NavigationViewItem Icon="Find" Tag="Search" />
+                    <!--<NavigationViewItem Icon="Find" Tag="Search" />-->
                 </NavigationView.MenuItems>
                 <Frame x:Name="contentFrame" x:FieldModifier="Public" />
             </NavigationView>
             <Grid Grid.Column="1">
                 <Frame x:Name="editorFrame" x:FieldModifier="Public" />
             </Grid>
+        </Grid>
+        <Grid Grid.Row="2" Background="#E57373">
+            <TextBlock Text="" x:Name="StatusBar" Margin="8, 0, 0, 0" x:FieldModifier="Public" FontSize="12" VerticalAlignment="Center" />
         </Grid>
     </Grid>
 </Window>

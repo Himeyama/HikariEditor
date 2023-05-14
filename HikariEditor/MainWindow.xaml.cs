@@ -20,8 +20,8 @@ namespace HikariEditor
     {
         // Mica
         WindowsSystemDispatcherQueueHelper m_wsdqHelper; // See below for implementation.
-        //MicaController m_backdropController;
-        DesktopAcrylicController m_backdropController;
+        MicaController m_backdropController;
+        //DesktopAcrylicController m_backdropController;
         SystemBackdropConfiguration m_configurationSource;
         [DllImport("uxtheme.dll", EntryPoint = "#132")]
         private static extern bool ShouldAppsUseDarkMode();
@@ -30,7 +30,6 @@ namespace HikariEditor
 
         public MainWindow()
         {
-            //editor = new Editor();
             InitializeComponent();
             configSetup();
             loadConfig();
@@ -45,7 +44,7 @@ namespace HikariEditor
             WindowId myWndId = Microsoft.UI.Win32Interop.GetWindowIdFromWindow(hWnd);
             AppWindow appWindow = AppWindow.GetFromWindowId(myWndId);
             appWindow.Resize(new SizeInt32(1920, 1080));
-            editorFrame.Navigate(typeof(Editor));
+            editorFrame.Navigate(typeof(Editor), this);
         }
 
         // 開くをクリック
@@ -65,6 +64,10 @@ namespace HikariEditor
             AutoSave.IsChecked = (bool)config.Values["AutoSave"];
         }
 
+        private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            config.Values["AutoSave"] = AutoSaveToggleSwitch.IsOn;
+        }
         void EnableAutoSave(object sender, RoutedEventArgs e)
         {
             config.Values["AutoSave"] = AutoSave.IsChecked;
@@ -151,11 +154,6 @@ namespace HikariEditor
                 case ElementTheme.Light: m_configurationSource.Theme = SystemBackdropTheme.Light; break;
                 case ElementTheme.Default: m_configurationSource.Theme = SystemBackdropTheme.Default; break;
             }
-        }
-
-        private void MenuFlyoutItem_Click(object sender, RoutedEventArgs e)
-        {
-
         }
     }
 }

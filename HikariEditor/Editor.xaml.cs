@@ -1,28 +1,28 @@
-﻿// Copyright (c) Microsoft Corporation and Contributors.
-// Licensed under the MIT License.
-
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace HikariEditor
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class Editor : Page
     {
         List<string> tabs = new() { };
+        MainWindow mainWindow;
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            mainWindow = e.Parameter as MainWindow;
+            base.OnNavigatedTo(e);
+        }
 
         public Editor()
         {
@@ -110,6 +110,21 @@ namespace HikariEditor
             tabs.Add(fileName);
         }
 
+        string str2MD5(string src)
+        {
+            byte[] srcBytes = Encoding.UTF8.GetBytes(src);
+            string MD5src;
+            using (MD5 md5 = MD5.Create())
+            {
+                byte[] MD5srcBytes = md5.ComputeHash(srcBytes);
+                StringBuilder sb = new();
+                for (int i = 0; i < MD5srcBytes.Length; i++)
+                    sb.Append(MD5srcBytes[i].ToString("x2"));
+                MD5src = sb.ToString();
+            }
+            return MD5src;
+        }
+
         async Task server()
         {
             IPAddress ipaddr = IPAddress.Parse("127.0.0.1");
@@ -155,9 +170,30 @@ namespace HikariEditor
                             string src = httpCommand[0..4];
                             string[] srcs = httpCommand[5..^0].Split('\n');
                             string fileName = b642str(srcs[0]);
+                            string shortFileName = Path.GetFileName(fileName);
                             string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
 
-                            Debug.WriteLine($"=== {fileName} ===\n{srcCode}\n===");
+                            Debug.WriteLine($"=== {shortFileName} ===\n{srcCode}\n===");
+                            File.WriteAllText(fileName, srcCode);
+                            mainWindow.StatusBar.Text = $"{shortFileName} を保存しました";
+                            DelayResetStatusBar(3);
+                        }
+
+                        if (httpCommand.Length >= 8 && httpCommand[0..8] == "autosave")
+                        {
+                            string src = httpCommand[0..8];
+                            string[] srcs = httpCommand[9..^0].Split('\n');
+                            string fileName = b642str(srcs[0]);
+                            string shortFileName = Path.GetFileName(fileName);
+                            string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
+                            Debug.WriteLine($"=== 自動保存: {shortFileName} ===\n{srcCode}\n===");
+
+                            if (!mainWindow.AutoSave.IsChecked)
+                                return;
+
+                            File.WriteAllText(fileName, srcCode);
+                            mainWindow.StatusBar.Text = $"{shortFileName} を自動保存しました";
+                            DelayResetStatusBar(3);
                         }
                     }
 
@@ -184,11 +220,15 @@ namespace HikariEditor
                         open=filename(base64)
                         ex: http://127.0.0.1:8086?open=QzpcVXNlcnNcbWluYW5ccm9vdFxEb2N1bWVudHNcdW50aXRsZWQxLnJi
                         */
-                        string log = $"=== {fileName} ===\n";
+                        string log = $"=== 読み込み: {fileName} ===\n";
                         log += src;
                         log += "\n======";
                         Debug.WriteLine(log);
                         string b64src = str2b64(src);
+
+                        // MD5 を取得
+                        string md5src = str2MD5(src);
+
                         byte[] responseBytes = Encoding.UTF8.GetBytes($"HTTP/1.1 200 OK\r\nContent-Length: {b64src.Length}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{b64src}");
                         stream.Write(responseBytes, 0, responseBytes.Length);
                         byte[] bufferB64src = Encoding.UTF8.GetBytes(b64src);
@@ -210,6 +250,13 @@ namespace HikariEditor
             {
                 listener.Stop();
             }
+        }
+
+        private async void DelayResetStatusBar(int sec)
+        {
+            // 連続して保存すると表示が短くなるバグあり
+            await Task.Delay(TimeSpan.FromSeconds(sec));
+            mainWindow.StatusBar.Text = "";
         }
     }
 }

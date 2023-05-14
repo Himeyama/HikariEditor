@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using Microsoft.UI.Xaml.Controls;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -30,28 +28,20 @@ namespace HikariEditor
             InitializeComponent();
             fullFile = config == null ? "C:\\Users\\minan" : (string)config.Values["openDirPath"];
 
-            string file = "";
-            addChildFiles(file, fullFile, null, ExplorerTree);
+            //string file = "";
+            //addChildFiles(file, fullFile, null, ExplorerTree);
+            addTreeViewFiles(fullFile);
             ExplorerTree.ItemInvoked += fileClick;
         }
 
         void fileClick(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
-            //Debug.WriteLine(args.InvokedItem.Content);
-            string fileName = (string)((TreeViewNode)args.InvokedItem).Content;
-            string path = "";
-            TreeViewNode parent = ((TreeViewNode)args.InvokedItem).Parent;
-            while (parent != null)
-            {
-                path = string.IsNullOrEmpty(path) ? (string)parent.Content : $"{(string)parent.Content}\\{path}";
-                parent = parent.Parent;
-            }
-            string fileFullPath = $"{fullFile}{path}\\{fileName}";
-            Debug.WriteLine(fileFullPath);
+            FileItem file = args.InvokedItem as FileItem;
+            if (file == null) return;
 
             try
             {
-                string message = $"open {fileFullPath}";
+                string message = $"open {file.Path}";
                 string server = "127.0.0.1";
                 int port = 8086;
                 using TcpClient client = new(server, port);
@@ -62,38 +52,55 @@ namespace HikariEditor
             catch { }
         }
 
-        void addChildFiles(string file, string fFile, TreeViewNode parent, TreeView root)
+        void addChildNode(FileItem file)
         {
-            if (!Directory.Exists(fFile)) return;
+            if (!Directory.Exists(file.Path)) return;
+            string[] fileList = { };
+            try
+            {
+                fileList = Directory.GetDirectories(file.Path, "*").Concat(Directory.GetFiles(file.Path, "*")).ToArray();
+            }
+            catch { }
 
+            foreach (string f in fileList)
+            {
+                FileItem chfile = Directory.Exists(f)
+                    ? new FileItem { Path = f, Name = Path.GetFileName(f), Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true }
+                    : new FileItem { Path = f, Name = Path.GetFileName(f), Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = true };
+                file.Children.Add(chfile);
+            }
+        }
+
+        void addTreeViewFiles(string filePath)
+        {
             // 子ファイルを取得
             string[] fileList = { };
             try
             {
-                fileList = Directory.GetDirectories(fFile, "*").Concat(Directory.GetFiles(fFile, "*")).ToArray();
+                fileList = Directory.GetDirectories(filePath, "*").Concat(Directory.GetFiles(filePath, "*")).ToArray();
             }
             catch
             {
             }
 
-            // 子ファイル一覧
-            List<string> chFiles = new();
             foreach (string f in fileList)
             {
-                string[] fs = f.Split("\\");
-                chFiles.Add(fs[fs.Count() - 1]);
+                FileItem file = Directory.Exists(f)
+                    ? new FileItem { Path = f, Name = Path.GetFileName(f), Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true }
+                    : new FileItem { Path = f, Name = Path.GetFileName(f), Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = true };
+                ExplorerTree.RootNodes.Add(file);
+                addChildNode(file);
             }
-            for (int i = 0; i < chFiles.Count(); i++)
+        }
+
+        private void ExplorerTree_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
+        {
+            FileItem file = (FileItem)args.Node;
+            foreach (FileItem f in file.Children)
             {
-                string chf = chFiles[i];
-                string chfFile = fileList[i];
-                TreeViewNode fileNode = new();
-                fileNode.Content = chf;
-                if (parent != null)
-                    parent.Children.Add(fileNode);
-                else if (root != null)
-                    root.RootNodes.Add(fileNode);
-                addChildFiles(chf, chfFile, fileNode, null);
+                if (!f.Flag) continue;
+                f.Flag = false;
+                addChildNode(f);
             }
         }
     }
