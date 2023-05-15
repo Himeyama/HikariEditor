@@ -65,8 +65,8 @@ namespace HikariEditor
             foreach (string f in fileList)
             {
                 FileItem chfile = Directory.Exists(f)
-                    ? new FileItem { Path = f, Name = Path.GetFileName(f), Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true }
-                    : new FileItem { Path = f, Name = Path.GetFileName(f), Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = true };
+                    ? new FileItem(f) { Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true }
+                    : new FileItem(f) { Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = true };
                 file.Children.Add(chfile);
             }
         }
@@ -86,8 +86,8 @@ namespace HikariEditor
             foreach (string f in fileList)
             {
                 FileItem file = Directory.Exists(f)
-                    ? new FileItem { Path = f, Name = Path.GetFileName(f), Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true }
-                    : new FileItem { Path = f, Name = Path.GetFileName(f), Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = true };
+                    ? new FileItem(f) { Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true }
+                    : new FileItem(f) { Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = true };
                 ExplorerTree.RootNodes.Add(file);
                 addChildNode(file);
             }

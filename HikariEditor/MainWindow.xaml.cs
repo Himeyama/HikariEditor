@@ -155,6 +155,11 @@ namespace HikariEditor
                 case ElementTheme.Default: m_configurationSource.Theme = SystemBackdropTheme.Default; break;
             }
         }
+
+        private void ClickNLBtn(object sender, RoutedEventArgs e)
+        {
+            NLBtn.Content = (string)NLBtn.Content == "LF" ? "CRLF" : "LF";
+        }
     }
 }
 

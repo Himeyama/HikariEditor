@@ -13,7 +13,8 @@
             x:Name="Tabs"
             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0"
             AddTabButtonClick="TabView_AddTabButtonClick"
-            TabCloseRequested="TabView_TabCloseRequested">
+            TabCloseRequested="TabView_TabCloseRequested"
+            IsAddTabButtonVisible="False">
         </TabView>
     </Grid>
 </Page>

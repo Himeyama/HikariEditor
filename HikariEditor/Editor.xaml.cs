@@ -170,12 +170,11 @@ namespace HikariEditor
                             string src = httpCommand[0..4];
                             string[] srcs = httpCommand[5..^0].Split('\n');
                             string fileName = b642str(srcs[0]);
-                            string shortFileName = Path.GetFileName(fileName);
+                            FileItem fileItem = new(fileName);
                             string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
-
-                            Debug.WriteLine($"=== {shortFileName} ===\n{srcCode}\n===");
-                            File.WriteAllText(fileName, srcCode);
-                            mainWindow.StatusBar.Text = $"{shortFileName} を保存しました";
+                            Debug.WriteLine($"=== {fileItem.Name} ===\n{srcCode}\n===");
+                            fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
+                            mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました";
                             DelayResetStatusBar(3);
                         }
 
@@ -184,15 +183,15 @@ namespace HikariEditor
                             string src = httpCommand[0..8];
                             string[] srcs = httpCommand[9..^0].Split('\n');
                             string fileName = b642str(srcs[0]);
-                            string shortFileName = Path.GetFileName(fileName);
+                            FileItem fileItem = new(fileName);
                             string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
-                            Debug.WriteLine($"=== 自動保存: {shortFileName} ===\n{srcCode}\n===");
+                            Debug.WriteLine($"=== 自動保存: {fileItem.Name} ===\n{srcCode}\n===");
 
                             if (!mainWindow.AutoSave.IsChecked)
                                 return;
 
-                            File.WriteAllText(fileName, srcCode);
-                            mainWindow.StatusBar.Text = $"{shortFileName} を自動保存しました";
+                            fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
+                            mainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました";
                             DelayResetStatusBar(3);
                         }
                     }
