@@ -5,7 +5,12 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics;
 using Windows.Storage;
 using WinRT;
@@ -21,12 +26,15 @@ namespace HikariEditor
         SystemBackdropConfiguration m_configurationSource;
         [DllImport("uxtheme.dll", EntryPoint = "#132")]
         private static extern bool ShouldAppsUseDarkMode();
-        //Editor editor;
+
+        public Editor editor;
         ApplicationDataContainer config;
+
 
         public MainWindow()
         {
             InitializeComponent();
+            editorSetupAsync();
             configSetup();
             loadConfig();
 
@@ -43,6 +51,43 @@ namespace HikariEditor
             editorFrame.Navigate(typeof(Editor), this);
             config.Values["explorerDir"] = "";
             OpenExplorer.IsEnabled = false;
+        }
+
+        async Task editorSetupAsync()
+        {
+            // エディタの初期設定
+            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string editorDir = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\Assets";
+            Debug.WriteLine(editorDir);
+            bool exists = Directory.Exists(editorDir);
+            if (!Directory.Exists(editorDir))
+            {
+                Debug.WriteLine("Create Directory");
+                Directory.CreateDirectory(editorDir);
+            }
+
+            string editorUri = @"https://registry.npmjs.org/monaco-editor/-/monaco-editor-0.38.0.tgz";
+            string downloadFile = editorDir + @"\" + Path.GetFileName(editorUri);
+            if (!File.Exists(downloadFile))
+            {
+                HttpClient client = new();
+                HttpResponseMessage response = await client.GetAsync(editorUri);
+                if (response.StatusCode != System.Net.HttpStatusCode.OK)
+                    return;
+                using Stream stream = await response.Content.ReadAsStreamAsync();
+                using FileStream dst = File.Create(downloadFile);
+                stream.CopyTo(dst);
+            }
+
+            if (!Directory.Exists($"{editorDir}\\editor"))
+            {
+                FileItem editorCp = new(downloadFile);
+                editorCp.extract();
+                Directory.Move($"{editorDir}\\package", $"{editorDir}\\editor");
+            }
+
+            if (Directory.Exists($"{editorDir}\\editor"))
+                File.Copy($"{editorDir}\\Editor.html", $"{editorDir}\\editor\\index.html", true);
         }
 
         // 開くをクリック
@@ -201,6 +246,20 @@ namespace HikariEditor
             if (explorerDir != "")
                 Process.Start("explorer.exe", explorerDir);
         }
+
+        async void ClickPasteText(object sender, RoutedEventArgs e)
+        {
+            DataPackageView dataPackageView = Clipboard.GetContent();
+            if (dataPackageView.Contains(StandardDataFormats.Text))
+            {
+                string text = await dataPackageView.GetTextAsync();
+
+                // To output the text from this example, you need a TextBlock control
+                // with a name of "TextOutput".
+                //Debug.WriteLine("Clipboard now contains: " + text);
+                editor.callPasteFunction(text);
+            }
+        }
     }
 }
 
@@ -237,4 +296,6 @@ class WindowsSystemDispatcherQueueHelper
             CreateDispatcherQueueController(options, ref m_dispatcherQueueController);
         }
     }
+
+
 }

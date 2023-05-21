@@ -40,7 +40,8 @@ namespace HikariEditor
                 }
                 string extension = Path.GetExtension(fileName);
                 string b64src = str2base64(src);
-                string uri = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\Assets\monaco-editor\index.html";
+                string uri = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\Assets\editor\index.html";
+                //Debug.WriteLine(uri);
                 //uri += $"?src={b64src}";
                 uri += $"?extension={extension}";
                 uri += $"&file={str2base64(fileName)}";
@@ -49,11 +50,29 @@ namespace HikariEditor
                     uri += "&theme=vs-light";
                 }
                 WebView.Source = new Uri(uri);
+                //WebView.NavigationCompleted += setupWebview;
             }
             else
             {
 
             }
         }
+
+        //async void pasteText(object sender, CoreWebView2NavigationCompletedEventArgs e)
+        //{
+        //DataPackageView dataPackageView = Clipboard.GetContent();
+        //if (dataPackageView.Contains(StandardDataFormats.Text))
+        //{
+        //    String text = await dataPackageView.GetTextAsync();
+
+        //    // To output the text from this example, you need a TextBlock control
+        //    // with a name of "TextOutput".
+        //    Debug.WriteLine("Clipboard now contains: " + text);
+        //}
+
+        //string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        //string result = await WebView.CoreWebView2.ExecuteScriptAsync($"user_profile = () => {{ return '{userProfile.Replace("\\", "/")}'}}");
+        //Debug.WriteLine(result);
+        //}
     }
 }

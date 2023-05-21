@@ -22,6 +22,7 @@ namespace HikariEditor
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             mainWindow = e.Parameter as MainWindow;
+            mainWindow.editor = this;
             base.OnNavigatedTo(e);
         }
 
@@ -29,6 +30,20 @@ namespace HikariEditor
         {
             InitializeComponent();
             waitServer();
+        }
+
+        async public void callPasteFunction(string text)
+        {
+            // 貼付機能
+            TabViewItem tab = (TabViewItem)Tabs.SelectedItem;
+            if (tab == null) return;
+            EditorUnit editorUnit = tab.Content as EditorUnit;
+            if (editorUnit == null) return;
+            WebView2 webView = editorUnit.WebView;
+            if (webView == null) return;
+            string encText = new Text(text).EncodeBase64();
+            await webView.ExecuteScriptAsync($"paste_text('{encText}')");
+            Debug.WriteLine(encText);
         }
 
         string str2b64(string str)

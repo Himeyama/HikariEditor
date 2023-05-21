@@ -11,6 +11,6 @@
     mc:Ignorable="d">
 
     <Grid x:Name="editArea">
-        <WebView2 x:Name="WebView" Source="ms-appx:///Assets/monaco-editor/editor.html" />
+        <WebView2 x:Name="WebView" x:FieldModifier="Public" />
     </Grid>
 </UserControl>

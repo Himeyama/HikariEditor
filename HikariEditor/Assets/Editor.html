@@ -107,11 +107,11 @@
             }
             src = src.replace(/\r\n/g, "\n");
             if (tmp_src != src) {
-                if(tmp_src == ""){
+                if (tmp_src == "") {
                     tmp_src = src;
                     return;
                 }
-                tmp_src = src;                
+                tmp_src = src;
                 console.log(src);
                 const xhr = new XMLHttpRequest();
                 let data = btoa(`autosave ${b64file}\n${src}`);
@@ -149,7 +149,7 @@
         document.addEventListener("keydown", () => {
             let src = editor.getValue();
             src = src.replace(/\r\n/g, "\n");
-            if(event.ctrlKey && event.key === 's'){
+            if (event.ctrlKey && event.key === 's') {
                 event.preventDefault();
                 const xhr = new XMLHttpRequest();
                 let data = btoa(`save ${b64file}\n${src}`);
@@ -164,6 +164,18 @@
                 xhr.send();
             }
         })
+
+        paste_text = (base64_text) => {
+            let text = atob(base64_text);
+            const selection = editor.getSelection();
+            if (!selection) return;
+            editor.executeEdits("clipboard", [{
+                range: selection,
+                text: text,
+                forceMoveMarkers: true,
+            }]);
+            console.log(text);
+        }
     </script>
 </body>
 

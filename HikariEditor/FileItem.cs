@@ -1,4 +1,6 @@
 ﻿using Microsoft.UI.Xaml.Controls;
+using SharpCompress.Common;
+using SharpCompress.Readers;
 using System.IO;
 
 namespace HikariEditor
@@ -42,6 +44,29 @@ namespace HikariEditor
         {
             src = ToLF(src);
             return src.Replace("\n", "\r\n");
+        }
+
+        public void extract()
+        {
+            string ext = System.IO.Path.GetExtension(Path).Trim();
+            string extDir = System.IO.Path.GetDirectoryName(Path);
+            if (ext == ".tgz")
+            {
+                using Stream stream = File.OpenRead(Path);
+                IReader reader = ReaderFactory.Open(stream);
+                while (reader.MoveToNextEntry())
+                {
+                    if (!reader.Entry.IsDirectory)
+                    {
+                        reader.WriteEntryToDirectory(extDir, new ExtractionOptions()
+                        {
+                            ExtractFullPath = true,
+                            Overwrite = true
+                        });
+                    }
+                }
+            }
+            else return;
         }
     }
 }

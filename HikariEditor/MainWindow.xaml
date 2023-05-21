@@ -37,7 +37,11 @@
                     </MenuBarItem>
 
                     <MenuBarItem Title="Edit" x:Uid="Edit">
-                        
+                        <MenuFlyoutItem x:Uid="Paste" Text="Paste" Click="ClickPasteText">
+                            <MenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Control" Key="V"/>
+                            </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem>
                     </MenuBarItem>
                     
                     <MenuBarItem Title="Help" x:Uid="Help">
@@ -81,7 +85,6 @@
                 <TextBlock Grid.Column="0" Text="" x:Name="StatusBar" Margin="8, 0, 0, 0" x:FieldModifier="Public" FontSize="12" VerticalAlignment="Center" />
                 <Button Grid.Column="1" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="40" Background="Transparent" BorderBrush="Transparent" x:FieldModifier="Public" />
             </Grid>
-            
         </Grid>
     </Grid>
 </Window>

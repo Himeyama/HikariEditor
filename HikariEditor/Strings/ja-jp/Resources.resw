@@ -159,6 +159,9 @@
   <data name="OpenPageTitle.Text" xml:space="preserve">
     <value>ディレクトリを開く</value>
   </data>
+  <data name="Paste.Text" xml:space="preserve">
+    <value>貼り付け</value>
+  </data>
   <data name="Save.Text" xml:space="preserve">
     <value>保存</value>
   </data>
