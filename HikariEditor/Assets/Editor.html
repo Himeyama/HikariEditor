@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <link rel="stylesheet" data-name="vs/editor/editor.main" href="./min/vs/editor/editor.main.css" />
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #container {
+            height: 100%;
+        }
+
+        @media(prefers-color-scheme: dark) {
+            body {
+                background-color: #1E1E1E;
+            }
+        }
+
+        @media(prefers-color-scheme: light) {
+            body {
+                background-color: #fffffe;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container"></div>
+    <script src="./min/vs/loader.js"></script>
+    <script>
+        require.config({ paths: { 'vs': './min/vs' } });
+    </script>
+    <script src="./min/vs/editor/editor.main.nls.js"></script>
+    <script src="./min/vs/editor/editor.main.js"></script>
+    <script>
+        let param = document.location.search.substring(1);
+        let param_list = param.split('&');
+        let params = {};
+        for (let i = 0; i < param_list.length; i++) {
+            let elem = param_list[i].split('=');
+            params[elem[0]] = elem[1];
+        }
+        let b64file = params["file"];
+        let b64src = params["src"];
+        let extension = params["extension"];
+        let lang;
+        let theme = params["theme"];
+        if (theme === undefined) theme = "vs-dark";
+        extensions = {
+            ".rb": "ruby",
+            ".py": "python",
+            ".txt": "plaintext",
+            ".bat": "bat",
+            ".c": "c",
+            ".cpp": "cpp",
+            ".cs": "csharp",
+            ".css": "css",
+            ".go": "go",
+            ".html": "html",
+            ".htm": "htm",
+            ".ini": "ini",
+            ".java": "java",
+            ".js": "javascript",
+            ".md": "markdown",
+            ".markdown": "markdown",
+            ".rs": "rust",
+            ".pl": "perl",
+            ".php": "php",
+            ".r": "r",
+            ".ts": "typescript",
+            ".scss": "scss",
+            ".xml": "xml",
+            ".xaml": "xml",
+            ".yaml": "yaml",
+            ".json": "json",
+            ".vb": "vb",
+            ".h": "c"
+        }
+        lang = extensions[extension];
+        if (lang === undefined) lang = null;
+        let editor = monaco.editor.create(document.getElementById('container'), {
+            value: "",
+            language: lang,
+            theme: theme,
+            automaticLayout: true
+        });
+        let tmp_src = "";
+        open_file(b64file);
+
+        setInterval(autosave, 1000);
+        function file_load(b64src) {
+            let src = atob(b64src);
+            editor.setValue(src);
+        }
+
+        function autosave() {
+            let src = editor.getValue();
+            if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+                monaco.editor.setTheme("vs-light")
+            } else {
+                monaco.editor.setTheme("vs-dark")
+            }
+            src = src.replace(/\r\n/g, "\n");
+            if (tmp_src != src) {
+                if(tmp_src == ""){
+                    tmp_src = src;
+                    return;
+                }
+                tmp_src = src;                
+                console.log(src);
+                const xhr = new XMLHttpRequest();
+                let data = btoa(`autosave ${b64file}\n${src}`);
+                xhr.open('GET', `http://127.0.0.1:8086?data=${data}`, true);
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        console.log(xhr.responseText);
+                    } else {
+                        console.log('Request failed.  Returned status of ' + xhr.status);
+                    }
+                };
+                xhr.send();
+            }
+        }
+
+        function open_file(b64file) {
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', `http://127.0.0.1:8086?open=${b64file}`);
+            xhr.onload = () => {
+                a = xhr;
+                if (xhr.status === 200) {
+                    let b64src = xhr.responseText
+                    log = "=== READ ===\n"
+                    log += atob(b64src);
+                    log += "\n============"
+                    console.log(log)
+                    file_load(b64src);
+                } else {
+                    console.log('Request failed.  Returned status of ' + xhr.status);
+                }
+            }
+            xhr.send();
+        }
+
+        document.addEventListener("keydown", () => {
+            let src = editor.getValue();
+            src = src.replace(/\r\n/g, "\n");
+            if(event.ctrlKey && event.key === 's'){
+                event.preventDefault();
+                const xhr = new XMLHttpRequest();
+                let data = btoa(`save ${b64file}\n${src}`);
+                xhr.open('GET', `http://127.0.0.1:8086?data=${data}`, true);
+                xhr.onload = function () {
+                    if (xhr.status === 200) {
+                        console.log(xhr.responseText);
+                    } else {
+                        console.log('Request failed.  Returned status of ' + xhr.status);
+                    }
+                };
+                xhr.send();
+            }
+        })
+    </script>
+</body>
+
+</html>
