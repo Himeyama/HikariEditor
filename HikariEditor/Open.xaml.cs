@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation and Contributors.
 // Licensed under the MIT License.
 
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
@@ -29,7 +30,6 @@ namespace HikariEditor
         {
             mainWindow = e.Parameter as MainWindow;
             explorerFrame = mainWindow.contentFrame;
-            //mainWindow.contentFrame.Navigate(typeof(Explorer));
             base.OnNavigatedTo(e);
         }
 
@@ -85,12 +85,12 @@ namespace HikariEditor
             items = new();
             foreach (string drive in Directory.GetLogicalDrives())
             {
-                items.Add(new Directories { Path = drive, Name = "" });
+                items.Add(new Directories { Path = drive, Name = drive });
             }
             DirPath.Text = "";
             currentDir = "";
             Directories.ItemsSource = items;
-            OpenBtn.IsEnabled = false;
+            OpenBtn.IsEnabled = true;
         }
 
         void DirOpenComputerClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -123,14 +123,16 @@ namespace HikariEditor
                 OpenBtn.IsEnabled = false;
         }
 
+        // 開くボタンのクリック
         private void OpenBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            //string openDirPath = ((Directories)Directories.SelectedValue).Path;
             string openDirPath = DirPath.Text;
             config.Values["openDirPath"] = openDirPath;
-            explorerFrame.Navigate(typeof(Explorer));
+            explorerFrame.Navigate(typeof(Explorer), mainWindow);
             mainWindow.Menu.SelectedItem = mainWindow.ItemExplorer;
-            mainWindow.editorFrame.Navigate(typeof(Editor));
+            mainWindow.editorFrame.Navigate(typeof(Editor), mainWindow);
+            mainWindow.OpenExplorer.IsEnabled = true;
+            mainWindow.SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(336);
         }
 
         private void Directories_Tapped(object sender, TappedRoutedEventArgs e)
@@ -138,6 +140,11 @@ namespace HikariEditor
             if ((Directories)Directories.SelectedValue == null)
                 return;
             DirPath.Text = ((Directories)Directories.SelectedValue).Path;
+        }
+
+        private void OpenCloseButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        {
+            mainWindow.editorFrame.Navigate(typeof(Editor), mainWindow);
         }
     }
 }

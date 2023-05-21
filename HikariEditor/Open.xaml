@@ -16,7 +16,12 @@
         </DataTemplate>
     </Page.Resources>
     <Grid RowDefinitions="Auto, Auto, *, Auto">
-        <TextBlock Grid.Row="0" Text="Open Directory" x:Uid="OpenPageTitle" Margin="8, 8, 8, 8" FontSize="32" />
+        <Grid ColumnDefinitions="*, Auto" Grid.Row="0">
+            <TextBlock Grid.Column="0" Text="Open Directory" x:Uid="OpenPageTitle" Margin="8, 8, 8, 8" FontSize="32" />
+            <Button Grid.Column="1" VerticalAlignment="Center" Margin="0, 0, 8, 0" Click="OpenCloseButtonClick">
+                <FontIcon Glyph="&#xE10A;" FontFamily="Segoe Fluent Icons" />
+            </Button>
+        </Grid>
         <Grid Grid.Row="1" Margin="8, 8, 8, 8" ColumnDefinitions="Auto, Auto, Auto, *">
             <Button Grid.Column="0" Margin="8, 0, 0, 0" Click="DirOpenParentClick" x:Name="DirOpenParentBtn">
                 <FontIcon Glyph="&#xE110;" FontFamily="Segoe Fluent Icons" />

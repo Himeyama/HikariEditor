@@ -1,11 +1,10 @@
-﻿// Licensed under the MIT License.
-
-using Microsoft.UI;
+﻿using Microsoft.UI;
 using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Windows.Graphics;
 using Windows.Storage;
@@ -13,9 +12,6 @@ using WinRT;
 
 namespace HikariEditor
 {
-    /// <summary>
-    /// An empty window that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class MainWindow : Window
     {
         // Mica
@@ -45,6 +41,8 @@ namespace HikariEditor
             AppWindow appWindow = AppWindow.GetFromWindowId(myWndId);
             appWindow.Resize(new SizeInt32(1920, 1080));
             editorFrame.Navigate(typeof(Editor), this);
+            config.Values["explorerDir"] = "";
+            OpenExplorer.IsEnabled = false;
         }
 
         // 開くをクリック
@@ -78,19 +76,26 @@ namespace HikariEditor
             Close();
         }
 
-        void MenuChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
-        {
-            NavigationViewItem selectedItem = args.SelectedItem as NavigationViewItem;
-            switch (selectedItem.Tag)
-            {
-                case "Explorer":
-                    contentFrame.Navigate(typeof(Explorer), "hogehogehogehoge");
-                    break;
-                case "Search":
-                    contentFrame.Navigate(typeof(Search));
-                    break;
-            }
-        }
+        //void MenuChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        //{
+        //    NavigationViewItem selectedItem = args.SelectedItem as NavigationViewItem;
+        //    //if (selectedItem == null) return;
+        //    Debug.WriteLine("a");
+        //    if ((string)selectedItem.Tag == "Explorer")
+        //    {
+        //        SideMenuEditorArea.ColumnDefinitions[0].Width =
+        //            SideMenuEditorArea.ColumnDefinitions[0].Width.ToString() == "300" ?
+        //            new GridLength(48) : new GridLength(300);
+
+        //        //Debug.WriteLine(SideMenuEditorArea.ColumnDefinitions[0].Width.ToString());
+
+        //        contentFrame.Navigate(typeof(Explorer), this);
+        //    }
+        //    else if ((string)selectedItem.Tag == "Search")
+        //    {
+        //        contentFrame.Navigate(typeof(Search), this);
+        //    }
+        //}
 
         bool TrySetSystemBackdrop()
         {
@@ -159,6 +164,42 @@ namespace HikariEditor
         private void ClickNLBtn(object sender, RoutedEventArgs e)
         {
             NLBtn.Content = (string)NLBtn.Content == "LF" ? "CRLF" : "LF";
+        }
+
+        private void MenuChanged(NavigationView sender, NavigationViewItemInvokedEventArgs args)
+        {
+            NavigationViewItem selectedItem = sender.SelectedItem as NavigationViewItem;
+            if (selectedItem == null) return;
+            if ((string)selectedItem.Tag == "Explorer")
+            {
+                if (SideMenuEditorArea.ColumnDefinitions[0].Width.ToString() == "336")
+                {
+                    SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(48);
+                    ItemExplorer.IsSelected = false;
+                    OpenExplorer.IsEnabled = false;
+                }
+                else
+                {
+                    SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(336);
+                    ItemExplorer.IsSelected = true;
+                    OpenExplorer.IsEnabled = true;
+                }
+
+                //Debug.WriteLine(SideMenuEditorArea.ColumnDefinitions[0].Width.ToString());
+
+                contentFrame.Navigate(typeof(Explorer), this);
+            }
+            else if ((string)selectedItem.Tag == "Search")
+            {
+                contentFrame.Navigate(typeof(Search), this);
+            }
+        }
+
+        public void ClickOpenExplorer(object sender, RoutedEventArgs e)
+        {
+            string explorerDir = config.Values["explorerDir"] as string;
+            if (explorerDir != "")
+                Process.Start("explorer.exe", explorerDir);
         }
     }
 }

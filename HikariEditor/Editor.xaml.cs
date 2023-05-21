@@ -17,6 +17,7 @@ namespace HikariEditor
     {
         List<string> tabs = new() { };
         MainWindow mainWindow;
+        int counter = 0;
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -89,7 +90,8 @@ namespace HikariEditor
             if (tabs.Contains(fileName))
             {
                 TabViewItem tab = (TabViewItem)Tabs.FindName(fileName);
-                tab.IsSelected = true;
+                if (tab != null)
+                    tab.IsSelected = true;
                 return;
             }
             tabListAdd(fileName);
@@ -175,7 +177,8 @@ namespace HikariEditor
                             Debug.WriteLine($"=== {fileItem.Name} ===\n{srcCode}\n===");
                             fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
                             mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました";
-                            DelayResetStatusBar(3);
+                            counter++;
+                            DelayResetStatusBar(1000);
                         }
 
                         if (httpCommand.Length >= 8 && httpCommand[0..8] == "autosave")
@@ -192,7 +195,8 @@ namespace HikariEditor
 
                             fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
                             mainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました";
-                            DelayResetStatusBar(3);
+                            counter++;
+                            DelayResetStatusBar(1000);
                         }
                     }
 
@@ -251,11 +255,14 @@ namespace HikariEditor
             }
         }
 
-        private async void DelayResetStatusBar(int sec)
+        async void DelayResetStatusBar(int sec)
         {
-            // 連続して保存すると表示が短くなるバグあり
-            await Task.Delay(TimeSpan.FromSeconds(sec));
-            mainWindow.StatusBar.Text = "";
+            int count = counter;
+            await Task.Delay(TimeSpan.FromMilliseconds(sec));
+            if (count >= counter)
+            {
+                mainWindow.StatusBar.Text = "";
+            }
         }
     }
 }

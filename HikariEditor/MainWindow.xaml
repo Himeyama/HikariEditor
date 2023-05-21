@@ -29,6 +29,7 @@
                                 <KeyboardAccelerator Modifiers="Control" Key="O"/>
                             </MenuFlyoutItem.KeyboardAccelerators>
                         </MenuFlyoutItem>
+                        <MenuFlyoutItem x:FieldModifier="Public" Text="Open Explorer" x:Name="OpenExplorer" x:Uid="OpenExplorer" Click="ClickOpenExplorer"/>
                         <MenuFlyoutSeparator />
                         <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" Click="EnableAutoSave" x:FieldModifier="Public" />
                         <MenuFlyoutSeparator />
@@ -36,24 +37,15 @@
                     </MenuBarItem>
 
                     <MenuBarItem Title="Edit" x:Uid="Edit">
-                        <MenuFlyoutItem Text="Undo"/>
-                        <MenuFlyoutItem Text="Cut"/>
-                        <MenuFlyoutItem Text="Copy"/>
-                        <MenuFlyoutItem Text="Paste"/>
+                        
                     </MenuBarItem>
-
+                    
                     <MenuBarItem Title="Help" x:Uid="Help">
                         <MenuFlyoutItem Text="About"/>
                     </MenuBarItem>
                 </MenuBar>
 
                 <Grid x:Name="AppTitleBar" Grid.Column="2">
-                    <!--
-                    <Image Source="Images/WindowIcon.png"
-               HorizontalAlignment="Left" 
-               Width="16" Height="16" 
-               Margin="8,0"/>
-                    -->
                     <TextBlock x:Name="AppTitleTextBlock" 
                         x:Uid="AppTitleText"
                         Text="Editor"
@@ -62,10 +54,10 @@
                 </Grid>
             </Grid>
         </Grid>
-        <Grid Grid.Row="1" ColumnDefinitions="300, *" >
+        <Grid Grid.Row="1" x:Name="SideMenuEditorArea" x:FieldModifier="Public" ColumnDefinitions="48, *">
             <NavigationView 
                 Grid.Column="0"
-                SelectionChanged="MenuChanged"
+                ItemInvoked="MenuChanged"
                 x:Name="Menu" PaneDisplayMode="LeftCompact"
                 IsBackButtonVisible="Collapsed" IsBackEnabled="False"
                 IsPaneToggleButtonVisible="False"
