@@ -1,5 +1,7 @@
 # ひかりエディタ
 
+![image](https://github.com/Himeyama/HikariEditor/assets/39254183/32d527cf-9e01-408f-bfd3-6d94354742eb)
+
 ## 証明書のインストール方法
 1. `.cer` ファイルを開き、「証明書のインストール」をクリック
 2. 「ローカルコンピューター」を選択し次へ 
