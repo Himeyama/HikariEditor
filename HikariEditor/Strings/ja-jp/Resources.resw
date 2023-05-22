@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="About.Text" xml:space="preserve">
+    <value>ひかりエディタについて</value>
+  </data>
   <data name="AddNewFile.Text" xml:space="preserve">
     <value>新規ファイル</value>
   </data>
@@ -124,10 +127,13 @@
     <value>新しいフォルダー</value>
   </data>
   <data name="AppTitleText.Text" xml:space="preserve">
-    <value>自作エディタ</value>
+    <value>ひかりエディタ</value>
   </data>
   <data name="AutoSave.Text" xml:space="preserve">
     <value>自動保存</value>
+  </data>
+  <data name="Copy.Text" xml:space="preserve">
+    <value>コピー</value>
   </data>
   <data name="Edit.Title" xml:space="preserve">
     <value>編集</value>
@@ -167,5 +173,8 @@
   </data>
   <data name="Search.Text" xml:space="preserve">
     <value>検索</value>
+  </data>
+  <data name="Version.Text" xml:space="preserve">
+    <value>バージョン</value>
   </data>
 </root>

@@ -13,6 +13,7 @@
     <DefaultLanguage>ja-JP</DefaultLanguage>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="About.xaml" />
     <None Remove="Editor.xaml" />
     <None Remove="EditorUnit.xaml" />
     <None Remove="Explorer.xaml" />
@@ -79,6 +80,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Assets\icons\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="About.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
 
   <!-- 

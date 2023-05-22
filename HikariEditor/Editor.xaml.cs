@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace HikariEditor
 {
@@ -32,7 +33,7 @@ namespace HikariEditor
             waitServer();
         }
 
-        async public void callPasteFunction(string text)
+        async public void CallPasteFunction(string text)
         {
             // 貼付機能
             TabViewItem tab = (TabViewItem)Tabs.SelectedItem;
@@ -43,7 +44,18 @@ namespace HikariEditor
             if (webView == null) return;
             string encText = new Text(text).EncodeBase64();
             await webView.ExecuteScriptAsync($"paste_text('{encText}')");
-            Debug.WriteLine(encText);
+        }
+
+        async public void CallCopyFunction()
+        {
+            // コピー機能
+            TabViewItem tab = (TabViewItem)Tabs.SelectedItem;
+            if (tab == null) return;
+            EditorUnit editorUnit = tab.Content as EditorUnit;
+            if (editorUnit == null) return;
+            WebView2 webView = editorUnit.WebView;
+            if (webView == null) return;
+            await webView.ExecuteScriptAsync($"copy_text()");
         }
 
         string str2b64(string str)
@@ -159,7 +171,7 @@ namespace HikariEditor
                 string commands = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
                 // HTTP リクエストの場合
 
-                if (commands[0..3] == "GET")
+                if (commands[0..4] == "POST")
                 {
                     string[] data = commands.Split(' ');
 
@@ -171,8 +183,6 @@ namespace HikariEditor
                     {
                         string b64Command = match.Groups[1].Value;
                         string httpCommand = b642str(b64Command);
-                        //byte[] b64bytes = Convert.FromBase64String(b64Command);
-                        //string httpCommand = Encoding.UTF8.GetString(b64bytes);
 
                         /*
                         data=(base64)
@@ -212,6 +222,19 @@ namespace HikariEditor
                             mainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました";
                             counter++;
                             DelayResetStatusBar(1000);
+                        }
+
+                        if (httpCommand.Length >= 14 && httpCommand[0..14] == "copy-clipboard")
+                        {
+                            string src = httpCommand[0..14];
+                            string[] srcs = httpCommand[15..^0].Split('\n');
+                            string fileName = b642str(srcs[0]);
+                            FileItem fileItem = new(fileName);
+                            string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
+                            Debug.WriteLine($"=== コピー: {fileItem.Name} ===\n{srcCode}\n===");
+                            DataPackage dataPackage = new();
+                            dataPackage.SetText(srcCode);
+                            Clipboard.SetContent(dataPackage);
                         }
                     }
 

@@ -23,7 +23,6 @@
                 
                 <MenuBar Grid.Column="1">
                     <MenuBarItem Title="File" x:Uid="File">
-                        <!--<MenuFlyoutItem Text="New" x:Uid="New" />-->
                         <MenuFlyoutItem Text="Open Directory..." x:Uid="Open" x:Name="Open" Click="OpenClick">
                             <MenuFlyoutItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Control" Key="O"/>
@@ -37,6 +36,11 @@
                     </MenuBarItem>
 
                     <MenuBarItem Title="Edit" x:Uid="Edit">
+                        <MenuFlyoutItem x:Uid="Copy" Text="Copy" Click="ClickCopyText">
+                            <MenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Control" Key="C"/>
+                            </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem>
                         <MenuFlyoutItem x:Uid="Paste" Text="Paste" Click="ClickPasteText">
                             <MenuFlyoutItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Control" Key="V"/>
@@ -45,7 +49,7 @@
                     </MenuBarItem>
                     
                     <MenuBarItem Title="Help" x:Uid="Help">
-                        <MenuFlyoutItem Text="About"/>
+                        <MenuFlyoutItem Text="About Hikari Editor" Click="ClickAboutDialog" x:Uid="About"/>
                     </MenuBarItem>
                 </MenuBar>
 
@@ -65,6 +69,7 @@
                 x:Name="Menu" PaneDisplayMode="LeftCompact"
                 IsBackButtonVisible="Collapsed" IsBackEnabled="False"
                 IsPaneToggleButtonVisible="False"
+                IsSettingsVisible="False"
                 x:FieldModifier="Public">
                 <NavigationView.MenuItems>
                     <NavigationViewItem Tag="Explorer" x:FieldModifier="Public" x:Name="ItemExplorer">
@@ -72,7 +77,6 @@
                             <FontIcon Glyph="&#xF56E;" FontFamily="Segoe Fluent Icons"></FontIcon>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
-                    <!--<NavigationViewItem Icon="Find" Tag="Search" />-->
                 </NavigationView.MenuItems>
                 <Frame x:Name="contentFrame" x:FieldModifier="Public" />
             </NavigationView>

@@ -1,5 +1,5 @@
-<Page
-    x:Class="HikariEditor.Search"
+﻿<Page
+    x:Class="HikariEditor.About"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:HikariEditor"
@@ -7,9 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel>
-        <StackPanel Margin="16, 8, 16, 8">
-            <TextBlock Text="Search" x:Uid="Search"/>
-        </StackPanel>
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <TextBlock Text="© 2023 MURATA Mitsuharu" Margin="0, 8, 0, 0" />
+        <HyperlinkButton Content="リポジトリ" NavigateUri="https://github.com/himeyama/HikariEditor" Margin="0, 8, 0, 0" />
     </StackPanel>
 </Page>

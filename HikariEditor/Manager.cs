@@ -10,7 +10,6 @@ namespace HikariEditor
 
         public static void openDirectoryMenu()
         {
-            //mainWindow.contentFrame
             contentFrame.Navigate(typeof(Explorer), mainWindow);
         }
     }

@@ -121,27 +121,6 @@ namespace HikariEditor
             Close();
         }
 
-        //void MenuChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
-        //{
-        //    NavigationViewItem selectedItem = args.SelectedItem as NavigationViewItem;
-        //    //if (selectedItem == null) return;
-        //    Debug.WriteLine("a");
-        //    if ((string)selectedItem.Tag == "Explorer")
-        //    {
-        //        SideMenuEditorArea.ColumnDefinitions[0].Width =
-        //            SideMenuEditorArea.ColumnDefinitions[0].Width.ToString() == "300" ?
-        //            new GridLength(48) : new GridLength(300);
-
-        //        //Debug.WriteLine(SideMenuEditorArea.ColumnDefinitions[0].Width.ToString());
-
-        //        contentFrame.Navigate(typeof(Explorer), this);
-        //    }
-        //    else if ((string)selectedItem.Tag == "Search")
-        //    {
-        //        contentFrame.Navigate(typeof(Search), this);
-        //    }
-        //}
-
         bool TrySetSystemBackdrop()
         {
             if (DesktopAcrylicController.IsSupported())
@@ -230,8 +209,6 @@ namespace HikariEditor
                     OpenExplorer.IsEnabled = true;
                 }
 
-                //Debug.WriteLine(SideMenuEditorArea.ColumnDefinitions[0].Width.ToString());
-
                 contentFrame.Navigate(typeof(Explorer), this);
             }
             else if ((string)selectedItem.Tag == "Search")
@@ -253,12 +230,24 @@ namespace HikariEditor
             if (dataPackageView.Contains(StandardDataFormats.Text))
             {
                 string text = await dataPackageView.GetTextAsync();
-
-                // To output the text from this example, you need a TextBlock control
-                // with a name of "TextOutput".
-                //Debug.WriteLine("Clipboard now contains: " + text);
-                editor.callPasteFunction(text);
+                editor.CallPasteFunction(text);
             }
+        }
+
+        private void ClickCopyText(object sender, RoutedEventArgs e)
+        {
+            editor.CallCopyFunction();
+        }
+
+        async private void ClickAboutDialog(object sender, RoutedEventArgs e)
+        {
+            ContentDialog dialog = new();
+            dialog.XamlRoot = this.Content.XamlRoot;
+            dialog.Title = "ひかりエディタ";
+            dialog.PrimaryButtonText = "OK";
+            dialog.DefaultButton = ContentDialogButton.Primary;
+            dialog.Content = new About();
+            await dialog.ShowAsync();
         }
     }
 }

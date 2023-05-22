@@ -1,7 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation and Contributors.
-// Licensed under the MIT License.
-
-using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using System;
@@ -15,14 +12,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Windows.Storage;
 
-// To learn more about WinUI, the WinUI project structure,
-// and more about our project templates, see: http://aka.ms/winui-project-info.
-
 namespace HikariEditor
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class Explorer : Page
     {
         string fullFile;
@@ -196,7 +187,6 @@ namespace HikariEditor
             BitmapImage bmpImage = new();
             Uri uri = new(iconResource);
             img.UriSource = uri;
-            //img.Source = bmpImage;
         }
 
         private void ClickOpenExplorer(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
@@ -204,9 +194,6 @@ namespace HikariEditor
             mainWindow.ClickOpenExplorer(sender, e);
         }
 
-        /// <summary>
-        /// ファイルを追加するボタンがクリックされたときに実行されるメソッド
-        /// </summary>
         void ClickAddNewFile(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             string addFilePath;
@@ -234,9 +221,6 @@ namespace HikariEditor
 
         }
 
-        /// <summary>
-        /// フォルダを追加するボタンがクリックされたときに実行されるメソッド
-        /// </summary>
         void ClickAddNewFolder(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             string addFolderPath;

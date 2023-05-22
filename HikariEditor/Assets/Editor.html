@@ -115,7 +115,7 @@
                 console.log(src);
                 const xhr = new XMLHttpRequest();
                 let data = btoa(`autosave ${b64file}\n${src}`);
-                xhr.open('GET', `http://127.0.0.1:8086?data=${data}`, true);
+                xhr.open('POST', `http://127.0.0.1:8086?data=${data}`, true);
                 xhr.onload = function () {
                     if (xhr.status === 200) {
                         console.log(xhr.responseText);
@@ -129,7 +129,7 @@
 
         function open_file(b64file) {
             let xhr = new XMLHttpRequest();
-            xhr.open('GET', `http://127.0.0.1:8086?open=${b64file}`);
+            xhr.open('POST', `http://127.0.0.1:8086?open=${b64file}`);
             xhr.onload = () => {
                 a = xhr;
                 if (xhr.status === 200) {
@@ -153,7 +153,7 @@
                 event.preventDefault();
                 const xhr = new XMLHttpRequest();
                 let data = btoa(`save ${b64file}\n${src}`);
-                xhr.open('GET', `http://127.0.0.1:8086?data=${data}`, true);
+                xhr.open('POST', `http://127.0.0.1:8086?data=${data}`, true);
                 xhr.onload = function () {
                     if (xhr.status === 200) {
                         console.log(xhr.responseText);
@@ -175,6 +175,24 @@
                 forceMoveMarkers: true,
             }]);
             console.log(text);
+        }
+
+        copy_text = () => {
+            let text = editor.getModel().getValueInRange(editor.getSelection());
+            if(text == "") return;
+            text = text.replace(/\r\n/g, "\n");
+            console.log(text);
+            const xhr = new XMLHttpRequest();
+            let data = btoa(`copy-clipboard ${b64file}\n${text}`);
+            xhr.open('POST', `http://127.0.0.1:8086?data=${data}`, true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    console.log(xhr.responseText);
+                } else {
+                    console.log('Request failed.  Returned status of ' + xhr.status);
+                }
+            };
+            xhr.send();
         }
     </script>
 </body>
