@@ -8,12 +8,12 @@
 
   <Identity
     Name="1b085dd6-dfeb-4bf2-9e99-54b26ea22091"
-    Publisher="CN=minan"
+    Publisher="CN=MURATA Mitsuharu"
     Version="1.0.0.0" />
 
   <Properties>
     <DisplayName>HikariEditor</DisplayName>
-    <PublisherDisplayName>minan</PublisherDisplayName>
+    <PublisherDisplayName>MURATA Mitsuharu</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -36,7 +36,7 @@
         BackgroundColor="transparent"
         Square150x150Logo="Assets\Square150x150Logo.png"
         Square44x44Logo="Assets\Square44x44Logo.png">
-        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"  Square71x71Logo="Assets\SmallTile.png" Square310x310Logo="Assets\LargeTile.png"/>
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
