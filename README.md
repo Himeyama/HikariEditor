@@ -12,6 +12,9 @@
 - amd64: https://aka.ms/windowsappsdk/1.2/1.2.221109.1/windowsappruntimeinstall-x64.exe
 - x86: https://aka.ms/windowsappsdk/1.2/1.2.221109.1/windowsappruntimeinstall-x86.exe
 
+## WebView2 のインストール
+- https://developer.microsoft.com/ja-jp/microsoft-edge/webview2/consumer/
+
 ## インストール方法
 ```ps1
 Add-AppPackage .\Microsoft.WindowsAppRuntime.1.2.msix
