@@ -49,20 +49,17 @@ namespace HikariEditor
             editorFrame.Navigate(typeof(Editor), this);
             config.Values["explorerDir"] = "";
             OpenExplorer.IsEnabled = false;
-            _ = editorSetupAsync();
-            _ = copyEditorFile();
+            editorSetup();
         }
 
-        async Task copyEditorFile()
+        async void editorSetup()
         {
-            StorageFile htmlFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Editor.html"));
-            string tempDirectory = Path.GetTempPath();
-            string editorDir = $"{tempDirectory}HikariEditor";
-            if (File.Exists(htmlFile.Path))
-            {
-                if (Directory.Exists($"{editorDir}\\editor"))
-                    File.Copy(htmlFile.Path, $"{editorDir}\\editor\\index.html", true);
-            }
+            StatusBar.Text = "エディタの初期設定中...";
+            await editorSetupAsync();
+            _ = copyEditorFile();
+            StatusBar.Text = "エディタの初期設定、完了";
+            await Task.Delay(2000);
+            StatusBar.Text = "";
         }
 
         async Task editorSetupAsync()
@@ -97,6 +94,18 @@ namespace HikariEditor
                 FileItem editorCp = new(downloadFile);
                 editorCp.extract();
                 Directory.Move($"{editorDir}\\package", $"{editorDir}\\editor");
+            }
+        }
+
+        async Task copyEditorFile()
+        {
+            StorageFile htmlFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Editor.html"));
+            string tempDirectory = Path.GetTempPath();
+            string editorDir = $"{tempDirectory}HikariEditor";
+            if (File.Exists(htmlFile.Path))
+            {
+                if (Directory.Exists($"{editorDir}\\editor"))
+                    File.Copy(htmlFile.Path, $"{editorDir}\\editor\\index.html", true);
             }
         }
 
