@@ -7,7 +7,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
-using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
@@ -34,7 +33,6 @@ namespace HikariEditor
         public MainWindow()
         {
             InitializeComponent();
-            editorSetupAsync();
             configSetup();
             loadConfig();
 
@@ -51,18 +49,33 @@ namespace HikariEditor
             editorFrame.Navigate(typeof(Editor), this);
             config.Values["explorerDir"] = "";
             OpenExplorer.IsEnabled = false;
+            _ = editorSetupAsync();
+            _ = copyEditorFile();
+        }
+
+        async Task copyEditorFile()
+        {
+            StorageFile htmlFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Editor.html"));
+            string tempDirectory = Path.GetTempPath();
+            string editorDir = $"{tempDirectory}HikariEditor";
+            if (File.Exists(htmlFile.Path))
+            {
+                if (Directory.Exists($"{editorDir}\\editor"))
+                    File.Copy(htmlFile.Path, $"{editorDir}\\editor\\index.html", true);
+            }
         }
 
         async Task editorSetupAsync()
         {
             // エディタの初期設定
-            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            string editorDir = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\Assets";
-            Debug.WriteLine(editorDir);
+            //string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string tempDirectory = Path.GetTempPath();
+            //Debug.WriteLine(Assembly.GetExecutingAssembly());
+            //string editorDir = $"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\\Assets";
+            string editorDir = $"{tempDirectory}HikariEditor";
             bool exists = Directory.Exists(editorDir);
-            if (!Directory.Exists(editorDir))
+            if (!exists)
             {
-                Debug.WriteLine("Create Directory");
                 Directory.CreateDirectory(editorDir);
             }
 
@@ -85,9 +98,6 @@ namespace HikariEditor
                 editorCp.extract();
                 Directory.Move($"{editorDir}\\package", $"{editorDir}\\editor");
             }
-
-            if (Directory.Exists($"{editorDir}\\editor"))
-                File.Copy($"{editorDir}\\Editor.html", $"{editorDir}\\editor\\index.html", true);
         }
 
         // 開くをクリック
