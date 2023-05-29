@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://unpkg.com/xterm@5.1.0/css/xterm.css" />
+    <script src="https://unpkg.com/xterm@5.1.0/lib/xterm.js"></script>
+    <script src="https://unpkg.com/xterm-addon-fit@0.7.0/lib/xterm-addon-fit.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+/*            background: transparent;*/
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #808080;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="terminalParent" style="margin: 8px;">
+        <div id="terminal"></div>
+    </div>
+    <script>
+        let uri = new URL(window.location);
+        let theme = uri.searchParams.get("theme");
+        let backgroundColor = "#282828";
+        if (theme == "light") {
+            backgroundColor = "#F9F9F9";
+        }
+        document.body.style.backgroundColor = backgroundColor;
+        let term = new Terminal({
+            theme: {
+                "background": backgroundColor,
+            },
+            rows: 14
+        });
+        let fitAddon = new FitAddon.FitAddon;
+        term.loadAddon(fitAddon);
+        term.open(document.getElementById('terminal'));
+        fitAddon.fit();
+
+        setInterval(() => {
+            fitAddon.fit();
+        }, 200);
+
+        let cmd_stack = "";
+        let mainTerminal = () => {
+            if (term._initialized) {
+                return;
+            }
+            term._initialized = true;
+            term.prompt = () => {
+                term.write('\r\n> ')
+            };
+
+            term.write('Hikari Editor\r\n');
+            term.prompt();
+
+            term.onKey(e => {
+                const ev = e.domEvent
+                const printable = !ev.altKey && !ev.ctrlKey && !ev.metaKey
+
+                if (ev.keyCode === 13) {
+                    if (cmd_stack == "clear") {
+                        term.clear();
+                    } else {
+                        cmd_stack = "";
+                    }
+                    term.prompt();
+                    cmd_stack = "";
+                    console.log(cmd_stack);                    
+                } else if (ev.keyCode === 8) {
+                    if (term._core.buffer.x > 2) {
+                        term.write('\b \b');
+                    }
+                } else if (printable) {
+                    term.write(e.key);
+                    cmd_stack += e.key;
+                }
+            });
+        }
+        mainTerminal();
+    </script>
+</body>
+
+</html>
