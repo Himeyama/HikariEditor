@@ -165,6 +165,9 @@
   <data name="OpenPageTitle.Text" xml:space="preserve">
     <value>ディレクトリを開く</value>
   </data>
+  <data name="OpenTerminal.Text" xml:space="preserve">
+    <value>ターミナルを開く</value>
+  </data>
   <data name="Paste.Text" xml:space="preserve">
     <value>貼り付け</value>
   </data>
@@ -173,6 +176,9 @@
   </data>
   <data name="Search.Text" xml:space="preserve">
     <value>検索</value>
+  </data>
+  <data name="Terminal.Title" xml:space="preserve">
+    <value>ターミナル</value>
   </data>
   <data name="Version.Text" xml:space="preserve">
     <value>バージョン</value>

@@ -4,7 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:HikariEditor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:controls="using:ABI.Microsoft.UI.Xaml.Controls"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
     <Grid
         RowDefinitions="40, *, 24" x:Name="Window">
@@ -47,13 +48,21 @@
                             </MenuFlyoutItem.KeyboardAccelerators>
                         </MenuFlyoutItem>
                     </MenuBarItem>
-                    
+
+                    <MenuBarItem Title="Terminal" x:Uid="Terminal">
+                        <MenuFlyoutItem Name="OpenTerminal"  x:FieldModifier="Public" x:Uid="OpenTerminal" Text="Open Terminal" Click="ClickOpenTerminal">
+                            <MenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Control" Key="T"/>
+                            </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem>
+                    </MenuBarItem>
+
                     <MenuBarItem Title="Help" x:Uid="Help">
                         <MenuFlyoutItem Text="About Hikari Editor" Click="ClickAboutDialog" x:Uid="About"/>
                     </MenuBarItem>
                 </MenuBar>
 
-                <Grid x:Name="AppTitleBar" Grid.Column="2">
+                <Grid x:Name="AppTitleBar" Grid.Column="2" x:FieldModifier="Public" >
                     <TextBlock x:Name="AppTitleTextBlock" 
                         x:Uid="AppTitleText"
                         Text="Editor"
@@ -80,11 +89,12 @@
                 </NavigationView.MenuItems>
                 <Frame x:Name="contentFrame" x:FieldModifier="Public" />
             </NavigationView>
-            <Grid Grid.Column="1">
-                <Frame x:Name="editorFrame" x:FieldModifier="Public" />
+            <Grid Grid.Column="1" RowDefinitions="*, Auto" x:FieldModifier="Public" x:Name="RightSideFrames">
+                <Frame Grid.Row="0" x:Name="editorFrame" x:FieldModifier="Public" />
+                <Frame Grid.Row="1" x:Name="terminalFrame" x:FieldModifier="Public" Height="0" />
             </Grid>
         </Grid>
-        <Grid Grid.Row="2" Background="#E57373">
+        <Grid Grid.Row="2" Background="#E57373" >
             <Grid ColumnDefinitions="*, Auto">
                 <TextBlock Grid.Column="0" Text="" x:Name="StatusBar" Margin="8, 0, 0, 0" x:FieldModifier="Public" FontSize="12" VerticalAlignment="Center" />
                 <Button Grid.Column="1" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="40" Background="Transparent" BorderBrush="Transparent" x:FieldModifier="Public" />

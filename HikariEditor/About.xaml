@@ -10,5 +10,7 @@
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <TextBlock Text="© 2023 MURATA Mitsuharu" Margin="0, 8, 0, 0" />
         <HyperlinkButton Content="リポジトリ" NavigateUri="https://github.com/himeyama/HikariEditor" Margin="0, 8, 0, 0" />
+        <TextBlock Text="monaco-editor: MIT License" />
+        <TextBlock Text="xterm.js: MIT License" />
     </StackPanel>
 </Page>
