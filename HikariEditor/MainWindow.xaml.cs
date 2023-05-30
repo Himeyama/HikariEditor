@@ -2,6 +2,7 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using Svgicon5;
 using System;
 using System.Diagnostics;
@@ -123,15 +124,29 @@ namespace HikariEditor
         void loadConfig()
         {
             AutoSave.IsChecked = (bool)config.Values["AutoSave"];
+            ToggleStyle(AutoSave.IsChecked);
+        }
+
+        void ToggleStyle(bool isOn)
+        {
+            if (isOn)
+            {
+                AutoSaveToggleSwitchText.Text = "オン";
+                AutoSaveToggleSwitchText.Foreground = new SolidColorBrush(Colors.Black);
+                AutoSaveToggleSwitchText.Margin = new Thickness(5, 12.5, 0, 0);
+            }
+            else
+            {
+                AutoSaveToggleSwitchText.Text = "オフ";
+                AutoSaveToggleSwitchText.Margin = new Thickness(19, 12.5, 0, 0);
+                AutoSaveToggleSwitchText.Foreground = AppTitleBar.ActualTheme == ElementTheme.Light ? new SolidColorBrush(Colors.Black) : (Brush)new SolidColorBrush(Colors.White);
+            }
         }
 
         private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
             config.Values["AutoSave"] = AutoSaveToggleSwitch.IsOn;
-        }
-        void EnableAutoSave(object sender, RoutedEventArgs e)
-        {
-            config.Values["AutoSave"] = AutoSave.IsChecked;
+            ToggleStyle(AutoSaveToggleSwitch.IsOn);
         }
 
         void ExitClick(object sender, RoutedEventArgs e)

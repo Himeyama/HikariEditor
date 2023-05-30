@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
@@ -86,7 +87,7 @@ namespace HikariEditor
             return Encoding.UTF8.GetString(b64bytes);
         }
 
-        private void TabView_AddTabButtonClick(TabView sender, object args)
+        private void TabViewAddTabButtonClick(TabView sender, object args)
         {
             TabViewItem newTab = new();
             newTab.IconSource = new SymbolIconSource() { Symbol = Symbol.Document };
@@ -97,10 +98,12 @@ namespace HikariEditor
             sender.TabItems.Add(newTab);
         }
 
-        private void TabView_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
+        private void TabViewCloseTab(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
             tabs.Remove(args.Tab.Name);
             sender.TabItems.Remove(args.Tab);
+            if (tabs.Count == 0)
+                mainWindow.editorFrame.Height = 0;
         }
 
         async void waitServer()
@@ -111,7 +114,7 @@ namespace HikariEditor
             }
         }
 
-        void addTab(string fileName, string shortFileName)
+        public void addTab(string fileName, string shortFileName)
         {
             // タブが存在する場合
             if (tabs.Contains(fileName))
@@ -276,16 +279,6 @@ namespace HikariEditor
                         stream.Write(bufferB64src, 0, bufferB64src.Length);
                     }
                 }
-
-                //スペース区切り
-                string[] sCommands = commands.Split(' ');
-                string command = sCommands[0];
-                if (command == "open")
-                {
-                    string fileName = string.Join(" ", sCommands[1..^0]).TrimEnd('\0');
-                    string shortFileName = Path.GetFileName(fileName).TrimEnd('\0');
-                    addTab(fileName, shortFileName);
-                }
             }
             finally
             {
@@ -301,6 +294,14 @@ namespace HikariEditor
             {
                 mainWindow.StatusBar.Text = "";
             }
+        }
+
+        private void EditorTabChange(object sender, SelectionChangedEventArgs e)
+        {
+            string fileName = ((FrameworkElement)((TabView)sender).SelectedItem).Name;
+            string extension = Path.GetExtension(fileName);
+            mainWindow.rightArea.ColumnDefinitions[1].Width =
+                extension == ".tex" ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         }
     }
 }

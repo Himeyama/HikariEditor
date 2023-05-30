@@ -1,4 +1,5 @@
-﻿using Microsoft.UI.Xaml.Controls;
+﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
 using System;
@@ -7,9 +8,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using System.Text;
 using Windows.Storage;
 
 namespace HikariEditor
@@ -55,18 +54,11 @@ namespace HikariEditor
             {
                 config.Values["explorerDir"] = Path.GetDirectoryName(file.Path);
             }
+            mainWindow.editor.addTab(file.Path, file.Name);
+            mainWindow.editorFrame.Height = double.NaN;
 
-            try
-            {
-                string message = $"open {file.Path}";
-                string server = "127.0.0.1";
-                int port = 8086;
-                using TcpClient client = new(server, port);
-                byte[] data = Encoding.UTF8.GetBytes(message);
-                using NetworkStream stream = client.GetStream();
-                stream.Write(data, 0, data.Length);
-            }
-            catch { }
+            mainWindow.rightArea.ColumnDefinitions[1].Width =
+                file.Extension == ".tex" ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         }
 
         void addChildNode(FileItem file)

@@ -9,6 +9,7 @@ namespace HikariEditor
     {
         public string Path { get; set; }
         public string Name { get; set; }
+        public string Extension { get; set; }
         public string Icon1 { get; set; }
         public string Icon2 { get; set; }
         public string Color1 { get; set; }
@@ -19,6 +20,7 @@ namespace HikariEditor
         {
             Path = fileName;
             Name = System.IO.Path.GetFileName(fileName);
+            Extension = System.IO.Path.GetExtension(fileName);
             Flag = false;
         }
 

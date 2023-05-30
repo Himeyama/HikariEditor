@@ -13,13 +13,14 @@
             <Grid ColumnDefinitions="Auto, Auto, *">
                 <StackPanel Padding="16, 0, 0, 0" Grid.Column="0" Orientation="Horizontal" Width="114">
                     <TextBlock Padding="0, 0, 0, 0" Text="Auto Save" x:Uid="AutoSave" VerticalAlignment="Center" FontSize="12" />
-                    <StackPanel Padding="8, 1, 0, 0">
+                    <Grid Padding="8, 1, 0, 0">
                         <ToggleSwitch AutomationProperties.Name="AutoSaveToggleSwitch"
-                                  OffContent="" OnContent=""
-                                  IsOn="{x:Bind AutoSave.IsChecked, Mode=TwoWay}"
-                                  Toggled="ToggleSwitch_Toggled"
-                                  x:Name="AutoSaveToggleSwitch" />
-                    </StackPanel>
+                              OffContent="" OnContent=""
+                              IsOn="{x:Bind AutoSave.IsChecked, Mode=TwoWay}"
+                              Toggled="ToggleSwitch_Toggled"
+                              x:Name="AutoSaveToggleSwitch" />
+                        <TextBlock FontSize="10" x:Name="AutoSaveToggleSwitchText" IsHitTestVisible="False" />
+                    </Grid>
                 </StackPanel>
                 
                 <MenuBar Grid.Column="1">
@@ -31,7 +32,7 @@
                         </MenuFlyoutItem>
                         <MenuFlyoutItem x:FieldModifier="Public" Text="Open Explorer" x:Name="OpenExplorer" x:Uid="OpenExplorer" Click="ClickOpenExplorer"/>
                         <MenuFlyoutSeparator />
-                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" Click="EnableAutoSave" x:FieldModifier="Public" />
+                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" x:FieldModifier="Public" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutItem Text="Exit" x:Uid="Exit" Click="ExitClick"/>
                     </MenuBarItem>
@@ -90,11 +91,14 @@
                 <Frame x:Name="contentFrame" x:FieldModifier="Public" />
             </NavigationView>
             <Grid Grid.Column="1" RowDefinitions="*, Auto" x:FieldModifier="Public" x:Name="RightSideFrames">
-                <Frame Grid.Row="0" x:Name="editorFrame" x:FieldModifier="Public" />
+                <Grid ColumnDefinitions="*, 0" x:FieldModifier="Public" Grid.Row="0" x:Name="rightArea">
+                    <Frame Grid.Column="0" x:Name="editorFrame" x:FieldModifier="Public" Height="0" />
+                    <Frame Grid.Column="1" x:Name="previewFrame" x:FieldModifier="Public" Background="White" />
+                </Grid>
                 <Frame Grid.Row="1" x:Name="terminalFrame" x:FieldModifier="Public" Height="0" />
             </Grid>
         </Grid>
-        <Grid Grid.Row="2" Background="#E57373" >
+        <Grid Grid.Row="2">
             <Grid ColumnDefinitions="*, Auto">
                 <TextBlock Grid.Column="0" Text="" x:Name="StatusBar" Margin="8, 0, 0, 0" x:FieldModifier="Public" FontSize="12" VerticalAlignment="Center" />
                 <Button Grid.Column="1" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="40" Background="Transparent" BorderBrush="Transparent" x:FieldModifier="Public" />
