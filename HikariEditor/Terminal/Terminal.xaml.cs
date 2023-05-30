@@ -12,9 +12,6 @@ namespace HikariEditor
             mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
             mainWindow.terminalFrame.Height = 300;
             mainWindow.OpenTerminal.IsEnabled = false;
-            //var a = new ProcessStartInfo();
-            //proc.StartInfo.FileName = @"C:\Users\minan\AppData\Local\Microsoft\WindowsApps\wt.exe";
-            //proc.Start();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -26,14 +23,13 @@ namespace HikariEditor
         public Terminal()
         {
             InitializeComponent();
-
             AddNewTab(terminalTabs);
         }
 
+        // タブの追加
         void AddNewTab(TabView tabs)
         {
             TabViewItem newTab = new();
-            //newTab.IconSource = new SymbolIconSource() { Symbol = Symbol.Document };
             newTab.Header = "Terminal";
             TerminalUnit frame = new();
             newTab.Content = frame;
@@ -41,11 +37,13 @@ namespace HikariEditor
             tabs.TabItems.Add(newTab);
         }
 
+        // タブの追加ボタンをクリック
         private void TabViewAddTabButtonClick(TabView sender, object args)
         {
             AddNewTab(sender);
         }
 
+        // タブを閉じる
         private void TabViewTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
             sender.TabItems.Remove(args.Tab);
