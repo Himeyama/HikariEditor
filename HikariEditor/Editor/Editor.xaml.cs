@@ -305,8 +305,14 @@ namespace HikariEditor
             if (selectedItem == null) return;
             string fileName = ((FrameworkElement)((TabView)sender).SelectedItem).Name;
             string extension = Path.GetExtension(fileName);
-            mainWindow.rightArea.ColumnDefinitions[1].Width =
-                extension == ".tex" ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+            if (extension == ".tex")
+            {
+                mainWindow.rightArea.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);
+            }
+            else
+            {
+                mainWindow.rightArea.ColumnDefinitions[1].Width = new GridLength(0);
+            }
         }
     }
 }

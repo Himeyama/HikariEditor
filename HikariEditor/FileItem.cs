@@ -74,7 +74,7 @@ namespace HikariEditor
             string fileName = GetAddFileName();
             if (File.Exists(fileName) || Directory.Exists(fileName))
                 return "";
-            File.Create(fileName);
+            using (File.Create(fileName)) ;
             return fileName;
         }
 

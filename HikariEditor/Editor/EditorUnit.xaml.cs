@@ -18,27 +18,13 @@ namespace HikariEditor
         {
             InitializeComponent();
 
+            /* タブを開く */
             if (File.Exists(fileName))
             {
-                string src = "";
-                try
-                {
-                    src = File.ReadAllText(fileName);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("ファイルを読み込めませんでした。");
-                    Console.WriteLine(e.Message);
-                }
                 string extension = Path.GetExtension(fileName);
-                string b64src = str2base64(src);
-
-                //StorageFile htmlFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Editor.html"));
                 string tempDirectory = Path.GetTempPath();
                 string editorDir = $"{tempDirectory}HikariEditor";
                 string uri = $"{editorDir}\\editor\\index.html";
-
-                //string uri = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + @"\Assets\editor\index.html";
                 uri += $"?extension={extension}";
                 uri += $"&file={str2base64(fileName)}";
                 if (ActualTheme == ElementTheme.Light)
