@@ -107,6 +107,7 @@ namespace HikariEditor
         void OpenClick(object sender, RoutedEventArgs e)
         {
             editorFrame.Navigate(typeof(Open), this);
+            editorFrame.Height = double.NaN;
         }
 
         // ターミナルを開く

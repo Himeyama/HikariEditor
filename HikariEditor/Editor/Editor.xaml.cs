@@ -103,7 +103,10 @@ namespace HikariEditor
             tabs.Remove(args.Tab.Name);
             sender.TabItems.Remove(args.Tab);
             if (tabs.Count == 0)
+            {
                 mainWindow.editorFrame.Height = 0;
+                mainWindow.previewFrame.Height = 0;
+            }
         }
 
         async void waitServer()
@@ -298,6 +301,8 @@ namespace HikariEditor
 
         private void EditorTabChange(object sender, SelectionChangedEventArgs e)
         {
+            FrameworkElement selectedItem = (FrameworkElement)((TabView)sender).SelectedItem;
+            if (selectedItem == null) return;
             string fileName = ((FrameworkElement)((TabView)sender).SelectedItem).Name;
             string extension = Path.GetExtension(fileName);
             mainWindow.rightArea.ColumnDefinitions[1].Width =
