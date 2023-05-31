@@ -27,7 +27,10 @@
     <None Remove="About.xaml" />
     <None Remove="Editor.xaml" />
     <None Remove="EditorUnit.xaml" />
+    <None Remove="Error.xaml" />
     <None Remove="Explorer.xaml" />
+    <None Remove="Explorer\NewFolder.xaml" />
+    <None Remove="NewFile.xaml" />
     <None Remove="Open.xaml" />
     <None Remove="ResourceDictionary1.xaml" />
     <None Remove="Search.xaml" />
@@ -63,6 +66,9 @@
     <ProjectCapability Include="Msix" />
   </ItemGroup>
   <ItemGroup>
+    <Page Update="Explorer\NewFolder.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+    </Page>
     <Page Update="Open.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -114,6 +120,12 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <Page Update="Error.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="NewFile.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="TerminalUnit.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

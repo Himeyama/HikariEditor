@@ -186,52 +186,45 @@ namespace HikariEditor
             mainWindow.ClickOpenExplorer(sender, e);
         }
 
-        void ClickAddNewFile(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        async void ClickAddNewFile(object sender, RoutedEventArgs e)
         {
-            string addFilePath;
+            ContentDialog dialog = new();
+            dialog.XamlRoot = this.Content.XamlRoot;
+            dialog.Title = "ファイル作成";
+            dialog.PrimaryButtonText = "OK";
+            dialog.DefaultButton = ContentDialogButton.Primary;
+            NewFile content = new();
+            dialog.Content = content;
+            await dialog.ShowAsync();
+
             string addFileDir = ((FileItem)ExplorerTree.SelectedItem) == null ? fullFile : ((FileItem)ExplorerTree.SelectedItem).Path;
-            addFilePath = $"{addFileDir}\\New File";
-            if (!File.Exists(addFilePath))
-                using (File.Create(addFilePath)) ;
-            else
-            {
-                for (int i = 2; i < 1024; i++)
-                {
-                    addFilePath = $"{addFileDir}\\New File ({i})";
-                    if (!File.Exists(addFilePath))
-                    {
-                        using (File.Create(addFilePath)) ;
-                        break;
-                    }
-                }
-            }
+            string fileName = content.fileName.Text;
+
+            FileItem addFile = new(addFileDir, fileName);
+            string addFilePath = addFile.CreateAddFile();
+
             FileItem fileItem = new(addFilePath) { Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = false };
             if (((FileItem)ExplorerTree.SelectedItem) == null)
                 ExplorerTree.RootNodes.Add(fileItem);
             else
                 ((FileItem)ExplorerTree.SelectedItem).Children.Add(fileItem);
-
         }
 
-        void ClickAddNewFolder(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        async void ClickAddNewFolder(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            string addFolderPath;
+            ContentDialog dialog = new();
+            dialog.XamlRoot = this.Content.XamlRoot;
+            dialog.Title = "フォルダー作成";
+            dialog.PrimaryButtonText = "OK";
+            dialog.DefaultButton = ContentDialogButton.Primary;
+            NewFolder content = new();
+            dialog.Content = content;
+            await dialog.ShowAsync();
+
             string addFileDir = ((FileItem)ExplorerTree.SelectedItem) == null ? fullFile : ((FileItem)ExplorerTree.SelectedItem).Path;
-            addFolderPath = $"{addFileDir}\\New Folder";
-            if (!Directory.Exists(addFolderPath))
-                Directory.CreateDirectory(addFolderPath);
-            else
-            {
-                for (int i = 2; i < 1024; i++)
-                {
-                    addFolderPath = $"{addFileDir}\\New Folder ({i})";
-                    if (!Directory.Exists(addFolderPath))
-                    {
-                        Directory.CreateDirectory(addFolderPath);
-                        break;
-                    }
-                }
-            }
+            FileItem folder = new(addFileDir, content.folderName.Text);
+            string addFolderPath = folder.CreateAddDirectory();
+
             FileItem fileItem = new(addFolderPath) { Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true };
             if (((FileItem)ExplorerTree.SelectedItem) == null)
                 ExplorerTree.RootNodes.Add(fileItem);
@@ -241,7 +234,33 @@ namespace HikariEditor
 
         private void DeleteFileButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            FileItem fileItem = ExplorerTree.SelectedItem as FileItem;
+            string file = fileItem == null ? fullFile : ((FileItem)ExplorerTree.SelectedItem).Path;
+            if (File.Exists(file))
+            {
+                try
+                {
+                    File.Delete(file);
+                    fileItem.Parent.Children.Remove(fileItem);
+                }
+                catch (IOException err)
+                {
+                    Debug.WriteLine(err.Message);
+                    Error.Dialog("エラー", err.Message, Content.XamlRoot);
+                    return;
+                }
 
+
+                //fileItem.cl
+            }
+            else if (Directory.Exists(file))
+            {
+                Directory.Delete(file);
+            }
+            else
+            {
+
+            }
         }
     }
 }
