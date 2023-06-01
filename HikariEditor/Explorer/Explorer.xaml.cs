@@ -201,9 +201,12 @@ namespace HikariEditor
             string fileName = content.fileName.Text;
 
             FileItem addFile = new(addFileDir, fileName);
-            string addFilePath = addFile.CreateAddFile();
+            if (!addFile.CreateFile(mainWindow))
+            {
+                return;
+            }
 
-            FileItem fileItem = new(addFilePath) { Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = false };
+            FileItem fileItem = new(addFile.Path) { Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = false };
             if (((FileItem)ExplorerTree.SelectedItem) == null)
                 ExplorerTree.RootNodes.Add(fileItem);
             else
@@ -223,9 +226,12 @@ namespace HikariEditor
 
             string addFileDir = ((FileItem)ExplorerTree.SelectedItem) == null ? fullFile : ((FileItem)ExplorerTree.SelectedItem).Path;
             FileItem folder = new(addFileDir, content.folderName.Text);
-            string addFolderPath = folder.CreateAddDirectory();
+            if (!folder.CreateDirectory(mainWindow))
+            {
+                return;
+            }
 
-            FileItem fileItem = new(addFolderPath) { Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true };
+            FileItem fileItem = new(folder.Path) { Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true };
             if (((FileItem)ExplorerTree.SelectedItem) == null)
                 ExplorerTree.RootNodes.Add(fileItem);
             else
@@ -249,13 +255,17 @@ namespace HikariEditor
                     Error.Dialog("エラー", err.Message, Content.XamlRoot);
                     return;
                 }
-
-
-                //fileItem.cl
             }
             else if (Directory.Exists(file))
             {
-                Directory.Delete(file);
+                try
+                {
+                    Directory.Delete(file);
+                }
+                catch (IOException err)
+                {
+                    Error.Dialog("例外: 入出力エラー", err.Message, mainWindow.Content.XamlRoot);
+                }
             }
             else
             {
