@@ -47,6 +47,51 @@ namespace HikariEditor
             InitFileItem();
         }
 
+        public bool CreateFile(MainWindow mainWindow)
+        {
+            if (!File.Exists(Path))
+            {
+                if (Directory.Exists(Dirname))
+                {
+                    using (File.Create(Path)) ;
+                }
+                else
+                {
+                    Error.Dialog("作成失敗", "選択している項目はフォルダではありません。", mainWindow.Content.XamlRoot);
+                    return false;
+                }
+
+            }
+            else
+            {
+                Error.Dialog("作成失敗", "同名のファイルが既に存在しています。", mainWindow.Content.XamlRoot);
+                return false;
+            }
+            return true;
+        }
+
+        public bool CreateDirectory(MainWindow mainWindow)
+        {
+            if (!Directory.Exists(Path))
+            {
+                if (File.Exists(Path))
+                {
+                    Error.Dialog("作成失敗", "同名のファイルが既に存在しています。", mainWindow.Content.XamlRoot);
+                    return false;
+                }
+                else
+                {
+                    Directory.CreateDirectory(Path);
+                }
+            }
+            else
+            {
+                Error.Dialog("作成失敗", "同名のフォルダが既に存在しています。", mainWindow.Content.XamlRoot);
+                return false;
+            }
+            return true;
+        }
+
         public string GetAddFileName()
         {
             /* ファイル作成時に候補となるファイル名 */
