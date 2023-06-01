@@ -53,7 +53,13 @@ namespace HikariEditor
             {
                 if (Directory.Exists(Dirname))
                 {
-                    using (File.Create(Path)) ;
+                    if (!Directory.Exists(Path))
+                        using (File.Create(Path)) ;
+                    else
+                    {
+                        Error.Dialog("作成失敗", "同名のフォルダが存在しています。", mainWindow.Content.XamlRoot);
+                        return false;
+                    }
                 }
                 else
                 {
@@ -90,61 +96,6 @@ namespace HikariEditor
                 return false;
             }
             return true;
-        }
-
-        public string GetAddFileName()
-        {
-            /* ファイル作成時に候補となるファイル名 */
-            /* a.txt が存在しない場合
-               a.txt 
-               a.txt が存在する場合
-               a (2).txt
-            */
-
-            if (!File.Exists(Path) && !Directory.Exists(Path))
-                return Path;
-
-            for (long i = 2; i < 4294967295; i++)
-            {
-                string nextFilename = $"{Dirname}\\{WithoutName} ({i}){Extension}";
-                if (!File.Exists(nextFilename) && !Directory.Exists(nextFilename))
-                    return nextFilename;
-            }
-            return "";
-        }
-
-        public string CreateAddFile()
-        {
-            /* GetAddFileName() に基づき、空ファイルを作成します。 */
-            string fileName = GetAddFileName();
-            if (File.Exists(fileName) || Directory.Exists(fileName))
-                return "";
-            using (File.Create(fileName)) ;
-            return fileName;
-        }
-
-        public string GetAddDirectoryName()
-        {
-            if (!Directory.Exists(Path) && !File.Exists(Path))
-                return Path;
-
-            for (long i = 2; i < 4294967295; i++)
-            {
-                string nextFilename = $"{Dirname}\\{WithoutName} ({i})";
-                if (!Directory.Exists(nextFilename) && !File.Exists(nextFilename))
-                    return nextFilename;
-            }
-            return "";
-        }
-
-        public string CreateAddDirectory()
-        {
-            /* GetAddDirectoryName() に基づき、空ファイルを作成します。 */
-            string fileName = GetAddDirectoryName();
-            if (Directory.Exists(fileName) || File.Exists(fileName))
-                return "";
-            Directory.CreateDirectory(fileName);
-            return fileName;
         }
 
         public void Save(string src, string NL)
