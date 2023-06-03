@@ -204,7 +204,8 @@ namespace HikariEditor
                             string[] srcs = httpCommand[5..^0].Split('\n');
                             string fileName = b642str(srcs[0]);
                             FileItem fileItem = new(fileName);
-                            string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
+                            string srcCode64 = string.Join(Environment.NewLine, srcs[1..^0]);
+                            string srcCode = b642str(srcCode64);
                             Debug.WriteLine($"=== {fileItem.Name} ===\n{srcCode}\n===");
                             fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
                             mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました";
