@@ -210,6 +210,55 @@ namespace HikariEditor
                             mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました";
                             counter++;
                             DelayResetStatusBar(1000);
+                            if (fileItem.Extension == ".tex")
+                            {
+                                mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました。TeX のコンパイルを行います。";
+                                counter++;
+                                DelayResetStatusBar(1000);
+
+                                bool tex_compile_error = false;
+                                try
+                                {
+                                    using (Process process = new())
+                                    {
+                                        process.StartInfo.UseShellExecute = false;
+                                        process.StartInfo.FileName = "C:\\texlive\\2022\\bin\\win32\\ptex2pdf.exe";
+                                        process.StartInfo.CreateNoWindow = true;
+                                        process.StartInfo.Arguments = $"-l -ot -interaction=nonstopmode -halt-on-error -kanji=utf8 -output-directory=\"{fileItem.Dirname}\" \"{fileItem.Path}\"";
+                                        process.StartInfo.RedirectStandardOutput = true;
+                                        process.Start();
+                                        process.WaitForExit();
+                                        string stdout = process.StandardOutput.ReadToEnd();
+                                        Debug.WriteLine(stdout);
+                                        if (process.ExitCode == 0)
+                                        {
+                                            mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに成功しました。";
+                                        }
+                                        else
+                                        {
+                                            mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに失敗しました。";
+                                            tex_compile_error = true;
+                                        }
+                                        counter++;
+                                        DelayResetStatusBar(1000);
+                                    }
+
+                                    if (!tex_compile_error)
+                                    {
+                                        FileItem pdfFileItem = new(fileItem.Dirname, $"{fileItem.WithoutName}.pdf");
+                                        PDFPageInfo pdfPageInfo = new();
+                                        pdfPageInfo.mainWindow = mainWindow;
+                                        pdfPageInfo.fileItem = pdfFileItem;
+                                        Debug.WriteLine(pdfFileItem.Path);
+                                        mainWindow.previewFrame.Navigate(typeof(PDF), pdfPageInfo);
+                                    }
+
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine(e.Message);
+                                }
+                            }
                         }
 
                         if (httpCommand.Length >= 8 && httpCommand[0..8] == "autosave")
@@ -219,11 +268,9 @@ namespace HikariEditor
                             string fileName = b642str(srcs[0]);
                             FileItem fileItem = new(fileName);
                             string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
-                            Debug.WriteLine($"=== 自動保存: {fileItem.Name} ===\n{srcCode}\n===");
-
                             if (!mainWindow.AutoSave.IsChecked)
                                 return;
-
+                            Debug.WriteLine($"=== 自動保存: {fileItem.Name} ===\n{srcCode}\n===");
                             fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
                             mainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました";
                             counter++;
