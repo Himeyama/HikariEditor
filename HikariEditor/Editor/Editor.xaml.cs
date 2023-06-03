@@ -171,163 +171,167 @@ namespace HikariEditor
                 listener.Start();
                 using TcpClient handler = await listener.AcceptTcpClientAsync();
 
-                byte[] buffer = new byte[1024];
-                using NetworkStream stream = handler.GetStream();
-                stream.Read(buffer, 0, buffer.Length);
-                string commands = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-                // HTTP リクエストの場合
-
-                if (commands[0..4] == "POST")
+                //byte[] buffer = new byte[1024];
+                using (NetworkStream stream = handler.GetStream())
                 {
-                    string[] data = commands.Split(' ');
+                    byte[] buffer = new byte[stream.Socket.ReceiveBufferSize];
+                    stream.Read(buffer, 0, buffer.Length);
 
-                    // 保存処理
-                    string parameter = data[1];
-                    string pattern = @"^/\?data=(.*)$";
-                    Match match = Regex.Match(parameter, pattern);
-                    if (match.Success)
+                    string commands = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                    // HTTP リクエストの場合
+
+                    if (commands[0..4] == "POST")
                     {
-                        string b64Command = match.Groups[1].Value;
-                        string httpCommand = b642str(b64Command);
+                        string[] data = commands.Split(' ');
 
-                        /*
-                        data=(base64)
-                        ===
-                        save FileName(base64)
-                        src...
-                        ===
-                        ex: http://127.0.0.1:8086/?data=c2F2ZSBRenBjCnB1dHMgIkhlbGxvISI=
-                        */
-                        if (httpCommand.Length >= 4 && httpCommand[0..4] == "save")
+                        // 保存処理
+                        string parameter = data[1];
+                        string pattern = @"^/\?data=(.*)$";
+                        Match match = Regex.Match(parameter, pattern);
+                        if (match.Success)
                         {
-                            string src = httpCommand[0..4];
-                            string[] srcs = httpCommand[5..^0].Split('\n');
-                            string fileName = b642str(srcs[0]);
-                            FileItem fileItem = new(fileName);
-                            string srcCode64 = string.Join(Environment.NewLine, srcs[1..^0]);
-                            string srcCode = b642str(srcCode64);
-                            Debug.WriteLine($"=== {fileItem.Name} ===\n{srcCode}\n===");
-                            fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
-                            mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました";
-                            counter++;
-                            DelayResetStatusBar(1000);
-                            if (fileItem.Extension == ".tex")
+                            string b64Command = match.Groups[1].Value;
+                            string httpCommand = b642str(b64Command);
+
+                            /*
+                            data=(base64)
+                            ===
+                            save FileName(base64)
+                            src...
+                            ===
+                            ex: http://127.0.0.1:8086/?data=c2F2ZSBRenBjCnB1dHMgIkhlbGxvISI=
+                            */
+                            if (httpCommand.Length >= 4 && httpCommand[0..4] == "save")
                             {
-                                mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました。TeX のコンパイルを行います。";
+                                string src = httpCommand[0..4];
+                                string[] srcs = httpCommand[5..^0].Split('\n');
+                                string fileName = b642str(srcs[0]);
+                                FileItem fileItem = new(fileName);
+                                string srcCode64 = string.Join(Environment.NewLine, srcs[1..^0]);
+                                string srcCode = b642str(srcCode64);
+                                Debug.WriteLine($"=== {fileItem.Name} ===\n{srcCode}\n===");
+                                fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
+                                mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました";
                                 counter++;
                                 DelayResetStatusBar(1000);
-
-                                bool tex_compile_error = false;
-                                try
+                                if (fileItem.Extension == ".tex")
                                 {
-                                    using (Process process = new())
-                                    {
-                                        process.StartInfo.UseShellExecute = false;
-                                        process.StartInfo.FileName = "C:\\texlive\\2022\\bin\\win32\\ptex2pdf.exe";
-                                        process.StartInfo.CreateNoWindow = true;
-                                        process.StartInfo.Arguments = $"-l -ot -interaction=nonstopmode -halt-on-error -kanji=utf8 -output-directory=\"{fileItem.Dirname}\" \"{fileItem.Path}\"";
-                                        process.StartInfo.RedirectStandardOutput = true;
-                                        process.Start();
-                                        process.WaitForExit();
-                                        string stdout = process.StandardOutput.ReadToEnd();
-                                        Debug.WriteLine(stdout);
-                                        if (process.ExitCode == 0)
-                                        {
-                                            mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに成功しました。";
-                                        }
-                                        else
-                                        {
-                                            mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに失敗しました。";
-                                            tex_compile_error = true;
-                                        }
-                                        counter++;
-                                        DelayResetStatusBar(1000);
-                                    }
+                                    mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました。TeX のコンパイルを行います。";
+                                    counter++;
+                                    DelayResetStatusBar(1000);
 
-                                    if (!tex_compile_error)
+                                    bool tex_compile_error = false;
+                                    try
                                     {
-                                        FileItem pdfFileItem = new(fileItem.Dirname, $"{fileItem.WithoutName}.pdf");
-                                        PDFPageInfo pdfPageInfo = new();
-                                        pdfPageInfo.mainWindow = mainWindow;
-                                        pdfPageInfo.fileItem = pdfFileItem;
-                                        Debug.WriteLine(pdfFileItem.Path);
-                                        mainWindow.previewFrame.Navigate(typeof(PDF), pdfPageInfo);
-                                    }
+                                        using (Process process = new())
+                                        {
+                                            process.StartInfo.UseShellExecute = false;
+                                            process.StartInfo.FileName = "C:\\texlive\\2022\\bin\\win32\\ptex2pdf.exe";
+                                            process.StartInfo.CreateNoWindow = true;
+                                            process.StartInfo.Arguments = $"-l -ot -interaction=nonstopmode -halt-on-error -kanji=utf8 -output-directory=\"{fileItem.Dirname}\" \"{fileItem.Path}\"";
+                                            process.StartInfo.RedirectStandardOutput = true;
+                                            process.Start();
+                                            process.WaitForExit();
+                                            string stdout = process.StandardOutput.ReadToEnd();
+                                            Debug.WriteLine(stdout);
+                                            if (process.ExitCode == 0)
+                                            {
+                                                mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに成功しました。";
+                                            }
+                                            else
+                                            {
+                                                mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに失敗しました。";
+                                                tex_compile_error = true;
+                                            }
+                                            counter++;
+                                            DelayResetStatusBar(1000);
+                                        }
 
+                                        if (!tex_compile_error)
+                                        {
+                                            FileItem pdfFileItem = new(fileItem.Dirname, $"{fileItem.WithoutName}.pdf");
+                                            PDFPageInfo pdfPageInfo = new();
+                                            pdfPageInfo.mainWindow = mainWindow;
+                                            pdfPageInfo.fileItem = pdfFileItem;
+                                            Debug.WriteLine(pdfFileItem.Path);
+                                            mainWindow.previewFrame.Navigate(typeof(PDF), pdfPageInfo);
+                                        }
+
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        Console.WriteLine(e.Message);
+                                    }
                                 }
-                                catch (Exception e)
-                                {
-                                    Console.WriteLine(e.Message);
-                                }
+                            }
+
+                            if (httpCommand.Length >= 8 && httpCommand[0..8] == "autosave")
+                            {
+                                string src = httpCommand[0..8];
+                                string[] srcs = httpCommand[9..^0].Split('\n');
+                                string fileName = b642str(srcs[0]);
+                                FileItem fileItem = new(fileName);
+                                string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
+                                if (!mainWindow.AutoSave.IsChecked)
+                                    return;
+                                Debug.WriteLine($"=== 自動保存: {fileItem.Name} ===\n{srcCode}\n===");
+                                fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
+                                mainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました";
+                                counter++;
+                                DelayResetStatusBar(1000);
+                            }
+
+                            if (httpCommand.Length >= 14 && httpCommand[0..14] == "copy-clipboard")
+                            {
+                                string src = httpCommand[0..14];
+                                string[] srcs = httpCommand[15..^0].Split('\n');
+                                string fileName = b642str(srcs[0]);
+                                FileItem fileItem = new(fileName);
+                                string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
+                                Debug.WriteLine($"=== コピー: {fileItem.Name} ===\n{srcCode}\n===");
+                                DataPackage dataPackage = new();
+                                dataPackage.SetText(srcCode);
+                                Clipboard.SetContent(dataPackage);
                             }
                         }
 
-                        if (httpCommand.Length >= 8 && httpCommand[0..8] == "autosave")
+                        // ファイルを開く処理
+                        pattern = @"^/\?open=(.*)$";
+                        match = Regex.Match(parameter, pattern);
+                        if (match.Success)
                         {
-                            string src = httpCommand[0..8];
-                            string[] srcs = httpCommand[9..^0].Split('\n');
-                            string fileName = b642str(srcs[0]);
-                            FileItem fileItem = new(fileName);
-                            string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
-                            if (!mainWindow.AutoSave.IsChecked)
+                            string b64file = match.Groups[1].Value;
+                            string fileName = b642str(b64file);
+                            string src = "";
+                            try
+                            {
+                                src = File.ReadAllText(fileName);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.WriteLine(fileName);
+                                Debug.WriteLine("ファイルを読み込めませんでした。");
+                                Debug.WriteLine(e.Message);
                                 return;
-                            Debug.WriteLine($"=== 自動保存: {fileItem.Name} ===\n{srcCode}\n===");
-                            fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
-                            mainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました";
-                            counter++;
-                            DelayResetStatusBar(1000);
-                        }
+                            }
+                            /*
+                            open=filename(base64)
+                            ex: http://127.0.0.1:8086?open=QzpcVXNlcnNcbWluYW5ccm9vdFxEb2N1bWVudHNcdW50aXRsZWQxLnJi
+                            */
+                            string log = $"=== 読み込み: {fileName} ===\n";
+                            log += src;
+                            log += "\n======";
+                            Debug.WriteLine(log);
+                            string b64src = str2b64(src);
 
-                        if (httpCommand.Length >= 14 && httpCommand[0..14] == "copy-clipboard")
-                        {
-                            string src = httpCommand[0..14];
-                            string[] srcs = httpCommand[15..^0].Split('\n');
-                            string fileName = b642str(srcs[0]);
-                            FileItem fileItem = new(fileName);
-                            string srcCode = string.Join(Environment.NewLine, srcs[1..^0]);
-                            Debug.WriteLine($"=== コピー: {fileItem.Name} ===\n{srcCode}\n===");
-                            DataPackage dataPackage = new();
-                            dataPackage.SetText(srcCode);
-                            Clipboard.SetContent(dataPackage);
-                        }
-                    }
+                            // MD5 を取得
+                            string md5src = str2MD5(src);
 
-                    // ファイルを開く処理
-                    pattern = @"^/\?open=(.*)$";
-                    match = Regex.Match(parameter, pattern);
-                    if (match.Success)
-                    {
-                        string b64file = match.Groups[1].Value;
-                        string fileName = b642str(b64file);
-                        string src = "";
-                        try
-                        {
-                            src = File.ReadAllText(fileName);
+                            byte[] responseBytes = Encoding.UTF8.GetBytes($"HTTP/1.1 200 OK\r\nContent-Length: {b64src.Length}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{b64src}");
+                            stream.Write(responseBytes, 0, responseBytes.Length);
+                            byte[] bufferB64src = Encoding.UTF8.GetBytes(b64src);
+                            stream.Write(bufferB64src, 0, bufferB64src.Length);
                         }
-                        catch (Exception e)
-                        {
-                            Debug.WriteLine(fileName);
-                            Debug.WriteLine("ファイルを読み込めませんでした。");
-                            Debug.WriteLine(e.Message);
-                            return;
-                        }
-                        /*
-                        open=filename(base64)
-                        ex: http://127.0.0.1:8086?open=QzpcVXNlcnNcbWluYW5ccm9vdFxEb2N1bWVudHNcdW50aXRsZWQxLnJi
-                        */
-                        string log = $"=== 読み込み: {fileName} ===\n";
-                        log += src;
-                        log += "\n======";
-                        Debug.WriteLine(log);
-                        string b64src = str2b64(src);
-
-                        // MD5 を取得
-                        string md5src = str2MD5(src);
-
-                        byte[] responseBytes = Encoding.UTF8.GetBytes($"HTTP/1.1 200 OK\r\nContent-Length: {b64src.Length}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{b64src}");
-                        stream.Write(responseBytes, 0, responseBytes.Length);
-                        byte[] bufferB64src = Encoding.UTF8.GetBytes(b64src);
-                        stream.Write(bufferB64src, 0, bufferB64src.Length);
                     }
                 }
             }
