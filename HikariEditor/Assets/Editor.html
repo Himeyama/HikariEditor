@@ -213,10 +213,12 @@
         document.addEventListener("keydown", () => {
             let src = editor.getValue();
             src = src.replace(/\r\n/g, "\n");
+            let b64src = btoa(src);
             if (event.ctrlKey && event.key === 's') {
                 event.preventDefault();
                 const xhr = new XMLHttpRequest();
-                let data = btoa(`save ${b64file}\n${src}`);
+                let data = btoa(`save ${b64file}\n${b64src}`);
+                console.log(b64src);
                 xhr.open('POST', `http://127.0.0.1:8086?data=${data}`, true);
                 xhr.onload = function () {
                     if (xhr.status === 200) {
