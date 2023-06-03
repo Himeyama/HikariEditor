@@ -32,6 +32,7 @@
     <None Remove="Explorer\NewFolder.xaml" />
     <None Remove="NewFile.xaml" />
     <None Remove="Open.xaml" />
+    <None Remove="PDF.xaml" />
     <None Remove="ResourceDictionary1.xaml" />
     <None Remove="Search.xaml" />
     <None Remove="TerminalUnit.xaml" />
@@ -120,6 +121,9 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <Page Update="PDF.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="Error.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
