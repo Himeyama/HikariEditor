@@ -1,14 +1,15 @@
 <Page
-    x:Class="HikariEditor.Error"
+    x:Class="HikariEditor.LogPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:HikariEditor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
-    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <ScrollViewer >
-            <TextBlock x:Name="errorText" TextWrapping="Wrap" Margin="0, 8, 0, 0" />
+
+    <Grid Padding="16, 16, 16, 16" x:Name="LogTab" >
+        <ScrollViewer>
+            <StackPanel Grid.Row="0" x:Name="LogTabPanel" x:FieldModifier="Public" Padding="0, 0, 0, 16"/>
         </ScrollViewer>
     </Grid>
 </Page>
