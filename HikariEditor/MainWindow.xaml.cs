@@ -19,6 +19,8 @@ namespace HikariEditor
     public sealed partial class MainWindow : Window
     {
         public Editor editor;
+        public Terminal terminal;
+        public StackPanel logTabPanel;
         ApplicationDataContainer config;
 
 
@@ -114,6 +116,7 @@ namespace HikariEditor
         void ClickOpenTerminal(object sender, RoutedEventArgs e)
         {
             Terminal.ClickOpenTerminal(this);
+            terminal.AddNewTab(terminal.terminalTabs);
         }
 
         void configSetup()
@@ -219,5 +222,11 @@ namespace HikariEditor
             dialog.Content = new About();
             await dialog.ShowAsync();
         }
+
+        private void ClickOpenLog(object sender, RoutedEventArgs e)
+        {
+            LogPage.ClickOpenLog(this);
+        }
+
     }
 }

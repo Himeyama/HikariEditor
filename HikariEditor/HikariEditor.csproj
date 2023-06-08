@@ -17,11 +17,17 @@
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <AppxAutoIncrementPackageRevision>True</AppxAutoIncrementPackageRevision>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
-    <AppxBundle>Never</AppxBundle>
+    <AppxBundle>Always</AppxBundle>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Copyright>MURATA Mitsuharu</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Himeyama/HikariEditor</RepositoryUrl>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <AppxPackageDir>C:\Users\minan\source\repos\HikariEditor\HikariEditor\bin\</AppxPackageDir>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="About.xaml" />
@@ -30,6 +36,7 @@
     <None Remove="Error.xaml" />
     <None Remove="Explorer.xaml" />
     <None Remove="Explorer\NewFolder.xaml" />
+    <None Remove="LogPage.xaml" />
     <None Remove="NewFile.xaml" />
     <None Remove="Open.xaml" />
     <None Remove="PDF.xaml" />
@@ -104,6 +111,12 @@
     <Folder Include="Editor\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -121,6 +134,9 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+    <Page Update="LogPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="PDF.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

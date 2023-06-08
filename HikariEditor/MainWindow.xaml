@@ -56,10 +56,15 @@
                                 <KeyboardAccelerator Modifiers="Control" Key="T"/>
                             </MenuFlyoutItem.KeyboardAccelerators>
                         </MenuFlyoutItem>
+                        <MenuFlyoutItem Name="OpenLog"  x:FieldModifier="Public" x:Uid="OpenLog" Text="Open Log" Click="ClickOpenLog">
+                            <MenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Control" Key="U"/>
+                            </MenuFlyoutItem.KeyboardAccelerators>
+                        </MenuFlyoutItem>
                     </MenuBarItem>
 
-                    <MenuBarItem Title="LaTeX" x:Uid="LaTeX">
-                    </MenuBarItem>
+                    <!--<MenuBarItem Title="LaTeX" x:Uid="LaTeX">
+                    </MenuBarItem>-->
 
                     <MenuBarItem Title="Help" x:Uid="Help">
                         <MenuFlyoutItem Text="About Hikari Editor" Click="ClickAboutDialog" x:Uid="About"/>

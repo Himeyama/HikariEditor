@@ -162,6 +162,9 @@
   <data name="OpenExplorer.Text" xml:space="preserve">
     <value>場所を開く</value>
   </data>
+  <data name="OpenLog.Text" xml:space="preserve">
+    <value>ログ出力を開く</value>
+  </data>
   <data name="OpenPageTitle.Text" xml:space="preserve">
     <value>ディレクトリを開く</value>
   </data>
