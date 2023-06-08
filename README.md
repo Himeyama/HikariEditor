@@ -1,6 +1,6 @@
 # ひかりエディタ
 
-![image](https://github.com/Himeyama/HikariEditor/assets/39254183/b4804759-b2ea-43e5-ad1b-e37805be721a)
+![image](https://github.com/Himeyama/HikariEditor/assets/39254183/2d1c6ef6-0f09-4492-bb13-08f815242f73)
 
 ## 証明書のインストール方法
 1. `.cer` ファイルを開き、「証明書のインストール」をクリック
