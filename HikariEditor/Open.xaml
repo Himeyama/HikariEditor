@@ -36,7 +36,6 @@
                 <ListView
                     x:Name="Directories"
                     ItemTemplate="{StaticResource ContactListViewTemplate}"
-                    BorderBrush="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"
                     DoubleTapped="Directories_DoubleTapped"
                     Tapped="Directories_Tapped">
                 </ListView>

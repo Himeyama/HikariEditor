@@ -9,14 +9,12 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using Windows.Storage;
 
 namespace HikariEditor
 {
     public sealed partial class Explorer : Page
     {
         string fullFile;
-        ApplicationDataContainer config;
         MainWindow mainWindow;
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -27,10 +25,21 @@ namespace HikariEditor
 
         public Explorer()
         {
-            config = ApplicationData.Current.LocalSettings;
             InitializeComponent();
-            fullFile = config == null ? Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) : (string)config.Values["openDirPath"];
-            config.Values["explorerDir"] = fullFile;
+
+            Settings settings = new();
+            settings.LoadSetting();
+
+            if (settings.openDirPath == string.Empty)
+            {
+                fullFile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                settings.explorerDir = fullFile;
+            }
+            else
+            {
+                fullFile = settings.openDirPath;
+            }
+            settings.SaveSetting();
 
             setIcon(@"C:\Windows\System32\imageres.dll", 265, ExplorerIcon);
             setIcon(@"C:\Windows\System32\imageres.dll", 229, ReloadIcon);
@@ -45,15 +54,18 @@ namespace HikariEditor
         {
             FileItem file = args.InvokedItem as FileItem;
             if (file == null) return;
+            Settings settings = new();
+            settings.LoadSetting();
             if (Directory.Exists(file.Path))
             {
-                config.Values["explorerDir"] = file.Path;
+                settings.explorerDir = file.Path;
                 return;
             }
             else if (File.Exists(file.Path))
             {
-                config.Values["explorerDir"] = Path.GetDirectoryName(file.Path);
+                settings.explorerDir = Path.GetDirectoryName(file.Path);
             }
+            settings.SaveSetting();
             mainWindow.editor.addTab(file.Path, file.Name);
             mainWindow.editorFrame.Height = double.NaN;
 

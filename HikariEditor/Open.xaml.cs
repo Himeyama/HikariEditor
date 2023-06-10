@@ -5,7 +5,6 @@ using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Windows.Storage;
 
 
 namespace HikariEditor
@@ -13,7 +12,6 @@ namespace HikariEditor
     public sealed partial class Open : Page
     {
         List<Directories> items;
-        ApplicationDataContainer config;
         Frame explorerFrame;
         MainWindow mainWindow;
         string currentDir;
@@ -28,7 +26,6 @@ namespace HikariEditor
         public Open()
         {
             InitializeComponent();
-            config = ApplicationData.Current.LocalSettings;
             DirOpenHome();
         }
 
@@ -118,13 +115,15 @@ namespace HikariEditor
         // 開くボタンのクリック
         private void OpenBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
+            Settings settings = new();
             string openDirPath = DirPath.Text;
-            config.Values["openDirPath"] = openDirPath;
+            settings.openDirPath = openDirPath;
+            settings.SaveSetting();
             explorerFrame.Navigate(typeof(Explorer), mainWindow);
             mainWindow.Menu.SelectedItem = mainWindow.ItemExplorer;
             mainWindow.editorFrame.Navigate(typeof(Editor), mainWindow);
             mainWindow.OpenExplorer.IsEnabled = true;
-            mainWindow.SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(336);
+            mainWindow.SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(360);
         }
 
         private void Directories_Tapped(object sender, TappedRoutedEventArgs e)

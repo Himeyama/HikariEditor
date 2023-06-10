@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>HikariEditor</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -28,6 +28,8 @@
     <RepositoryUrl>https://github.com/Himeyama/HikariEditor</RepositoryUrl>
     <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <AppxPackageDir>C:\Users\minan\source\repos\HikariEditor\HikariEditor\bin\</AppxPackageDir>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    <StartupObject>HikariEditor.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="About.xaml" />
@@ -40,7 +42,6 @@
     <None Remove="NewFile.xaml" />
     <None Remove="Open.xaml" />
     <None Remove="PDF.xaml" />
-    <None Remove="ResourceDictionary1.xaml" />
     <None Remove="Search.xaml" />
     <None Remove="TerminalUnit.xaml" />
     <None Remove="Terminal\Terminal.xaml" />
@@ -57,9 +58,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls" Version="7.1.3" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.3.230502000" />
-    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.755" />
+    <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.756" />
     <PackageReference Include="SharpCompress" Version="0.33.0" />
     <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
     <Manifest Include="$(ApplicationManifest)" />
@@ -98,11 +98,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Update="Explorer.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="ResourceDictionary1.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
