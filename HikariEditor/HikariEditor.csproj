@@ -3,14 +3,26 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    <RootNamespace>HikariEditor</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Platforms>x86;x64;ARM64</Platforms>
-    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
-    <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
+    
+    
+    <!-- WinUI3 -->
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
+    
+    <!-- Project Options -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>HikariEditor</RootNamespace>
+    
+    <!-- App Options -->
+    <Platforms>x86;x64;ARM64</Platforms>
+    <Platform>x64</Platform>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
+    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
+    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
     <DefaultLanguage>ja-JP</DefaultLanguage>
+    
     <PackageIcon>Icon.png</PackageIcon>
     <ApplicationIcon>Assets\HikariEditor.ico</ApplicationIcon>
     <PackageCertificateThumbprint>7B2D2BB4DD51991D869B5CE680BE48121A9CCF42</PackageCertificateThumbprint>
@@ -22,13 +34,11 @@
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundle>Always</AppxBundle>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <Platform>x64</Platform>
+    
     <Copyright>MURATA Mitsuharu</Copyright>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Himeyama/HikariEditor</RepositoryUrl>
-    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
-    <AppxPackageDir>C:\Users\minan\source\repos\HikariEditor\HikariEditor\bin\</AppxPackageDir>
-    <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+    
     <StartupObject>HikariEditor.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
