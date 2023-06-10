@@ -1,13 +1,9 @@
 ﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Navigation;
-using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace HikariEditor
@@ -30,14 +26,14 @@ namespace HikariEditor
             Settings settings = new();
             settings.LoadSetting();
 
-            if (settings.openDirPath == string.Empty)
+            if (settings.OpenDirPath == string.Empty)
             {
                 fullFile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-                settings.explorerDir = fullFile;
+                settings.ExplorerDir = fullFile;
             }
             else
             {
-                fullFile = settings.openDirPath;
+                fullFile = settings.OpenDirPath;
             }
             settings.SaveSetting();
 
@@ -58,15 +54,15 @@ namespace HikariEditor
             settings.LoadSetting();
             if (Directory.Exists(file.Path))
             {
-                settings.explorerDir = file.Path;
+                settings.ExplorerDir = file.Path;
                 return;
             }
             else if (File.Exists(file.Path))
             {
-                settings.explorerDir = Path.GetDirectoryName(file.Path);
+                settings.ExplorerDir = Path.GetDirectoryName(file.Path);
             }
             settings.SaveSetting();
-            mainWindow.editor.addTab(file.Path, file.Name);
+            mainWindow.editor.AddTab(file.Path, file.Name);
             mainWindow.editorFrame.Height = double.NaN;
 
             mainWindow.rightArea.ColumnDefinitions[1].Width =
@@ -188,7 +184,7 @@ namespace HikariEditor
                 using Bitmap bmp = icon.ToBitmap();
                 bmp.Save(iconResource);
             }
-            BitmapImage bmpImage = new();
+            //BitmapImage bmpImage = new();
             Uri uri = new(iconResource);
             img.UriSource = uri;
         }

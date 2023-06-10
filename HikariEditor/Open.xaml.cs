@@ -2,24 +2,25 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
-using System;
-using System.Collections.Generic;
-using System.IO;
 
 
 namespace HikariEditor
 {
     public sealed partial class Open : Page
     {
-        List<Directories> items;
-        Frame explorerFrame;
-        MainWindow mainWindow;
-        string currentDir;
+        List<Directories>? items;
+        Frame? explorerFrame;
+        MainWindow? mainWindow;
+        string? currentDir;
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            mainWindow = e.Parameter as MainWindow;
-            explorerFrame = mainWindow.contentFrame;
+            if (e != null && e.Parameter != null)
+                mainWindow = (MainWindow)e.Parameter;
+
+            if (mainWindow != null)
+                explorerFrame = mainWindow.contentFrame;
+
             base.OnNavigatedTo(e);
         }
 
@@ -56,8 +57,13 @@ namespace HikariEditor
         {
             DirOpenParentBtn.IsEnabled = true;
             items = new();
-            string homeDir = Environment.GetEnvironmentVariable("userprofile");
+            string? homeDir = Environment.GetEnvironmentVariable("userprofile");
             currentDir = homeDir;
+            if (homeDir == null)
+            {
+                Error.Dialog("環境変数未定義エラー", "環境変数が未定義です。", mainWindow!.Content.XamlRoot);
+                return;
+            };
             string[] homeDirs = Directory.GetDirectories(homeDir);
             foreach (string dir in homeDirs)
             {
@@ -93,7 +99,12 @@ namespace HikariEditor
             string dir = DirPath.Text;
             if (string.IsNullOrEmpty(dir))
                 return;
-            DirectoryInfo parentDirInfo = Directory.GetParent(currentDir);
+            if (currentDir == null)
+            {
+                Error.Dialog("変数未定義エラー", "現在のディレクトリが未定義です。", mainWindow!.Content.XamlRoot);
+                return;
+            }
+            DirectoryInfo? parentDirInfo = Directory.GetParent(currentDir);
             if (parentDirInfo == null)
             {
                 DirOpenComputer();
@@ -117,10 +128,10 @@ namespace HikariEditor
         {
             Settings settings = new();
             string openDirPath = DirPath.Text;
-            settings.openDirPath = openDirPath;
+            settings.OpenDirPath = openDirPath;
             settings.SaveSetting();
-            explorerFrame.Navigate(typeof(Explorer), mainWindow);
-            mainWindow.Menu.SelectedItem = mainWindow.ItemExplorer;
+            explorerFrame!.Navigate(typeof(Explorer), mainWindow);
+            mainWindow!.Menu.SelectedItem = mainWindow.ItemExplorer;
             mainWindow.editorFrame.Navigate(typeof(Editor), mainWindow);
             mainWindow.OpenExplorer.IsEnabled = true;
             mainWindow.SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(360);
@@ -135,7 +146,7 @@ namespace HikariEditor
 
         private void OpenCloseButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            mainWindow.editorFrame.Navigate(typeof(Editor), mainWindow);
+            mainWindow!.editorFrame.Navigate(typeof(Editor), mainWindow);
         }
     }
 }

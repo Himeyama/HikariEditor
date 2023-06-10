@@ -2,11 +2,7 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 using System.Diagnostics;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics;
 using Windows.Storage;
@@ -30,16 +26,16 @@ namespace HikariEditor
 
             /* エディタの設定 */
             editorFrame.Navigate(typeof(Editor), this);
-            editorSetup();
+            EditorSetup();
 
             /* エクスプローラーを非表示に */
             OpenExplorer.IsEnabled = false;
 
             /* 自動保存設定の読み込み */
-            loadConfig();
+            LoadConfig();
         }
 
-        void setWindowSize(int width, int height)
+        void SetWindowSize(int width, int height)
         {
             IntPtr hWnd = WindowNative.GetWindowHandle(this);
             WindowId myWndId = Win32Interop.GetWindowIdFromWindow(hWnd);
@@ -47,17 +43,17 @@ namespace HikariEditor
             appWindow.Resize(new SizeInt32(width, height));
         }
 
-        async void editorSetup()
+        async void EditorSetup()
         {
             StatusBar.Text = "エディタの初期設定中...";
-            await editorSetupAsync();
+            await EditorSetupAsync();
             _ = CopyEditorFile();
             StatusBar.Text = "エディタの初期設定、完了";
             await Task.Delay(2000);
             StatusBar.Text = "";
         }
 
-        async Task editorSetupAsync()
+        static async Task EditorSetupAsync()
         {
             // エディタの初期設定
             string tempDirectory = Path.GetTempPath();
@@ -89,7 +85,7 @@ namespace HikariEditor
             }
         }
 
-        async Task CopyEditorFile()
+        static async Task CopyEditorFile()
         {
             StorageFile htmlFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Editor.html"));
             string tempDirectory = Path.GetTempPath();
@@ -115,11 +111,11 @@ namespace HikariEditor
             terminal.AddNewTab(terminal.terminalTabs);
         }
 
-        void loadConfig()
+        void LoadConfig()
         {
             Settings settings = new();
             settings.LoadSetting();
-            AutoSave.IsChecked = settings.autoSave;
+            AutoSave.IsChecked = settings.AutoSave;
             ToggleStyle(AutoSave.IsChecked);
         }
 
@@ -143,7 +139,7 @@ namespace HikariEditor
         {
             Settings settings = new();
             settings.LoadSetting();
-            settings.autoSave = AutoSaveToggleSwitch.IsOn;
+            settings.AutoSave = AutoSaveToggleSwitch.IsOn;
             ToggleStyle(AutoSaveToggleSwitch.IsOn);
             settings.SaveSetting();
         }
@@ -190,8 +186,8 @@ namespace HikariEditor
             Settings settings = new();
             settings.LoadSetting();
 
-            if (settings.explorerDir != "")
-                Process.Start("explorer.exe", settings.explorerDir);
+            if (settings.ExplorerDir != "")
+                Process.Start("explorer.exe", settings.ExplorerDir);
         }
 
         async void ClickPasteText(object sender, RoutedEventArgs e)
