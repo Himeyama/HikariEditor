@@ -2,7 +2,6 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -20,29 +19,24 @@ namespace HikariEditor
         public Editor editor;
         public Terminal terminal;
         public StackPanel logTabPanel;
-        ApplicationDataContainer config;
-
 
         public MainWindow()
         {
             InitializeComponent();
 
-            configSetup();
-            loadConfig();
-
+            /* タイトルバーの設定 */
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
-            Manager.mainWindow = this;
-            Manager.contentFrame = contentFrame;
 
-            //TitleBar titleBar = new(this, "Hikari Editor");
-            ExtendsContentIntoTitleBar = true;
-            SetTitleBar(AppTitleBar);
-            //setWindowSize(1920, 1200);
+            /* エディタの設定 */
             editorFrame.Navigate(typeof(Editor), this);
-            config.Values["explorerDir"] = "";
-            OpenExplorer.IsEnabled = false;
             editorSetup();
+
+            /* エクスプローラーを非表示に */
+            OpenExplorer.IsEnabled = false;
+
+            /* 自動保存設定の読み込み */
+            loadConfig();
         }
 
         void setWindowSize(int width, int height)
@@ -121,15 +115,11 @@ namespace HikariEditor
             terminal.AddNewTab(terminal.terminalTabs);
         }
 
-        void configSetup()
-        {
-            config = ApplicationData.Current.LocalSettings;
-            config.Values["AutoSave"] ??= false;
-        }
-
         void loadConfig()
         {
-            AutoSave.IsChecked = (bool)config.Values["AutoSave"];
+            Settings settings = new();
+            settings.LoadSetting();
+            AutoSave.IsChecked = settings.autoSave;
             ToggleStyle(AutoSave.IsChecked);
         }
 
@@ -138,21 +128,24 @@ namespace HikariEditor
             if (isOn)
             {
                 AutoSaveToggleSwitchText.Text = "オン";
-                AutoSaveToggleSwitchText.Foreground = new SolidColorBrush(Colors.Black);
+                //AutoSaveToggleSwitchText.Foreground = new SolidColorBrush(Colors.Black);
                 AutoSaveToggleSwitchText.Margin = new Thickness(5, 12.5, 0, 0);
             }
             else
             {
                 AutoSaveToggleSwitchText.Text = "オフ";
                 AutoSaveToggleSwitchText.Margin = new Thickness(19, 12.5, 0, 0);
-                AutoSaveToggleSwitchText.Foreground = AppTitleBar.ActualTheme == ElementTheme.Light ? new SolidColorBrush(Colors.Black) : (Brush)new SolidColorBrush(Colors.White);
+                //AutoSaveToggleSwitchText.Foreground = AppTitleBar.ActualTheme == ElementTheme.Light ? new SolidColorBrush(Colors.Black) : (Brush)new SolidColorBrush(Colors.White);
             }
         }
 
         private void ToggleSwitch_Toggled(object sender, RoutedEventArgs e)
         {
-            config.Values["AutoSave"] = AutoSaveToggleSwitch.IsOn;
+            Settings settings = new();
+            settings.LoadSetting();
+            settings.autoSave = AutoSaveToggleSwitch.IsOn;
             ToggleStyle(AutoSaveToggleSwitch.IsOn);
+            settings.SaveSetting();
         }
 
         void ExitClick(object sender, RoutedEventArgs e)
@@ -171,7 +164,7 @@ namespace HikariEditor
             if (selectedItem == null) return;
             if ((string)selectedItem.Tag == "Explorer")
             {
-                if (SideMenuEditorArea.ColumnDefinitions[0].Width.ToString() == "336")
+                if (SideMenuEditorArea.ColumnDefinitions[0].Width.ToString() == "360")
                 {
                     SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(48);
                     ItemExplorer.IsSelected = false;
@@ -179,7 +172,7 @@ namespace HikariEditor
                 }
                 else
                 {
-                    SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(336);
+                    SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(360);
                     ItemExplorer.IsSelected = true;
                     OpenExplorer.IsEnabled = true;
                 }
@@ -194,9 +187,11 @@ namespace HikariEditor
 
         public void ClickOpenExplorer(object sender, RoutedEventArgs e)
         {
-            string explorerDir = config.Values["explorerDir"] as string;
-            if (explorerDir != "")
-                Process.Start("explorer.exe", explorerDir);
+            Settings settings = new();
+            settings.LoadSetting();
+
+            if (settings.explorerDir != "")
+                Process.Start("explorer.exe", settings.explorerDir);
         }
 
         async void ClickPasteText(object sender, RoutedEventArgs e)
