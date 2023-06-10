@@ -3,7 +3,6 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.Runtime.InteropServices;
 
 namespace HikariEditor
@@ -11,11 +10,11 @@ namespace HikariEditor
     public sealed partial class Explorer : Page
     {
         string fullFile;
-        MainWindow mainWindow;
+        MainWindow? mainWindow;
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            mainWindow = e.Parameter as MainWindow;
+            mainWindow = (MainWindow)e.Parameter;
             base.OnNavigatedTo(e);
         }
 
@@ -37,18 +36,18 @@ namespace HikariEditor
             }
             settings.SaveSetting();
 
-            setIcon(@"C:\Windows\System32\imageres.dll", 265, ExplorerIcon);
-            setIcon(@"C:\Windows\System32\imageres.dll", 229, ReloadIcon);
-            setIcon(@"C:\Windows\System32\imageres.dll", 50, DeleteIcon);
+            SetIcon(@"C:\Windows\System32\imageres.dll", 265, ExplorerIcon);
+            SetIcon(@"C:\Windows\System32\imageres.dll", 229, ReloadIcon);
+            SetIcon(@"C:\Windows\System32\imageres.dll", 50, DeleteIcon);
 
-            addTreeViewFiles(fullFile);
-            ExplorerTree.ItemInvoked += fileClick;
+            AddTreeViewFiles(fullFile);
+            ExplorerTree.ItemInvoked += FileClick;
         }
 
         // ツリーを選択したとき
-        void fileClick(TreeView sender, TreeViewItemInvokedEventArgs args)
+        void FileClick(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
-            FileItem file = args.InvokedItem as FileItem;
+            FileItem file = (FileItem)args.InvokedItem;
             if (file == null) return;
             Settings settings = new();
             settings.LoadSetting();
@@ -59,20 +58,20 @@ namespace HikariEditor
             }
             else if (File.Exists(file.Path))
             {
-                settings.ExplorerDir = Path.GetDirectoryName(file.Path);
+                settings.ExplorerDir = Path.GetDirectoryName(file.Path)!;
             }
             settings.SaveSetting();
-            mainWindow.editor.AddTab(file.Path, file.Name);
+            mainWindow!.editor!.AddTab(file.Path, file.Name);
             mainWindow.editorFrame.Height = double.NaN;
 
             mainWindow.rightArea.ColumnDefinitions[1].Width =
                 file.Extension == ".tex" ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
         }
 
-        void addChildNode(FileItem file)
+        static void AddChildNode(FileItem file)
         {
             if (!Directory.Exists(file.Path)) return;
-            string[] fileList = { };
+            string[] fileList = Array.Empty<string>();
             try
             {
                 fileList = Directory.GetDirectories(file.Path, "*").Concat(Directory.GetFiles(file.Path, "*")).ToArray();
@@ -88,10 +87,10 @@ namespace HikariEditor
             }
         }
 
-        void addTreeViewFiles(string filePath)
+        void AddTreeViewFiles(string filePath)
         {
             // 子ファイルを取得
-            string[] fileList = { };
+            string[] fileList = Array.Empty<string>();
             try
             {
                 fileList = Directory.GetDirectories(filePath, "*").Concat(Directory.GetFiles(filePath, "*")).ToArray();
@@ -106,56 +105,25 @@ namespace HikariEditor
                     ? new FileItem(f) { Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true }
                     : new FileItem(f) { Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = true };
                 ExplorerTree.RootNodes.Add(file);
-                addChildNode(file);
+                AddChildNode(file);
             }
         }
 
-        private void ExplorerTree_Expanding(TreeView sender, TreeViewExpandingEventArgs args)
+        private void ExplorerTreeExpanding(TreeView sender, TreeViewExpandingEventArgs args)
         {
             FileItem file = (FileItem)args.Node;
-            foreach (FileItem f in file.Children)
+            foreach (FileItem f in file.Children.Cast<FileItem>())
             {
                 if (!f.Flag) continue;
                 f.Flag = false;
-                addChildNode(f);
+                AddChildNode(f);
             }
         }
 
         private void ReloadButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            mainWindow.contentFrame.Navigate(typeof(Explorer), mainWindow);
+            mainWindow!.contentFrame.Navigate(typeof(Explorer), mainWindow);
             mainWindow.OpenExplorer.IsEnabled = true;
-        }
-
-        private void CreateNewFolder(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            FileItem fileItem = ExplorerTree.SelectedItem as FileItem;
-            string newDirPath = fileItem == null ? fullFile : fileItem.Path;
-            string newFolderName = "New Folder";
-            if (CultureInfo.CurrentCulture.Name == "ja-JP")
-                newFolderName = "新しいフォルダー";
-            newDirPath = $"{newDirPath}\\{newFolderName}";
-
-            if (!Directory.Exists(newDirPath))
-            {
-                Directory.CreateDirectory(newDirPath);
-                return;
-            }
-            Debug.WriteLine($"CurrentCulture is {CultureInfo.CurrentCulture.Name}.");
-            for (int i = 2; i < 1024; i++)
-            {
-                string nNewDirPath = $"{newDirPath} ({i})";
-                if (!Directory.Exists(nNewDirPath))
-                {
-                    FileItem newFileItem = new(nNewDirPath) { Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true };
-                    if (fileItem == null)
-                        ExplorerTree.RootNodes.Add(newFileItem);
-                    else
-                        fileItem.Children.Add(newFileItem);
-                    Directory.CreateDirectory(nNewDirPath);
-                    return;
-                }
-            }
         }
 
         [DllImport("shell32.dll")]
@@ -167,7 +135,7 @@ namespace HikariEditor
             int icons
         );
 
-        void setIcon(string iconPath, int iconIndex, Microsoft.UI.Xaml.Controls.BitmapIcon img)
+        void SetIcon(string iconPath, int iconIndex, BitmapIcon img)
         {
             Icon icon;
             IntPtr largeIconHandle = IntPtr.Zero;
@@ -189,19 +157,19 @@ namespace HikariEditor
             img.UriSource = uri;
         }
 
-        private void ClickOpenExplorer(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        private void ClickOpenExplorer(object sender, RoutedEventArgs e)
         {
-            mainWindow.ClickOpenExplorer(sender, e);
+            mainWindow!.ClickOpenExplorer(sender, e);
         }
 
         async void ClickAddNewFile(object sender, RoutedEventArgs e)
         {
             ContentDialog dialog = new();
-            dialog.XamlRoot = this.Content.XamlRoot;
+            NewFile content = new();
+            dialog.XamlRoot = Content.XamlRoot;
             dialog.Title = "ファイル作成";
             dialog.PrimaryButtonText = "OK";
             dialog.DefaultButton = ContentDialogButton.Primary;
-            NewFile content = new();
             dialog.Content = content;
             await dialog.ShowAsync();
 
@@ -224,11 +192,11 @@ namespace HikariEditor
         async void ClickAddNewFolder(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             ContentDialog dialog = new();
+            NewFolder content = new();
             dialog.XamlRoot = this.Content.XamlRoot;
             dialog.Title = "フォルダー作成";
             dialog.PrimaryButtonText = "OK";
             dialog.DefaultButton = ContentDialogButton.Primary;
-            NewFolder content = new();
             dialog.Content = content;
             await dialog.ShowAsync();
 
@@ -248,14 +216,14 @@ namespace HikariEditor
 
         private void DeleteFileButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
-            FileItem fileItem = ExplorerTree.SelectedItem as FileItem;
+            FileItem? fileItem = ExplorerTree.SelectedItem as FileItem;
             string file = fileItem == null ? fullFile : ((FileItem)ExplorerTree.SelectedItem).Path;
             if (File.Exists(file))
             {
                 try
                 {
                     File.Delete(file);
-                    fileItem.Parent.Children.Remove(fileItem);
+                    fileItem!.Parent.Children.Remove(fileItem);
                 }
                 catch (IOException err)
                 {
@@ -272,7 +240,7 @@ namespace HikariEditor
                 }
                 catch (IOException err)
                 {
-                    Error.Dialog("例外: 入出力エラー", err.Message, mainWindow.Content.XamlRoot);
+                    Error.Dialog("例外: 入出力エラー", err.Message, mainWindow!.Content.XamlRoot);
                 }
             }
             else

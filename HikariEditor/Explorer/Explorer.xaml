@@ -61,7 +61,7 @@
             <ScrollViewer>
                 <TreeView x:Name="ExplorerTree"
                   ItemTemplate="{StaticResource ExplorerListViewTemplate}"
-                  Expanding="ExplorerTree_Expanding"/>
+                  Expanding="ExplorerTreeExpanding"/>
             </ScrollViewer>
         </Grid>
     </Grid>

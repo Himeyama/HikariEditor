@@ -35,10 +35,10 @@ namespace HikariEditor
             if ((Directories)Directories.SelectedValue == null)
                 return;
             DirOpenParentBtn.IsEnabled = true;
-            string dir = ((Directories)Directories.SelectedValue).Path;
+            string? dir = ((Directories)Directories.SelectedValue).Path;
             currentDir = dir;
             DirPath.Text = dir;
-            string[] dirs = Directory.GetDirectories(dir);
+            string[] dirs = Directory.GetDirectories(dir!);
             items = new();
             foreach (string d in dirs)
             {

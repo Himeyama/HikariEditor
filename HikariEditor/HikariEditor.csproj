@@ -40,6 +40,8 @@
     <RepositoryUrl>https://github.com/Himeyama/HikariEditor</RepositoryUrl>
     
     <StartupObject>HikariEditor.Program</StartupObject>
+    
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="About.xaml" />
