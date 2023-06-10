@@ -7,7 +7,7 @@ namespace HikariEditor
 {
     public sealed partial class EditorUnit : UserControl
     {
-        string str2base64(string str)
+        static string Str2Base64(string str)
         {
             byte[] bytesToEncode = System.Text.Encoding.UTF8.GetBytes(str);
             string base64EncodedString = Convert.ToBase64String(bytesToEncode);
@@ -26,7 +26,7 @@ namespace HikariEditor
                 string editorDir = $"{tempDirectory}HikariEditor";
                 string uri = $"{editorDir}\\editor\\index.html";
                 uri += $"?extension={extension}";
-                uri += $"&file={str2base64(fileName)}";
+                uri += $"&file={Str2Base64(fileName)}";
                 if (ActualTheme == ElementTheme.Light)
                 {
                     uri += "&theme=vs-light";
