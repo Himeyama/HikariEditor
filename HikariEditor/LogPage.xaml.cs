@@ -5,7 +5,7 @@ namespace HikariEditor
 {
     public sealed partial class LogPage : Page
     {
-        MainWindow mainWindow;
+        //MainWindow mainWindow;
         static public void ClickOpenLog(MainWindow mainWindow)
         {
             mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);

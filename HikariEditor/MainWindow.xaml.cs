@@ -3,7 +3,6 @@ using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
-using Svgicon5;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -27,6 +26,7 @@ namespace HikariEditor
         public MainWindow()
         {
             InitializeComponent();
+
             configSetup();
             loadConfig();
 
@@ -35,8 +35,10 @@ namespace HikariEditor
             Manager.mainWindow = this;
             Manager.contentFrame = contentFrame;
 
-            TitleBar titleBar = new(this, "Hikari Editor");
-            setWindowSize(1920, 1200);
+            //TitleBar titleBar = new(this, "Hikari Editor");
+            ExtendsContentIntoTitleBar = true;
+            SetTitleBar(AppTitleBar);
+            //setWindowSize(1920, 1200);
             editorFrame.Navigate(typeof(Editor), this);
             config.Values["explorerDir"] = "";
             OpenExplorer.IsEnabled = false;
@@ -55,7 +57,7 @@ namespace HikariEditor
         {
             StatusBar.Text = "エディタの初期設定中...";
             await editorSetupAsync();
-            _ = copyEditorFile();
+            _ = CopyEditorFile();
             StatusBar.Text = "エディタの初期設定、完了";
             await Task.Delay(2000);
             StatusBar.Text = "";
@@ -88,12 +90,12 @@ namespace HikariEditor
             if (!Directory.Exists($"{editorDir}\\editor"))
             {
                 FileItem editorCp = new(downloadFile);
-                editorCp.extract();
+                editorCp.Extract();
                 Directory.Move($"{editorDir}\\package", $"{editorDir}\\editor");
             }
         }
 
-        async Task copyEditorFile()
+        async Task CopyEditorFile()
         {
             StorageFile htmlFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Editor.html"));
             string tempDirectory = Path.GetTempPath();

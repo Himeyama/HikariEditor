@@ -5,7 +5,6 @@
     xmlns:local="using:HikariEditor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d">
     <Grid
         RowDefinitions="40, *, 24" x:Name="Window">

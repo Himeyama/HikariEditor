@@ -7,15 +7,16 @@ namespace HikariEditor
 {
     class FileItem : TreeViewNode
     {
+#nullable disable
         public string Path { get; set; }
         public string Name { get; set; }
         public string Dirname { get; set; }
         public string Extension { get; set; }
         public string WithoutName { get; set; }
-        public string? Icon1 { get; set; }
-        public string? Icon2 { get; set; }
-        public string? Color1 { get; set; }
-        public string? Color2 { get; set; }
+        public string Icon1 { get; set; }
+        public string Icon2 { get; set; }
+        public string Color1 { get; set; }
+        public string Color2 { get; set; }
         public bool Flag { get; set; }
 
         void InitFileItem()
@@ -54,7 +55,10 @@ namespace HikariEditor
                 if (Directory.Exists(Dirname))
                 {
                     if (!Directory.Exists(Path))
-                        using (File.Create(Path)) ;
+                        using (File.Create(Path))
+                        {
+                            ;
+                        }
                     else
                     {
                         Error.Dialog("作成失敗", "同名のフォルダが存在しています。", mainWindow.Content.XamlRoot);
@@ -122,7 +126,7 @@ namespace HikariEditor
             return src.Replace("\n", "\r\n");
         }
 
-        public void extract()
+        public void Extract()
         {
             string ext = System.IO.Path.GetExtension(Path).Trim();
             string extDir = System.IO.Path.GetDirectoryName(Path);
