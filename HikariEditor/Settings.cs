@@ -1,40 +1,39 @@
-﻿using System.IO;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace HikariEditor
 {
     internal class Settings
     {
-        string settingPath = string.Empty;
-        public string explorerDir { get; set; } = string.Empty;
-        public bool autoSave { get; set; } = false;
-        public string openDirPath { get; set; } = string.Empty;
+        string SettingPath = string.Empty;
+        public string ExplorerDir { get; set; } = string.Empty;
+        public bool AutoSave { get; set; } = false;
+        public string OpenDirPath { get; set; } = string.Empty;
 
         public Settings()
         {
-            settingPath = $"{Path.GetTempPath()}\\HikariEditor-settings.json";
+            SettingPath = $"{Path.GetTempPath()}\\HikariEditor-settings.json";
             /* 再帰となるような関数禁止 */
         }
 
         public void SaveSetting()
         {
             string jsonString = JsonSerializer.Serialize(this);
-            FileItem fileItem = new(settingPath);
+            FileItem fileItem = new(SettingPath);
             fileItem.Save(jsonString, "LF");
         }
 
         public void LoadSetting()
         {
-            if (!File.Exists(settingPath))
+            if (!File.Exists(SettingPath))
             {
                 SaveSetting();
                 return;
             }
-            string jsonString = File.ReadAllText(settingPath);
-            Settings settings = JsonSerializer.Deserialize<Settings>(jsonString);
-            explorerDir = settings.explorerDir;
-            autoSave = settings.autoSave;
-            openDirPath = settings.openDirPath;
+            string jsonString = File.ReadAllText(SettingPath);
+            Settings? settings = JsonSerializer.Deserialize<Settings>(jsonString);
+            ExplorerDir = settings!.ExplorerDir;
+            AutoSave = settings.AutoSave;
+            OpenDirPath = settings.OpenDirPath;
         }
     }
 }

@@ -12,7 +12,6 @@
         <TabView 
             x:Name="Tabs"
             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0"
-            AddTabButtonClick="TabViewAddTabButtonClick"
             TabCloseRequested="TabViewCloseTab"
             SelectionChanged="EditorTabChange"
             IsAddTabButtonVisible="False">
