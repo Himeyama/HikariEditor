@@ -6,7 +6,7 @@ namespace HikariEditor
     {
         public App()
         {
-            this.InitializeComponent();
+            InitializeComponent();
         }
 
         protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
@@ -15,6 +15,6 @@ namespace HikariEditor
             m_window.Activate();
         }
 
-        private Window m_window;
+        private Window? m_window;
     }
 }

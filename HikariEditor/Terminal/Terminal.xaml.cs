@@ -5,7 +5,7 @@ namespace HikariEditor
 {
     public sealed partial class Terminal : Page
     {
-        MainWindow mainWindow;
+        MainWindow? mainWindow;
 
         static public void ClickOpenTerminal(MainWindow mainWindow)
         {
@@ -16,7 +16,7 @@ namespace HikariEditor
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            mainWindow = e.Parameter as MainWindow;
+            mainWindow = (MainWindow)e.Parameter;
             mainWindow.terminal = this;
             base.OnNavigatedTo(e);
         }
@@ -28,26 +28,27 @@ namespace HikariEditor
 
         public void AddNewLogPage(TabView tabs)
         {
-            TabViewItem newTab = new();
-            newTab.Header = "ログ出力";
             LogPage frame = new();
-            if (mainWindow != null)
+            TabViewItem newTab = new()
             {
-                mainWindow.logTabPanel = frame.LogTabPanel;
-            }
-            newTab.Content = frame;
+                Header = "ログ出力",
+                Content = frame,
+                IsSelected = true
+            };
+            mainWindow!.logTabPanel = frame.LogTabPanel;
             tabs.TabItems.Add(newTab);
-            newTab.IsSelected = true;
         }
 
         // タブの追加
         public void AddNewTab(TabView tabs)
         {
-            TabViewItem newTab = new();
-            newTab.Header = "ターミナル";
             TerminalUnit frame = new();
-            newTab.Content = frame;
-            newTab.IsSelected = true;
+            TabViewItem newTab = new()
+            {
+                Header = "ターミナル",
+                Content = frame,
+                IsSelected = true
+            };
             tabs.TabItems.Add(newTab);
         }
 
@@ -62,7 +63,7 @@ namespace HikariEditor
         {
             /* ログ出力を閉じた場合に、メニューボタンを有効にする */
             if (((TabViewItem)sender.SelectedItem).Content.ToString() == "HikariEditor.LogPage")
-                mainWindow.OpenLog.IsEnabled = true;
+                mainWindow!.OpenLog.IsEnabled = true;
 
             /* 該当するタブを削除 */
             sender.TabItems.Remove(args.Tab);
@@ -70,7 +71,7 @@ namespace HikariEditor
             /* タブが無くなった場合に、メニューボタンを有効にする */
             if (sender.TabItems.Count == 0)
             {
-                mainWindow.OpenTerminal.IsEnabled = true;
+                mainWindow!.OpenTerminal.IsEnabled = true;
                 mainWindow.OpenLog.IsEnabled = true;
                 mainWindow.terminalFrame.Height = 0;
             };

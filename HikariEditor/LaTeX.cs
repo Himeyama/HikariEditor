@@ -1,6 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using System.Threading.Tasks;
+﻿using System.Diagnostics;
 
 namespace HikariEditor
 {
@@ -35,17 +33,18 @@ namespace HikariEditor
                         Error.Dialog("LaTeX コンパイルエラー", stdout, mainWindow.Content.XamlRoot);
                         tex_compile_error = true;
                     }
-                    editor.counter++;
+                    editor.Counter++;
                     editor.DelayResetStatusBar(1000);
                 }
 
                 if (!tex_compile_error)
                 {
                     FileItem pdfFileItem = new(fileItem.Dirname, $"{fileItem.WithoutName}.pdf");
-                    PDFPageInfo pdfPageInfo = new();
-                    pdfPageInfo.mainWindow = mainWindow;
-                    pdfPageInfo.fileItem = pdfFileItem;
-                    Debug.WriteLine(pdfFileItem.Path);
+                    PDFPageInfo pdfPageInfo = new()
+                    {
+                        mainWindow = mainWindow,
+                        fileItem = pdfFileItem
+                    };
                     mainWindow.previewFrame.Navigate(typeof(PDF), pdfPageInfo);
                 }
 

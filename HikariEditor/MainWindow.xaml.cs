@@ -1,20 +1,16 @@
-﻿using Microsoft.UI;
-using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
+﻿using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using System.Diagnostics;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Graphics;
 using Windows.Storage;
-using WinRT.Interop;
 
 namespace HikariEditor
 {
     public sealed partial class MainWindow : Window
     {
-        public Editor editor;
-        public Terminal terminal;
-        public StackPanel logTabPanel;
+        public Editor? editor;
+        public Terminal? terminal;
+        public StackPanel? logTabPanel;
 
         public MainWindow()
         {
@@ -35,13 +31,13 @@ namespace HikariEditor
             LoadConfig();
         }
 
-        void SetWindowSize(int width, int height)
-        {
-            IntPtr hWnd = WindowNative.GetWindowHandle(this);
-            WindowId myWndId = Win32Interop.GetWindowIdFromWindow(hWnd);
-            AppWindow appWindow = AppWindow.GetFromWindowId(myWndId);
-            appWindow.Resize(new SizeInt32(width, height));
-        }
+        //void SetWindowSize(int width, int height)
+        //{
+        //    IntPtr hWnd = WindowNative.GetWindowHandle(this);
+        //    WindowId myWndId = Win32Interop.GetWindowIdFromWindow(hWnd);
+        //    AppWindow appWindow = AppWindow.GetFromWindowId(myWndId);
+        //    appWindow.Resize(new SizeInt32(width, height));
+        //}
 
         async void EditorSetup()
         {
@@ -108,7 +104,7 @@ namespace HikariEditor
         void ClickOpenTerminal(object sender, RoutedEventArgs e)
         {
             Terminal.ClickOpenTerminal(this);
-            terminal.AddNewTab(terminal.terminalTabs);
+            terminal!.AddNewTab(terminal.terminalTabs);
         }
 
         void LoadConfig()
@@ -156,7 +152,7 @@ namespace HikariEditor
 
         private void MenuChanged(NavigationView sender, NavigationViewItemInvokedEventArgs args)
         {
-            NavigationViewItem selectedItem = sender.SelectedItem as NavigationViewItem;
+            NavigationViewItem? selectedItem = (NavigationViewItem)sender.SelectedItem;
             if (selectedItem == null) return;
             if ((string)selectedItem.Tag == "Explorer")
             {
@@ -196,23 +192,25 @@ namespace HikariEditor
             if (dataPackageView.Contains(StandardDataFormats.Text))
             {
                 string text = await dataPackageView.GetTextAsync();
-                editor.CallPasteFunction(text);
+                editor!.CallPasteFunction(text);
             }
         }
 
         private void ClickCopyText(object sender, RoutedEventArgs e)
         {
-            editor.CallCopyFunction();
+            editor!.CallCopyFunction();
         }
 
         async private void ClickAboutDialog(object sender, RoutedEventArgs e)
         {
-            ContentDialog dialog = new();
-            dialog.XamlRoot = this.Content.XamlRoot;
-            dialog.Title = "ひかりエディタ";
-            dialog.PrimaryButtonText = "OK";
-            dialog.DefaultButton = ContentDialogButton.Primary;
-            dialog.Content = new About();
+            ContentDialog dialog = new()
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = "ひかりエディタ",
+                PrimaryButtonText = "OK",
+                DefaultButton = ContentDialogButton.Primary,
+                Content = new About()
+            };
             await dialog.ShowAsync();
         }
 

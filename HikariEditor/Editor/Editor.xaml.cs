@@ -4,7 +4,6 @@ using Microsoft.UI.Xaml.Navigation;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Windows.ApplicationModel.DataTransfer;
@@ -15,18 +14,25 @@ namespace HikariEditor
     {
         readonly List<string> tabs = new() { };
         MainWindow? mainWindow;
-        public int counter = 0;
+        private int counter = 0;
+
+        public List<string> Tabs1 => tabs;
+
+        public MainWindow? MainWindow { get => mainWindow; set => mainWindow = value; }
+        public int Counter { get => counter; set => counter = value; }
 
         struct PostInfo
         {
-            public string top;
-            public string body;
-        };
+            private string top;
+            private string body;
 
+            public string Top { readonly get => top; set => top = value; }
+            public string Body { readonly get => body; set => body = value; }
+        }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            mainWindow = e.Parameter as MainWindow;
-            mainWindow!.editor = this;
+            MainWindow = e.Parameter as MainWindow;
+            MainWindow!.editor = this;
             base.OnNavigatedTo(e);
         }
 
@@ -100,12 +106,12 @@ namespace HikariEditor
 
         private void TabViewCloseTab(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
-            tabs.Remove(args.Tab.Name);
+            Tabs1.Remove(args.Tab.Name);
             sender.TabItems.Remove(args.Tab);
-            if (tabs.Count == 0)
+            if (Tabs1.Count == 0)
             {
-                mainWindow!.editorFrame.Height = 0;
-                mainWindow.previewFrame.Height = 0;
+                MainWindow!.editorFrame.Height = 0;
+                MainWindow.previewFrame.Height = 0;
             }
         }
 
@@ -120,7 +126,7 @@ namespace HikariEditor
         public void AddTab(string fileName, string shortFileName)
         {
             // タブが存在する場合
-            if (tabs.Contains(fileName))
+            if (Tabs1.Contains(fileName))
             {
                 TabViewItem tab = (TabViewItem)Tabs.FindName(fileName);
                 if (tab != null)
@@ -143,21 +149,21 @@ namespace HikariEditor
 
         void TabListAdd(string fileName)
         {
-            if (tabs.Contains(fileName)) return;
-            tabs.Add(fileName);
+            if (Tabs1.Contains(fileName)) return;
+            Tabs1.Add(fileName);
         }
 
-        static string Str2MD5(string src)
-        {
-            byte[] srcBytes = Encoding.UTF8.GetBytes(src);
-            string MD5src;
-            byte[] MD5srcBytes = MD5.HashData(srcBytes);
-            StringBuilder sb = new();
-            for (int i = 0; i < MD5srcBytes.Length; i++)
-                sb.Append(MD5srcBytes[i].ToString("x2"));
-            MD5src = sb.ToString();
-            return MD5src;
-        }
+        //static string Str2MD5(string src)
+        //{
+        //    byte[] srcBytes = Encoding.UTF8.GetBytes(src);
+        //    string MD5src;
+        //    byte[] MD5srcBytes = MD5.HashData(srcBytes);
+        //    StringBuilder sb = new();
+        //    for (int i = 0; i < MD5srcBytes.Length; i++)
+        //        sb.Append(MD5srcBytes[i].ToString("x2"));
+        //    MD5src = sb.ToString();
+        //    return MD5src;
+        //}
 
         async Task Server()
         {
@@ -169,43 +175,41 @@ namespace HikariEditor
             {
                 listener.Start();
                 using TcpClient handler = await listener.AcceptTcpClientAsync();
-                using (NetworkStream stream = handler.GetStream())
+                using NetworkStream stream = handler.GetStream();
+                stream.Socket.ReceiveBufferSize = 67108864;
+                byte[] buffer = new byte[stream.Socket.ReceiveBufferSize];
+                stream.Read(buffer, 0, buffer.Length);
+
+                string commands = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+
+                // HTTP リクエストの場合
+                if (commands[0..4] == "POST")
                 {
-                    stream.Socket.ReceiveBufferSize = 67108864;
-                    byte[] buffer = new byte[stream.Socket.ReceiveBufferSize];
-                    stream.Read(buffer, 0, buffer.Length);
+                    //PostInfo postInfo = new PostInfo();
+                    PostInfo postInfo = ReadPost(commands);
+                    string top = postInfo.Top;
+                    string body = postInfo.Body;
 
-                    string commands = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                    Debug.WriteLine(body);
+                    string[] data = top.Split(' ');
 
-                    // HTTP リクエストの場合
-                    if (commands[0..4] == "POST")
+                    /* 保存処理 パラメータの取得 */
+                    string parameter = data[1];
+                    string pattern = @"^/\?data=(.*)$";
+                    Match match = Regex.Match(parameter, pattern);
+                    if (match.Success)
                     {
-                        //PostInfo postInfo = new PostInfo();
-                        PostInfo postInfo = ReadPost(commands);
-                        string top = postInfo.top;
-                        string body = postInfo.body;
+                        string b64Command = match.Groups[1].Value;
+                        /* パラメータのデコード */
+                        string httpCommand = Base642Str(b64Command);
 
-                        Debug.WriteLine(body);
-                        string[] data = top.Split(' ');
-
-                        /* 保存処理 パラメータの取得 */
-                        string parameter = data[1];
-                        string pattern = @"^/\?data=(.*)$";
-                        Match match = Regex.Match(parameter, pattern);
-                        if (match.Success)
-                        {
-                            string b64Command = match.Groups[1].Value;
-                            /* パラメータのデコード */
-                            string httpCommand = Base642Str(b64Command);
-
-                            FileSave(body, httpCommand);
-                            AutoSave(body, httpCommand);
-                            CopyClipboard(httpCommand);
-                        }
-
-                        // ファイルを開く処理
-                        FileOpen(parameter, stream);
+                        FileSave(body, httpCommand);
+                        AutoSave(body, httpCommand);
+                        CopyClipboard(httpCommand);
                     }
+
+                    // ファイルを開く処理
+                    FileOpen(parameter, stream);
                 }
             }
             finally
@@ -214,7 +218,7 @@ namespace HikariEditor
             }
         }
 
-        PostInfo ReadPost(string commands)
+        static PostInfo ReadPost(string commands)
         {
             PostInfo postInfo = new();
             string? top;
@@ -232,12 +236,12 @@ namespace HikariEditor
                 }
                 body = stringReader.ReadLine()!.TrimEnd('\0');
             }
-            postInfo.top = top!;
-            postInfo.body = body;
+            postInfo.Top = top!;
+            postInfo.Body = body;
             return postInfo;
         }
 
-        void FileOpen(string parameter, NetworkStream stream)
+        static void FileOpen(string parameter, NetworkStream stream)
         {
             string pattern = @"^/\?open=(.*)$";
             Match match = Regex.Match(parameter, pattern);
@@ -245,7 +249,7 @@ namespace HikariEditor
             {
                 string b64file = match.Groups[1].Value;
                 string fileName = Base642Str(b64file);
-                string src = "";
+                string src;
                 try
                 {
                     src = File.ReadAllText(fileName);
@@ -263,9 +267,6 @@ namespace HikariEditor
                 Debug.WriteLine(log);
                 string b64src = Str2Base64(src);
 
-                // MD5 を取得
-                string md5src = Str2MD5(src);
-
                 byte[] responseBytes = Encoding.UTF8.GetBytes($"HTTP/1.1 200 OK\r\nContent-Length: {b64src.Length}\r\nAccess-Control-Allow-Origin: *\r\n\r\n{b64src}");
                 stream.Write(responseBytes, 0, responseBytes.Length);
                 byte[] bufferB64src = Encoding.UTF8.GetBytes(b64src);
@@ -277,24 +278,23 @@ namespace HikariEditor
         {
             if (httpCommand.Length >= 4 && httpCommand[0..4] == "save")
             {
-                string src = httpCommand[0..4];
                 string[] srcs = httpCommand[5..^0].Split('\n');
                 string fileName = Base642Str(srcs[0]); /* ファイル名 */
                 FileItem fileItem = new(fileName);
                 string srcCode = Base642Str(body);
                 Debug.WriteLine($"=== {fileItem.Name} ===\n{srcCode}\n===");
-                fileItem.Save(srcCode, mainWindow!.NLBtn.Content.ToString());
-                mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました。";
-                LogPage.AddLog(mainWindow, $"{fileItem.Name} を保存しました。");
-                counter++;
+                fileItem.Save(srcCode, MainWindow!.NLBtn.Content.ToString());
+                MainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました。";
+                LogPage.AddLog(MainWindow, $"{fileItem.Name} を保存しました。");
+                Counter++;
                 DelayResetStatusBar(1000);
                 if (fileItem.Extension == ".tex")
                 {
-                    mainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました。TeX のコンパイルを実行しています...";
-                    LogPage.AddLog(mainWindow, "LaTeX のコンパイルを実行しています...");
-                    counter++;
+                    MainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました。TeX のコンパイルを実行しています...";
+                    LogPage.AddLog(MainWindow, "LaTeX のコンパイルを実行しています...");
+                    Counter++;
                     DelayResetStatusBar(1000);
-                    _ = LaTeX.Compile(mainWindow, fileItem, this);
+                    _ = LaTeX.Compile(MainWindow, fileItem, this);
                 }
             }
         }
@@ -308,18 +308,18 @@ namespace HikariEditor
                 string fileName = Base642Str(srcs[0]);
                 FileItem fileItem = new(fileName);
                 string srcCode = Base642Str(body);
-                if (!mainWindow!.AutoSave.IsChecked)
+                if (!MainWindow!.AutoSave.IsChecked)
                     return;
                 Debug.WriteLine($"=== 自動保存: {fileItem.Name} ===\n{srcCode}\n===");
-                fileItem.Save(srcCode, mainWindow.NLBtn.Content.ToString());
-                mainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました。";
-                LogPage.AddLog(mainWindow, $"{fileItem.Name} を自動保存しました。");
-                counter++;
+                fileItem.Save(srcCode, MainWindow.NLBtn.Content.ToString());
+                MainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました。";
+                LogPage.AddLog(MainWindow, $"{fileItem.Name} を自動保存しました。");
+                Counter++;
                 DelayResetStatusBar(1000);
             }
         }
 
-        void CopyClipboard(string httpCommand)
+        static void CopyClipboard(string httpCommand)
         {
             if (httpCommand.Length >= 14 && httpCommand[0..14] == "copy-clipboard")
             {
@@ -337,11 +337,11 @@ namespace HikariEditor
 
         public async void DelayResetStatusBar(int sec)
         {
-            int count = counter;
+            int count = Counter;
             await Task.Delay(TimeSpan.FromMilliseconds(sec));
-            if (count >= counter)
+            if (count >= Counter)
             {
-                mainWindow!.StatusBar.Text = "";
+                MainWindow!.StatusBar.Text = "";
             }
         }
 
@@ -353,11 +353,11 @@ namespace HikariEditor
             string extension = System.IO.Path.GetExtension(fileName);
             if (extension == ".tex")
             {
-                mainWindow!.rightArea.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);
+                MainWindow!.rightArea.ColumnDefinitions[1].Width = new GridLength(1, GridUnitType.Star);
             }
             else
             {
-                mainWindow!.rightArea.ColumnDefinitions[1].Width = new GridLength(0);
+                MainWindow!.rightArea.ColumnDefinitions[1].Width = new GridLength(0);
             }
         }
     }

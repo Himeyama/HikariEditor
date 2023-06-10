@@ -1,5 +1,4 @@
 using Microsoft.UI.Xaml.Controls;
-using System;
 
 namespace HikariEditor
 {
@@ -11,7 +10,7 @@ namespace HikariEditor
             mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
             mainWindow.terminalFrame.Height = 300;
             mainWindow.OpenLog.IsEnabled = false;
-            mainWindow.terminal.AddNewLogPage(mainWindow.terminal.terminalTabs);
+            mainWindow.terminal!.AddNewLogPage(mainWindow.terminal.terminalTabs);
         }
         static public void AddLog(MainWindow mainWindow, string text)
         {

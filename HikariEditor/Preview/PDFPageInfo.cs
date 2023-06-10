@@ -2,7 +2,7 @@
 {
     internal class PDFPageInfo
     {
-        public MainWindow mainWindow;
-        public FileItem fileItem;
+        public MainWindow? mainWindow;
+        public FileItem? fileItem;
     }
 }
