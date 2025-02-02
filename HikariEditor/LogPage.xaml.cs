@@ -1,3 +1,4 @@
+using System;
 using Microsoft.UI.Xaml.Controls;
 
 namespace HikariEditor
@@ -33,6 +34,6 @@ namespace HikariEditor
             InitializeComponent();
         }
 
-        // ƒ^ƒu‚Ì’Ç‰Á
+        // ï¿½^ï¿½uï¿½Ì’Ç‰ï¿½
     }
 }

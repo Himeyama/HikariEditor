@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -61,7 +64,7 @@ namespace HikariEditor
             currentDir = homeDir;
             if (homeDir == null)
             {
-                Error.Dialog("ŠÂ‹«•Ï”–¢’è‹`ƒGƒ‰[", "ŠÂ‹«•Ï”‚ª–¢’è‹`‚Å‚·B", mainWindow!.Content.XamlRoot);
+                Error.Dialog("ï¿½Â‹ï¿½ï¿½Ïï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½Gï¿½ï¿½ï¿½[", "ï¿½Â‹ï¿½ï¿½Ïï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½Å‚ï¿½ï¿½B", mainWindow!.Content.XamlRoot);
                 return;
             };
             string[] homeDirs = Directory.GetDirectories(homeDir);
@@ -101,7 +104,7 @@ namespace HikariEditor
                 return;
             if (currentDir == null)
             {
-                Error.Dialog("•Ï”–¢’è‹`ƒGƒ‰[", "Œ»İ‚ÌƒfƒBƒŒƒNƒgƒŠ‚ª–¢’è‹`‚Å‚·B", mainWindow!.Content.XamlRoot);
+                Error.Dialog("ï¿½Ïï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½Gï¿½ï¿½ï¿½[", "ï¿½ï¿½ï¿½İ‚Ìƒfï¿½Bï¿½ï¿½ï¿½Nï¿½gï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½`ï¿½Å‚ï¿½ï¿½B", mainWindow!.Content.XamlRoot);
                 return;
             }
             DirectoryInfo? parentDirInfo = Directory.GetParent(currentDir);
@@ -123,7 +126,7 @@ namespace HikariEditor
                 OpenBtn.IsEnabled = false;
         }
 
-        // ŠJ‚­ƒ{ƒ^ƒ“‚ÌƒNƒŠƒbƒN
+        // ï¿½Jï¿½ï¿½ï¿½{ï¿½^ï¿½ï¿½ï¿½ÌƒNï¿½ï¿½ï¿½bï¿½N
         private void OpenBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             Settings settings = new();
