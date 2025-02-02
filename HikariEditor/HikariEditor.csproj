@@ -1,72 +1,52 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
+    <!-- アプリ名 -->
+    <AssemblyName>WinUIExample</AssemblyName>
+    
+    <!-- アプリの説明 -->
+    <Description>This app is an example of a small WinUI app.</Description>
+
+    <!-- 作者 -->
+    <Authors>MURATA Mitsuharu</Authors>
+
+    <!-- 法人・個人名 -->
+    <Company>MURATA Mitsuharu</Company>
+
+    <!-- 著作権情報 -->
+    <Copyright>(c) $([System.DateTime]::Now.Year) $(Company)</Copyright>
+
+    <!-- 発行先 -->
+    <PublishDir>publish</PublishDir>
+    
+    <!-- アイコン -->
+    <ApplicationIcon>Assets/App.ico</ApplicationIcon>
+
+    <!-- リポジトリの場所 -->
+    <RepositoryUrl>https://github.com/himeyama/WinUIExample</RepositoryUrl>
+    <PackageProjectUrl>$(RepositoryUrl)</PackageProjectUrl>
+
+    <!-- LICENSE & README.md の場所 -->
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <Nullable>enable</Nullable>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows10.0.19041.0</TargetFramework>
-    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
-    
-    
-    <!-- WinUI3 -->
+    <TargetFramework>net7.0-windows10.0.22621.0</TargetFramework>
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
-    
-    <!-- Project Options -->
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>HikariEditor</RootNamespace>
-    
-    <!-- App Options -->
-    <Platforms>x86;x64;ARM64</Platforms>
-    <Platform>x64</Platform>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
-    <PublishProfile>win10-$(Platform).pubxml</PublishProfile>
-    <RuntimeIdentifiers>win10-x86;win10-x64;win10-arm64</RuntimeIdentifiers>
     <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
-    <DefaultLanguage>ja-JP</DefaultLanguage>
-    
-    <PackageIcon>Icon.png</PackageIcon>
-    <ApplicationIcon>Assets\HikariEditor.ico</ApplicationIcon>
-    <PackageCertificateThumbprint>7B2D2BB4DD51991D869B5CE680BE48121A9CCF42</PackageCertificateThumbprint>
-    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
-    <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
-    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
-    <GenerateTestArtifacts>True</GenerateTestArtifacts>
-    <AppxBundle>Always</AppxBundle>
-    <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    
-    <Copyright>MURATA Mitsuharu</Copyright>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/Himeyama/HikariEditor</RepositoryUrl>
-    
-    <StartupObject>HikariEditor.Program</StartupObject>
-    
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+    <Platform>x64</Platform>
+    <Platforms>x64</Platforms>
+    <SelfContained>true</SelfContained>
+
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="About.xaml" />
-    <None Remove="Editor.xaml" />
-    <None Remove="EditorUnit.xaml" />
-    <None Remove="Error.xaml" />
-    <None Remove="Explorer.xaml" />
-    <None Remove="Explorer\NewFolder.xaml" />
-    <None Remove="LogPage.xaml" />
-    <None Remove="NewFile.xaml" />
-    <None Remove="Open.xaml" />
-    <None Remove="PDF.xaml" />
-    <None Remove="Search.xaml" />
-    <None Remove="TerminalUnit.xaml" />
-    <None Remove="Terminal\Terminal.xaml" />
-  </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\SplashScreen.scale-200.png" />
-    <Content Include="Assets\LockScreenLogo.scale-200.png" />
-    <Content Include="Assets\Square150x150Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.scale-200.png" />
-    <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\Wide310x150Logo.scale-200.png" />
-    <Content Include="Terminal\index.html" />
+    <None Include="..\LICENSE" Pack="true" PackagePath="\" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -77,101 +57,4 @@
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
-  <!-- 
-    Defining the "Msix" ProjectCapability here allows the Single-project MSIX Packaging
-    Tools extension to be activated for this project even if the Windows App SDK Nuget
-    package has not yet been restored.
-  -->
-  <ItemGroup Condition="'$(DisableMsixProjectCapabilityAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <ProjectCapability Include="Msix" />
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Explorer\NewFolder.xaml">
-      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
-    </Page>
-    <Page Update="Open.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="EditorUnit.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Editor.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Search.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="Explorer.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Assets\icons\" />
-    <Folder Include="Editor\" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Assets\Icon.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <Page Update="LogPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="PDF.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="Error.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="NewFile.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="TerminalUnit.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Update="Terminal\Terminal.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Page Update="About.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-  </ItemGroup>
-
-  <!-- 
-    Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 
-    Explorer "Package and Publish" context menu entry to be enabled for this project even if 
-    the Windows App SDK Nuget package has not yet been restored.
-  -->
-  <PropertyGroup Condition="'$(DisableHasPackageAndPublishMenuAddedByProject)'!='true' and '$(EnableMsixTooling)'=='true'">
-    <HasPackageAndPublishMenu>true</HasPackageAndPublishMenu>
-  </PropertyGroup>
 </Project>
