@@ -66,20 +66,17 @@
                         </MenuFlyoutItem>
                     </MenuBarItem>
 
-                    <!--<MenuBarItem Title="LaTeX" x:Uid="LaTeX">
-                    </MenuBarItem>-->
-
                     <MenuBarItem Title="Help" x:Uid="Help">
                         <MenuFlyoutItem Text="About Hikari Editor" Click="ClickAboutDialog" x:Uid="About"/>
                     </MenuBarItem>
                 </MenuBar>
 
                 <Grid x:Name="AppTitleBar" Grid.Column="2" x:FieldModifier="Public" >
-                    <TextBlock x:Name="AppTitleTextBlock" 
+                    <!-- <TextBlock x:Name="AppTitleTextBlock" 
                         x:Uid="AppTitleText"
                         Text="Editor"
                         VerticalAlignment="Center"
-                        HorizontalAlignment="Center" />
+                        HorizontalAlignment="Center" /> -->
                 </Grid>
             </Grid>
         </Grid>

@@ -11,13 +11,14 @@ WinUI 3 (Windows App SDK) と Monaco Editor を使った Windows 向けテキス
 HikariEditor/
 ├── HikariEditor/              # メインプロジェクト
 │   ├── Editor/                # マルチタブエディタ（Monaco Editor + WebView2）
-│   ├── Explorer/              # ファイルエクスプローラー（TreeView）
-│   ├── Terminal/              # ターミナル／ログ表示（WebView2）
+│   ├── Explorer/              # ファイルエクスプローラー（TreeView）+ FileItem.cs
+│   ├── Terminal/              # ターミナル／ログ表示（WebView2）+ LogPage.xaml
 │   ├── Preview/               # PDF プレビュー（LaTeX 出力）
+│   ├── Dialogs/               # ダイアログ・ページ（About, Error, Open, Search）
+│   ├── Helpers/               # ユーティリティ（Text.cs, Directories.cs）
 │   ├── Assets/                # アイコン・Editor.html（Monaco ラッパー）
 │   ├── MainWindow.xaml(.cs)   # メインウィンドウ・全体統合
 │   ├── Settings.cs            # 設定の読み書き（JSON）
-│   ├── FileItem.cs            # ファイル操作の抽象化
 │   ├── LaTeX.cs               # ptex2pdf 呼び出し・プレビュー連携
 │   └── HikariEditor.csproj
 ├── DESIGN/                    # 設計ドキュメント
@@ -84,7 +85,7 @@ PowerShell 7 以上が必要。
 
 ### 改行コード
 
-`FileItem.cs` でファイル読み書き時に LF/CRLF を変換。現在のモードはステータスバーで切り替え可能。
+`Explorer/FileItem.cs` でファイル読み書き時に LF/CRLF を変換。現在のモードはステータスバーで切り替え可能。
 
 ## コーディング規約
 
@@ -104,5 +105,10 @@ PowerShell 7 以上が必要。
 | `Preview/PDF.xaml.cs` | PDF プレビュー表示 |
 | `LaTeX.cs` | ptex2pdf 実行・結果処理 |
 | `Settings.cs` | 設定 JSON の読み書き |
-| `FileItem.cs` | ファイル作成・保存・.tgz 展開 |
+| `Explorer/FileItem.cs` | ファイル作成・保存・.tgz 展開 |
+| `Dialogs/Error.xaml.cs` | エラーダイアログ（静的ヘルパー） |
+| `Dialogs/Open.xaml.cs` | ディレクトリ選択ページ |
+| `Helpers/Text.cs` | Base64 エンコードユーティリティ |
+| `Helpers/Directories.cs` | ディレクトリ情報モデル |
+| `Terminal/LogPage.xaml.cs` | ログ表示・追記ヘルパー |
 | `Assets/Editor.html` | Monaco Editor の HTML ラッパー |
