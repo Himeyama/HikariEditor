@@ -2,94 +2,115 @@
 <html>
 
 <head>
-    <link rel="stylesheet" href="https://unpkg.com/xterm@5.1.0/css/xterm.css" />
-    <script src="https://unpkg.com/xterm@5.1.0/lib/xterm.js"></script>
-    <script src="https://unpkg.com/xterm-addon-fit@0.7.0/lib/xterm-addon-fit.js"></script>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@5.3.0/css/xterm.css" />
     <style>
-        body {
+        html, body {
             margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #1e1e1e;
+            overflow: hidden;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+        body.light {
+            background: #f9f9f9;
         }
 
-        ::-webkit-scrollbar-track {
-/*            background: transparent;*/
+        #terminal {
+            width: 100%;
+            height: 100%;
+            padding: 4px 0 0 6px;
+            box-sizing: border-box;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #808080;
-            border-radius: 4px;
+        /* xterm 既定のフォントを上書きし、Cascadia Code を主、BIZ UDGothic を全角フォールバックとして使う */
+        .xterm {
+            font-family: "Cascadia Code", "BIZ UDGothic", Consolas, monospace;
         }
     </style>
 </head>
 
 <body>
-    <div id="terminalParent" style="margin: 8px;">
-        <div id="terminal"></div>
-    </div>
+    <div id="terminal"></div>
+    <script src="https://cdn.jsdelivr.net/npm/xterm@5.3.0/lib/xterm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.8.0/lib/xterm-addon-fit.js"></script>
     <script>
-        let uri = new URL(window.location);
-        let theme = uri.searchParams.get("theme");
-        let backgroundColor = "#282828";
-        if (theme == "light") {
-            backgroundColor = "#F9F9F9";
-        }
-        document.body.style.backgroundColor = backgroundColor;
-        let term = new Terminal({
-            theme: {
-                "background": backgroundColor,
-            },
-            rows: 14
-        });
-        let fitAddon = new FitAddon.FitAddon;
-        term.loadAddon(fitAddon);
-        term.open(document.getElementById('terminal'));
-        fitAddon.fit();
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            const isLight = params.get('theme') === 'light';
+            if (isLight) document.body.classList.add('light');
 
-        setInterval(() => {
-            fitAddon.fit();
-        }, 200);
-
-        let cmd_stack = "";
-        let mainTerminal = () => {
-            if (term._initialized) {
-                return;
-            }
-            term._initialized = true;
-            term.prompt = () => {
-                term.write('\r\n> ')
-            };
-
-            term.write('Hikari Editor\r\n');
-            term.prompt();
-
-            term.onKey(e => {
-                const ev = e.domEvent
-                const printable = !ev.altKey && !ev.ctrlKey && !ev.metaKey
-
-                if (ev.keyCode === 13) {
-                    if (cmd_stack == "clear") {
-                        term.clear();
-                    } else {
-                        cmd_stack = "";
-                    }
-                    term.prompt();
-                    cmd_stack = "";
-                    console.log(cmd_stack);                    
-                } else if (ev.keyCode === 8) {
-                    if (term._core.buffer.x > 2) {
-                        term.write('\b \b');
-                    }
-                } else if (printable) {
-                    term.write(e.key);
-                    cmd_stack += e.key;
+            const term = new Terminal({
+                fontFamily: '"Cascadia Code", "BIZ UDGothic", Consolas, monospace',
+                fontSize: 14,
+                cursorBlink: true,
+                cursorStyle: 'bar',
+                convertEol: false,
+                allowProposedApi: true,
+                theme: isLight ? {
+                    background: '#f9f9f9',
+                    foreground: '#1a1a1a',
+                    cursor: '#1a1a1a',
+                    selectionBackground: '#cfe8ff'
+                } : {
+                    background: '#1e1e1e',
+                    foreground: '#f0f0f0',
+                    cursor: '#f0f0f0',
+                    selectionBackground: '#264f78'
                 }
             });
-        }
-        mainTerminal();
+            const fit = new FitAddon.FitAddon();
+            term.loadAddon(fit);
+            term.open(document.getElementById('terminal'));
+            fit.fit();
+
+            // C# 側から受け取った出力をそのまま端末に流す
+            function postSize() {
+                try {
+                    window.chrome.webview.postMessage(JSON.stringify({
+                        type: 'resize',
+                        cols: term.cols,
+                        rows: term.rows
+                    }));
+                } catch (_) { }
+            }
+
+            window.addEventListener('resize', () => {
+                fit.fit();
+                postSize();
+            });
+
+            // ユーザー入力 → C#
+            term.onData((data) => {
+                try {
+                    window.chrome.webview.postMessage(JSON.stringify({
+                        type: 'input',
+                        data: data
+                    }));
+                } catch (_) { }
+            });
+
+            // C# → ターミナル出力
+            window.chrome.webview.addEventListener('message', (event) => {
+                const msg = event.data;
+                if (typeof msg === 'string') {
+                    term.write(msg);
+                } else if (msg && msg.type === 'write') {
+                    term.write(msg.data);
+                } else if (msg && msg.type === 'clear') {
+                    term.clear();
+                }
+            });
+
+            // 準備完了を通知し、初期サイズも伝える
+            try {
+                window.chrome.webview.postMessage(JSON.stringify({ type: 'ready' }));
+                postSize();
+            } catch (_) { }
+
+            term.focus();
+        })();
     </script>
 </body>
 
