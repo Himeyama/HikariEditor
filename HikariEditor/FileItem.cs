@@ -133,7 +133,7 @@ namespace HikariEditor
             if (ext == ".tgz")
             {
                 using Stream stream = File.OpenRead(Path);
-                IReader reader = ReaderFactory.Open(stream);
+                IReader reader = ReaderFactory.OpenReader(stream);
                 while (reader.MoveToNextEntry())
                 {
                     if (!reader.Entry.IsDirectory)

@@ -182,9 +182,9 @@ namespace HikariEditor
                 using NetworkStream stream = handler.GetStream();
                 stream.Socket.ReceiveBufferSize = 67108864;
                 byte[] buffer = new byte[stream.Socket.ReceiveBufferSize];
-                stream.Read(buffer, 0, buffer.Length);
+                int bytesRead = stream.Read(buffer, 0, buffer.Length);
 
-                string commands = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
+                string commands = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
                 // HTTP リクエストの場合
                 if (commands[0..4] == "POST")
