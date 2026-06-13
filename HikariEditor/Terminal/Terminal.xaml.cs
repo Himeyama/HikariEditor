@@ -9,14 +9,15 @@ namespace HikariEditor
 
         static public void ClickOpenTerminal(MainWindow mainWindow)
         {
-            mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
+            // すでに Terminal ページが表示されている場合は再ナビゲートしない。
+            // 再ナビゲートすると新しいページが生成され、既存のログタブが失われるため。
+            if (mainWindow.terminalFrame.Content is not Terminal)
+                mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
             mainWindow.terminalFrame.Height = 300;
-            mainWindow.OpenTerminal.IsEnabled = false;
 
+            // メニューは常に有効。クリックするたびにターミナルタブを増やす。
             // Navigate は同期的に OnNavigatedTo を呼ぶのでこの時点で terminal は有効。
-            // ターミナルを開いたときだけタブを用意する（ログ単独表示では作らない）。
-            if (mainWindow.terminal!.terminalTabs.TabItems.Count == 0)
-                mainWindow.terminal.AddNewTab(mainWindow.terminal.terminalTabs);
+            mainWindow.terminal!.AddNewTab(mainWindow.terminal.terminalTabs);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -66,11 +67,9 @@ namespace HikariEditor
         // ターミナル・ログ出力タブを閉じる
         private void TabViewTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
-            /* 閉じるタブがログ出力の場合、メニューボタンを有効にし、閉じた状態を保存する */
+            /* 閉じるタブがログ出力の場合、閉じた状態を保存する */
             if (args.Tab.Content is LogPage)
             {
-                mainWindow!.OpenLog.IsEnabled = true;
-
                 // 次回起動時に開いた状態を復元しないよう、閉じたことを保存する
                 Settings settings = new();
                 settings.LoadSetting();
@@ -81,13 +80,18 @@ namespace HikariEditor
             /* 該当するタブを削除 */
             sender.TabItems.Remove(args.Tab);
 
-            /* タブが空になった場合、メニューボタンを有効にする */
+            /* ログタブが残っていなければ「ログを開く」を再び有効にする。
+               「ターミナルを開く」は常に有効（クリックでタブを増やせる）なので触らない。 */
+            bool hasLog = false;
+            foreach (TabViewItem tab in sender.TabItems)
+                if (tab.Content is LogPage)
+                    hasLog = true;
+
+            mainWindow!.OpenLog.IsEnabled = !hasLog;
+
+            /* タブが空になった場合はパネルを畳む */
             if (sender.TabItems.Count == 0)
-            {
-                mainWindow!.OpenTerminal.IsEnabled = true;
-                mainWindow.OpenLog.IsEnabled = true;
                 mainWindow.terminalFrame.Height = 0;
-            };
         }
     }
 }

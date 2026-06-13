@@ -7,7 +7,10 @@ namespace HikariEditor
     {
         static public void ClickOpenLog(MainWindow mainWindow)
         {
-            mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
+            // すでに Terminal ページが表示されている場合は再ナビゲートしない。
+            // 再ナビゲートすると新しいページが生成され、既存のターミナルタブが失われるため。
+            if (mainWindow.terminalFrame.Content is not Terminal)
+                mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
             mainWindow.terminalFrame.Height = 300;
             mainWindow.OpenLog.IsEnabled = false;
             mainWindow.terminal!.AddNewLogPage(mainWindow.terminal.terminalTabs);
