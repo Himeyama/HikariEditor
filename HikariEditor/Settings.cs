@@ -8,6 +8,7 @@ namespace HikariEditor
         public string ExplorerDir { get; set; } = string.Empty;
         public bool AutoSave { get; set; } = false;
         public string OpenDirPath { get; set; } = string.Empty;
+        public bool LogOpen { get; set; } = false;
 
         public Settings()
         {
@@ -35,6 +36,7 @@ namespace HikariEditor
             ExplorerDir = settings!.ExplorerDir;
             AutoSave = settings.AutoSave;
             OpenDirPath = settings.OpenDirPath;
+            LogOpen = settings.LogOpen;
         }
     }
 }

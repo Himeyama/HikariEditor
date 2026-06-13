@@ -12,6 +12,11 @@ namespace HikariEditor
             mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
             mainWindow.terminalFrame.Height = 300;
             mainWindow.OpenTerminal.IsEnabled = false;
+
+            // Navigate は同期的に OnNavigatedTo を呼ぶのでこの時点で terminal は有効。
+            // ターミナルを開いたときだけタブを用意する（ログ単独表示では作らない）。
+            if (mainWindow.terminal!.terminalTabs.TabItems.Count == 0)
+                mainWindow.terminal.AddNewTab(mainWindow.terminal.terminalTabs);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -19,12 +24,6 @@ namespace HikariEditor
             mainWindow = (MainWindow)e.Parameter;
             mainWindow.terminal = this;
             base.OnNavigatedTo(e);
-
-            // 初回ナビゲート時にタブが空ならターミナルタブを 1 つ用意する。
-            // 呼び出し側で AddNewTab を呼ぶと OnNavigatedTo より先に terminal フィールドが
-            // null のまま参照されるレースがあるため、ここで自己完結させる。
-            if (terminalTabs.TabItems.Count == 0)
-                AddNewTab(terminalTabs);
         }
 
         public Terminal()
@@ -67,9 +66,17 @@ namespace HikariEditor
         // ターミナル・ログ出力タブを閉じる
         private void TabViewTabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
         {
-            /* 閉じるタブがログ出力の場合、メニューボタンを有効にする */
+            /* 閉じるタブがログ出力の場合、メニューボタンを有効にし、閉じた状態を保存する */
             if (args.Tab.Content is LogPage)
+            {
                 mainWindow!.OpenLog.IsEnabled = true;
+
+                // 次回起動時に開いた状態を復元しないよう、閉じたことを保存する
+                Settings settings = new();
+                settings.LoadSetting();
+                settings.LogOpen = false;
+                settings.SaveSetting();
+            }
 
             /* 該当するタブを削除 */
             sender.TabItems.Remove(args.Tab);

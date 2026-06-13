@@ -105,10 +105,11 @@ namespace HikariEditor
         }
 
         // ターミナルを開く
+        // 初期タブの生成は Terminal.OnNavigatedTo に任せる（Navigate 完了前に
+        // terminal フィールドへ触れるとレースになるため）
         void ClickOpenTerminal(object sender, RoutedEventArgs e)
         {
             Terminal.ClickOpenTerminal(this);
-            terminal!.AddNewTab(terminal.terminalTabs);
         }
 
         void LoadConfig()
@@ -117,6 +118,19 @@ namespace HikariEditor
             settings.LoadSetting();
             AutoSave.IsChecked = settings.AutoSave;
             ToggleStyle(AutoSave.IsChecked);
+
+            // 前回ログを開いていた場合は復元する。
+            // コンストラクタ段階ではビジュアルツリーが未構築で terminalFrame の
+            // Navigate / 高さ変更が反映されないため、ウィンドウ表示後に一度だけ実行する。
+            if (settings.LogOpen)
+            {
+                void RestoreLog(object sender, WindowActivatedEventArgs e)
+                {
+                    Activated -= RestoreLog;
+                    LogPage.ClickOpenLog(this);
+                }
+                Activated += RestoreLog;
+            }
         }
 
         void ToggleStyle(bool isOn)

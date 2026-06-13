@@ -130,8 +130,10 @@ namespace HikariEditor
         private void OpenBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
         {
             Settings settings = new();
-            string openDirPath = DirPath.Text;
-            settings.OpenDirPath = openDirPath;
+            // 既存設定を読み込んでから更新する。LoadSetting を挟まないと
+            // LogOpen や AutoSave などが既定値で丸ごと上書きされてしまう。
+            settings.LoadSetting();
+            settings.OpenDirPath = DirPath.Text;
             settings.SaveSetting();
             explorerFrame!.Navigate(typeof(Explorer), mainWindow);
             mainWindow!.Menu.SelectedItem = mainWindow.ItemExplorer;
