@@ -41,6 +41,19 @@
             const isLight = params.get('theme') === 'light';
             if (isLight) document.body.classList.add('light');
 
+            // ANSI 16 色パレット（通常色 / bright 色）。light・dark どちらの
+            // UI テーマでも共通で使う。
+            const ansiPalette = {
+                black: '#000000', brightBlack: '#6F7372',
+                red: '#C60000', brightRed: '#FF2525',
+                green: '#5A9A00', brightGreen: '#8BE133',
+                yellow: '#C5A800', brightYellow: '#EADF4A',
+                blue: '#3C69A8', brightBlue: '#7DA4D1',
+                magenta: '#7B5B84', brightMagenta: '#AB86AF',
+                cyan: '#13989B', brightCyan: '#46D3D5',
+                white: '#C7C9C5', brightWhite: '#E3E3E3'
+            };
+
             const term = new Terminal({
                 fontFamily: '"Cascadia Code", "BIZ UDGothic", Consolas, monospace',
                 fontSize: 14,
@@ -52,12 +65,14 @@
                     background: '#f9f9f9',
                     foreground: '#1a1a1a',
                     cursor: '#1a1a1a',
-                    selectionBackground: '#cfe8ff'
+                    selectionBackground: '#cfe8ff',
+                    ...ansiPalette
                 } : {
                     background: '#1e1e1e',
                     foreground: '#f0f0f0',
                     cursor: '#f0f0f0',
-                    selectionBackground: '#264f78'
+                    selectionBackground: '#264f78',
+                    ...ansiPalette
                 }
             });
             const fit = new FitAddon.FitAddon();
