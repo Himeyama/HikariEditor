@@ -22,5 +22,7 @@
   <data name="Save.Text" xml:space="preserve"><value>Save</value></data>
   <data name="Search.Text" xml:space="preserve"><value>Search</value></data>
   <data name="Terminal.Title" xml:space="preserve"><value>Terminal</value></data>
+  <data name="ToggleAI.Text" xml:space="preserve"><value>AI Agent</value></data>
   <data name="Version.Text" xml:space="preserve"><value>Version</value></data>
+  <data name="View.Title" xml:space="preserve"><value>View</value></data>
 </root>

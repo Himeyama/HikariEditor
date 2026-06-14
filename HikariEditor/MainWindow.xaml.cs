@@ -23,6 +23,7 @@ public sealed partial class MainWindow : Window
     // 再オープン時やリサイズ後・次回起動時の復元に使う。
     double terminalHeight = 300;
     double explorerWidth = 360;
+    double aiPanelWidth = 400;
 
     static string EditorDir => $"{Path.GetTempPath()}HikariEditor";
 
@@ -46,6 +47,9 @@ public sealed partial class MainWindow : Window
 
         /* git リポジトリならブランチ名ボタンを表示 */
         _ = UpdateBranchButtonAsync();
+
+        /* AI パネルのモデルボタン表示を初期化 */
+        UpdateModelButton();
     }
 
     async void EditorSetup()
@@ -118,7 +122,9 @@ public sealed partial class MainWindow : Window
         // 前回のリサイズ結果を復元する
         terminalHeight = settings.TerminalHeight;
         explorerWidth = settings.ExplorerWidth;
+        aiPanelWidth = settings.AiPanelWidth;
         bool restoreLog = settings.LogOpen;
+        bool restoreAiPanel = settings.AiPanelOpen;
 
         // ビジュアルツリー構築後に一度だけ復元処理を行う。
         // コンストラクタ段階ではビジュアルツリーが未構築で Frame の
@@ -128,6 +134,7 @@ public sealed partial class MainWindow : Window
             Activated -= Restore;
             ShowExplorerPanel();              // エクスプローラーは既定で開いた状態にする
             if (restoreLog) LogPage.ClickOpenLog(this);
+            if (restoreAiPanel) ShowAIPanel();
         }
         Activated += Restore;
     }
@@ -232,8 +239,10 @@ public sealed partial class MainWindow : Window
 
     private void MenuChanged(NavigationView sender, NavigationViewItemInvokedEventArgs args)
     {
-        if (sender.SelectedItem is not NavigationViewItem selectedItem) return;
-        if ((string)selectedItem.Tag == "Explorer")
+        // AI 項目は SelectsOnInvoked=False のため SelectedItem に出ない。
+        // 実際にクリックされた項目で分岐する。
+        if (args.InvokedItemContainer is not NavigationViewItem item) return;
+        if ((string)item.Tag == "Explorer")
         {
             // 開いている（幅がコンパクトレールの 48 より大きい）ときは畳む
             if (SideMenuEditorArea.ColumnDefinitions[0].Width.Value > 48)
@@ -241,7 +250,11 @@ public sealed partial class MainWindow : Window
             else
                 ShowExplorerPanel();
         }
-        else if ((string)selectedItem.Tag == "Search")
+        else if ((string)item.Tag == "AI")
+        {
+            ToggleAIPanel();
+        }
+        else if ((string)item.Tag == "Search")
         {
             contentFrame.Navigate(typeof(Search), this);
         }
@@ -322,6 +335,113 @@ public sealed partial class MainWindow : Window
         OpenExplorer.IsEnabled = false;
     }
 
+    bool AIPanelVisible => SideMenuEditorArea.ColumnDefinitions[4].Width.Value > 0;
+
+    // 「表示」メニュー・サイドの AI 項目・ショートカットから共通で呼ぶトグル。
+    public void ToggleAIPanel()
+    {
+        if (AIPanelVisible)
+            HideAIPanel();
+        else
+            ShowAIPanel();
+    }
+
+    public void ShowAIPanel()
+    {
+        SideMenuEditorArea.ColumnDefinitions[4].Width = new GridLength(aiPanelWidth);
+        aiSplitter.Visibility = Visibility.Visible;
+        ToggleAI.IsChecked = true;
+        ModelBtn.Visibility = Visibility.Visible;
+        UpdateModelButton();
+        SaveAiPanelOpen(true);
+    }
+
+    public void HideAIPanel()
+    {
+        SideMenuEditorArea.ColumnDefinitions[4].Width = new GridLength(0);
+        aiSplitter.Visibility = Visibility.Collapsed;
+        ToggleAI.IsChecked = false;
+        ModelBtn.Visibility = Visibility.Collapsed;
+        SaveAiPanelOpen(false);
+    }
+
+    // AI パネルの表示状態を次回起動時の復元用に保存する。
+    static void SaveAiPanelOpen(bool open)
+    {
+        Settings settings = new();
+        settings.LoadSetting();
+        settings.AiPanelOpen = open;
+        settings.SaveSetting();
+    }
+
+    void ClickToggleAI(object sender, RoutedEventArgs e) => ToggleAIPanel();
+
+    // ステータスバーのモデルボタンに使用中モデル名を出す。未登録なら案内文。
+    public void UpdateModelButton()
+    {
+        ModelConfig? active = AIConfig.Load().ActiveModel;
+        ModelBtn.Content = active is null || string.IsNullOrWhiteSpace(active.Name)
+            ? (active is null ? "LLM が未登録" : active.Model)
+            : active.Name;
+    }
+
+    // モデル設定モーダル。登録・編集・使用モデルの選択を行う。
+    private async void ClickModelBtn(object sender, RoutedEventArgs e)
+    {
+        ModelSettings settings = new();
+        ContentDialog dialog = new()
+        {
+            XamlRoot = Content.XamlRoot,
+            Title = "モデル設定",
+            Content = settings,
+            PrimaryButtonText = "保存",
+            CloseButtonText = "キャンセル",
+            DefaultButton = ContentDialogButton.Primary,
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            return;
+
+        settings.Persist();
+        UpdateModelButton();
+        aiPanel.OnActiveModelChanged();   // 次回送信で新しい設定のクライアントを作り直す
+    }
+
+    // ハンドルのドラッグで AI パネルの横幅をリサイズする。パネルは右端にあるので
+    // 左へ動かす（delta が負）と広がるよう符号を反転する。
+    bool resizingAI;
+    double aiResizeStartX;
+    double aiResizeStartWidth;
+
+    void AISplitter_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        resizingAI = true;
+        aiResizeStartX = e.GetCurrentPoint(SideMenuEditorArea).Position.X;
+        aiResizeStartWidth = aiPanelWidth;
+        aiSplitter.CapturePointer(e.Pointer);
+    }
+
+    void AISplitter_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        if (!resizingAI) return;
+
+        double x = e.GetCurrentPoint(SideMenuEditorArea).Position.X;
+        double newWidth = aiResizeStartWidth - (x - aiResizeStartX);
+
+        // エディタ領域を最低限残しつつ、AI パネルが潰れないようにクランプする
+        double max = Math.Max(200, SideMenuEditorArea.ActualWidth - 200);
+        aiPanelWidth = Math.Clamp(newWidth, 200, max);
+        SideMenuEditorArea.ColumnDefinitions[4].Width = new GridLength(aiPanelWidth);
+    }
+
+    void AISplitter_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if (!resizingAI) return;
+        resizingAI = false;
+        aiSplitter.ReleasePointerCapture(e.Pointer);
+        SaveLayout();
+    }
+
     // ハンドルのドラッグでターミナル／ログ領域を上下にリサイズする。
     // ドラッグ中はハンドル自身が動いて自己相対座標が揺れるため、
     // 親コンテナ基準の座標で開始位置からの差分を計算する。
@@ -400,6 +520,7 @@ public sealed partial class MainWindow : Window
         settings.LoadSetting();
         settings.TerminalHeight = terminalHeight;
         settings.ExplorerWidth = explorerWidth;
+        settings.AiPanelWidth = aiPanelWidth;
         settings.SaveSetting();
     }
 }

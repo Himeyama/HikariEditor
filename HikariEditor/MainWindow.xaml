@@ -69,6 +69,14 @@
                         </MenuFlyoutItem>
                     </MenuBarItem>
 
+                    <MenuBarItem Title="View" x:Uid="View">
+                        <ToggleMenuFlyoutItem Text="AI Agent" x:Uid="ToggleAI" x:Name="ToggleAI" Click="ClickToggleAI" FontFamily="{StaticResource ContentControlThemeFontFamily}">
+                            <ToggleMenuFlyoutItem.KeyboardAccelerators>
+                                <KeyboardAccelerator Modifiers="Control" Key="I"/>
+                            </ToggleMenuFlyoutItem.KeyboardAccelerators>
+                        </ToggleMenuFlyoutItem>
+                    </MenuBarItem>
+
                     <MenuBarItem Title="Help" x:Uid="Help">
                         <MenuFlyoutItem Text="About Hikari Editor" Click="ClickAboutDialog" x:Uid="About" FontFamily="{StaticResource ContentControlThemeFontFamily}"/>
                     </MenuBarItem>
@@ -83,7 +91,7 @@
                 </Grid>
             </Grid>
         </Grid>
-        <Grid Grid.Row="1" x:Name="SideMenuEditorArea" x:FieldModifier="Public" ColumnDefinitions="48, Auto, *">
+        <Grid Grid.Row="1" x:Name="SideMenuEditorArea" x:FieldModifier="Public" ColumnDefinitions="48, Auto, *, Auto, 0">
             <NavigationView 
                 Grid.Column="0"
                 ItemInvoked="MenuChanged"
@@ -96,6 +104,12 @@
                     <NavigationViewItem Tag="Explorer" x:FieldModifier="Public" x:Name="ItemExplorer">
                         <NavigationViewItem.Icon>
                             <FontIcon Glyph="&#xF56E;" FontFamily="Segoe Fluent Icons"></FontIcon>
+                        </NavigationViewItem.Icon>
+                    </NavigationViewItem>
+                    <!-- AI はパネルのトグル（ただのボタン）。選択＝アクティブ表示は動かさない -->
+                    <NavigationViewItem Tag="AI" x:FieldModifier="Public" x:Name="ItemAI" SelectsOnInvoked="False">
+                        <NavigationViewItem.Icon>
+                            <FontIcon Glyph="&#xE8BD;" FontFamily="Segoe Fluent Icons"></FontIcon>
                         </NavigationViewItem.Icon>
                     </NavigationViewItem>
                 </NavigationView.MenuItems>
@@ -134,9 +148,23 @@
                 </local:ResizeHandle>
                 <Frame Grid.Row="2" x:Name="terminalFrame" x:FieldModifier="Public" Height="0" />
             </Grid>
+            <!-- AI パネルを左右にドラッグしてリサイズするハンドル -->
+            <local:ResizeHandle Grid.Column="3" x:Name="aiSplitter" Width="6"
+                                Orientation="Vertical" Visibility="Collapsed"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                PointerPressed="AISplitter_PointerPressed"
+                                PointerMoved="AISplitter_PointerMoved"
+                                PointerReleased="AISplitter_PointerReleased"
+                                PointerCaptureLost="AISplitter_PointerReleased">
+                <!-- Transparent な当たり判定を確保しつつ左端に区切り線を描く -->
+                <Border Background="Transparent" BorderThickness="1,0,0,0"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" />
+            </local:ResizeHandle>
+            <local:AIPanel Grid.Column="4" x:Name="aiPanel" />
         </Grid>
         <Grid Grid.Row="2">
-            <Grid ColumnDefinitions="Auto, *, Auto">
+            <Grid ColumnDefinitions="Auto, *, Auto, Auto">
                 <Grid.Resources>
                     <!-- ステータスバーのボタンは枠線を常に透明にし、背景はホバー・押下時だけうっすら変化させる -->
                     <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#22808080" />
@@ -147,7 +175,9 @@
                 <!-- git リポジトリのときだけ表示。クリックでブランチ切り替えモーダルを開く -->
                 <Button Grid.Column="0" Content="" x:Name="BranchBtn" Click="ClickBranchBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="4, 0, 0, 0" Visibility="Collapsed" x:FieldModifier="Public" Background="Transparent" BorderBrush="Transparent" />
                 <TextBlock Grid.Column="1" Text="" x:Name="StatusBar" Margin="8, 0, 0, 0" x:FieldModifier="Public" FontSize="12" VerticalAlignment="Center" />
-                <Button Grid.Column="2" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="56" x:FieldModifier="Public" Background="Transparent" BorderBrush="Transparent" />
+                <!-- AI パネル表示中だけ表示。クリックでモデル設定モーダルを開く。LF/CRLF ボタンと同スタイル。 -->
+                <Button Grid.Column="2" Content="LLM が未登録" x:Name="ModelBtn" Click="ClickModelBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="0, 0, 0, 0" Visibility="Collapsed" x:FieldModifier="Public" Background="Transparent" BorderBrush="Transparent" />
+                <Button Grid.Column="3" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="56" x:FieldModifier="Public" Background="Transparent" BorderBrush="Transparent" />
             </Grid>
         </Grid>
     </Grid>

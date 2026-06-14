@@ -1,0 +1,64 @@
+<UserControl
+    x:Class="HikariEditor.ModelSettings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HikariEditor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Width="560"
+    FontFamily="{StaticResource ContentControlThemeFontFamily}">
+
+    <Grid ColumnDefinitions="190, *" ColumnSpacing="16" Height="380">
+        <!-- 登録モデル一覧（選択＝使用するモデル） -->
+        <Grid Grid.Column="0" RowDefinitions="Auto, *, Auto" RowSpacing="6">
+            <TextBlock Grid.Row="0" Text="登録モデル（選択中が使用モデル）" FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+            <ListView Grid.Row="1" x:Name="modelsList" SelectionMode="Single"
+                      SelectionChanged="ModelsSelectionChanged"
+                      BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                      CornerRadius="4">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8">
+                <Button x:Name="addButton" Content="新規" Click="AddClick" />
+                <Button x:Name="deleteButton" Content="削除" Click="DeleteClick" />
+            </StackPanel>
+        </Grid>
+
+        <!-- 選択したモデルの編集フォーム -->
+        <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="formPanel" Spacing="10">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="設定名" FontSize="12" />
+                    <TextBox x:Name="nameBox" TextChanged="NameChanged" PlaceholderText="例: ローカル LLM" />
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="API 種別" FontSize="12" />
+                    <ComboBox x:Name="apiBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                        <ComboBoxItem Content="Chat Completions" />
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="エンドポイント" FontSize="12" />
+                    <TextBox x:Name="endpointBox" PlaceholderText="http://localhost/v1" />
+                    <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               Text="/chat/completions を除いたベース URL を入力します。例: http://localhost/v1/chat/completions の場合は http://localhost/v1" />
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="モデル名" FontSize="12" />
+                    <TextBox x:Name="modelBox" PlaceholderText="例: gpt-4o-mini" />
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="API キー（任意）" FontSize="12" />
+                    <PasswordBox x:Name="keyBox" />
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

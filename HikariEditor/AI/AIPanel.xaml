@@ -1,0 +1,66 @@
+<UserControl
+    x:Class="HikariEditor.AIPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:HikariEditor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    FontFamily="{StaticResource ContentControlThemeFontFamily}">
+
+    <UserControl.Resources>
+        <!-- ユーザー発言: 右寄せの吹き出し -->
+        <DataTemplate x:Key="UserTemplate">
+            <Border HorizontalAlignment="Right" MaxWidth="320" Margin="44,4,8,4"
+                    Background="{ThemeResource AccentFillColorDefaultBrush}"
+                    CornerRadius="12,12,0,12" Padding="12,8">
+                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" IsTextSelectionEnabled="True"
+                           Foreground="{ThemeResource TextOnAccentFillColorPrimaryBrush}" />
+            </Border>
+        </DataTemplate>
+
+        <!-- アシスタント発言: パネル全面・Markdown 描画 -->
+        <DataTemplate x:Key="AssistantTemplate">
+            <Border HorizontalAlignment="Stretch" Margin="8,4" Padding="4,4">
+                <local:MarkdownView Markdown="{Binding Text}" />
+            </Border>
+        </DataTemplate>
+
+        <!-- ツール実行の状況: 控えめな 1 行 -->
+        <DataTemplate x:Key="ToolTemplate">
+            <StackPanel Orientation="Horizontal" Margin="12,2" Spacing="6">
+                <FontIcon Glyph="&#xE90F;" FontFamily="Segoe Fluent Icons" FontSize="12"
+                          Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                <TextBlock Text="{Binding Text}" FontSize="12" FontFamily="Consolas"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </DataTemplate>
+
+        <local:ChatTemplateSelector x:Key="ChatSelector"
+            User="{StaticResource UserTemplate}"
+            Assistant="{StaticResource AssistantTemplate}"
+            Tool="{StaticResource ToolTemplate}" />
+    </UserControl.Resources>
+
+    <Grid RowDefinitions="*, Auto">
+        <!-- 会話部分のみスクロール可能。入力欄は固定。 -->
+        <ScrollViewer Grid.Row="0" x:Name="conversationScroll"
+                      VerticalScrollMode="Auto" VerticalScrollBarVisibility="Auto" Padding="0,8">
+            <ItemsControl x:Name="messageList" ItemTemplateSelector="{StaticResource ChatSelector}" />
+        </ScrollViewer>
+
+        <!-- パネル下部のチャット入力欄 -->
+        <Border Grid.Row="1" BorderThickness="0,1,0,0"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Padding="8">
+            <Grid ColumnDefinitions="*, Auto">
+                <TextBox Grid.Column="0" x:Name="inputBox" PlaceholderText="メッセージを入力..."
+                         AcceptsReturn="True" TextWrapping="Wrap" MaxHeight="160" />
+                <Button Grid.Column="1" x:Name="sendButton" Margin="8,0,0,0" Width="36" Padding="0"
+                        VerticalAlignment="Stretch" Click="SendClick"
+                        Style="{StaticResource AccentButtonStyle}" ToolTipService.ToolTip="送信">
+                    <FontIcon Glyph="&#xE74A;" FontFamily="Segoe Fluent Icons" FontSize="14" />
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>
