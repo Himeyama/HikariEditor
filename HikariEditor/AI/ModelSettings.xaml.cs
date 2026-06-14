@@ -80,6 +80,7 @@ public sealed partial class ModelSettings : UserControl
         _current.Endpoint = endpointBox.Text.Trim();
         _current.Model = modelBox.Text.Trim();
         _current.ApiKey = keyBox.Password;
+        _current.UseApiKeyHeader = apiKeyHeaderToggle.IsOn;
     }
 
     // 編集対象モデルの内容をフォームへ反映する。未選択ならフォームを無効化する。
@@ -93,12 +94,14 @@ public sealed partial class ModelSettings : UserControl
         endpointBox.IsEnabled = has;
         modelBox.IsEnabled = has;
         keyBox.IsEnabled = has;
+        apiKeyHeaderToggle.IsEnabled = has;
         deleteButton.IsEnabled = has;
 
         nameBox.Text = _current?.Name ?? "";
         endpointBox.Text = _current?.Endpoint ?? "";
         modelBox.Text = _current?.Model ?? "";
         keyBox.Password = _current?.ApiKey ?? "";
+        apiKeyHeaderToggle.IsOn = _current?.UseApiKeyHeader ?? false;
         apiBox.SelectedIndex = _current?.Api switch
         {
             ApiKind.Responses => 1,

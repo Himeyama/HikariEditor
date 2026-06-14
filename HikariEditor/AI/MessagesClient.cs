@@ -43,6 +43,11 @@ internal class MessagesClient : IChatEngine
         string apiKey = string.IsNullOrEmpty(config.ApiKey) ? "dummy" : config.ApiKey;
         ClientOptions options = new() { ApiKey = apiKey, AuthToken = null };
 
+        // Azure OpenAI 互換など api-key ヘッダーで認証する Anthropic 互換サーバー向け。
+        // ExtraHeaders は x-api-key を上書きしないが、別名の api-key は追加されるため共存できる。
+        if (config.UseApiKeyHeader)
+            options.ExtraHeaders = new Dictionary<string, string> { ["api-key"] = config.ApiKey };
+
         // Endpoint を指定すれば Anthropic 互換サーバーへ向けられる（未指定なら本家）。
         // SDK は BaseUrl へ /v1/messages を付与するため、OpenAI 流儀で末尾に /v1 を含む
         // ベース URL でも /v1/v1/messages と二重にならないよう取り除く。

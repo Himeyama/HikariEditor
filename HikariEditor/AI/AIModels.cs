@@ -41,6 +41,11 @@ public class ModelConfig : System.ComponentModel.INotifyPropertyChanged
     public string Model { get; set; } = string.Empty;       // 例: gpt-4o-mini
     public string ApiKey { get; set; } = string.Empty;
 
+    // true なら API キーを既定の認証ヘッダー（OpenAI 系は Authorization: Bearer、
+    // Anthropic は x-api-key）ではなく `api-key` ヘッダーで送る。
+    // Azure OpenAI など `api-key` ヘッダーで認証する API 向け。
+    public bool UseApiKeyHeader { get; set; }
+
     // 末尾のスラッシュ有無に関わらず /chat/completions を 1 度だけ付与する。
     [JsonIgnore]
     public string ChatCompletionsUrl => $"{Endpoint.TrimEnd('/')}/chat/completions";

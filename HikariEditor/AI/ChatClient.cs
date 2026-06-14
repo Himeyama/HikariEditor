@@ -1,5 +1,6 @@
 using System;
 using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -37,6 +38,10 @@ internal class ChatCompletionsClient : IChatEngine
         OpenAIClientOptions clientOptions = new();
         if (!string.IsNullOrEmpty(config.Endpoint))
             clientOptions.Endpoint = new Uri(config.Endpoint);
+        // Azure OpenAI 互換 API は Authorization ではなく api-key ヘッダーで認証する。
+        // 認証ヘッダー付与後（PerCall）に api-key を載せる。
+        if (config.UseApiKeyHeader)
+            clientOptions.AddPolicy(new ApiKeyHeaderPolicy(config.ApiKey), PipelinePosition.PerCall);
         _chat = new OpenAIChatClient(config.Model, credential, clientOptions);
 
         foreach (AITools.ToolSpec s in AITools.Specs)
@@ -122,4 +127,22 @@ internal class ChatCompletionsClient : IChatEngine
     }
 
     readonly record struct StreamedToolCall(string Id, string Name, string Arguments);
+}
+
+// API キーを `api-key` ヘッダーへ載せて送るパイプラインポリシー。
+// OpenAI SDK の既定では Authorization: Bearer で認証するため、Azure OpenAI など
+// api-key ヘッダーを要求するエンドポイント向けにヘッダーを上書きする。
+internal sealed class ApiKeyHeaderPolicy(string apiKey) : PipelinePolicy
+{
+    public override void Process(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
+    {
+        message.Request.Headers.Set("api-key", apiKey);
+        ProcessNext(message, pipeline, currentIndex);
+    }
+
+    public override ValueTask ProcessAsync(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
+    {
+        message.Request.Headers.Set("api-key", apiKey);
+        return ProcessNextAsync(message, pipeline, currentIndex);
+    }
 }

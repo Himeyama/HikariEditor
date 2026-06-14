@@ -60,6 +60,15 @@
                     <TextBlock Text="API キー（任意）" FontSize="12" />
                     <PasswordBox x:Name="keyBox" />
                 </StackPanel>
+                <StackPanel Spacing="4">
+                    <ToggleSwitch x:Name="apiKeyHeaderToggle"
+                                  Header="api-key ヘッダーで送る"
+                                  OffContent="既定の認証ヘッダー"
+                                  OnContent="api-key ヘッダー" />
+                    <TextBlock FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               TextWrapping="Wrap"
+                               Text="オンにすると API キーを Authorization / x-api-key ではなく api-key ヘッダーで送ります。Azure OpenAI など api-key ヘッダーで認証する API 向けです。" />
+                </StackPanel>
             </StackPanel>
         </ScrollViewer>
     </Grid>
