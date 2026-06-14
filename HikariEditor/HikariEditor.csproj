@@ -41,6 +41,11 @@
     <Platforms>x64</Platforms>
     <SelfContained>true</SelfContained>
 
+    <!-- 起動高速化: publish 時に IL を事前にネイティブコンパイルして JIT 待ちを減らす -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <!-- 実行時のプロファイルに基づくホットパス最適化（定常状態のもたつきを軽減） -->
+    <TieredPGO>true</TieredPGO>
+
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
