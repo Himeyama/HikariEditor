@@ -3,6 +3,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -42,6 +43,9 @@ public sealed partial class MainWindow : Window
 
         /* 自動保存設定の読み込み */
         LoadConfig();
+
+        /* git リポジトリならブランチ名ボタンを表示 */
+        _ = UpdateBranchButtonAsync();
     }
 
     async void EditorSetup()
@@ -165,6 +169,65 @@ public sealed partial class MainWindow : Window
         NLBtn.Content = (string)NLBtn.Content == "LF" ? "CRLF" : "LF";
         // 選択中タブの改行コードを切り替え、新しいコードで保存し直す
         editor?.ApplyNewline((string)NLBtn.Content);
+    }
+
+    static string OpenDir()
+    {
+        Settings settings = new();
+        settings.LoadSetting();
+        return settings.OpenDirPath;
+    }
+
+    // 開いているディレクトリが git リポジトリならブランチ名ボタンを表示する。
+    // ディレクトリを開き直したときや起動時に呼ぶ。
+    public async Task UpdateBranchButtonAsync()
+    {
+        string? branch = await Git.CurrentBranchAsync(OpenDir());
+        if (branch is null)
+        {
+            BranchBtn.Visibility = Visibility.Collapsed;
+        }
+        else
+        {
+            BranchBtn.Content = branch;
+            BranchBtn.Visibility = Visibility.Visible;
+        }
+    }
+
+    private async void ClickBranchBtn(object sender, RoutedEventArgs e)
+    {
+        string openDir = OpenDir();
+        string? current = await Git.CurrentBranchAsync(openDir);
+        List<string> branches = await Git.BranchesAsync(openDir);
+
+        ListView listView = new()
+        {
+            ItemsSource = branches,
+            SelectionMode = ListViewSelectionMode.Single,
+        };
+        if (current is not null)
+            listView.SelectedItem = current;
+
+        ContentDialog dialog = new()
+        {
+            Title = "ブランチを切り替え",
+            Content = listView,
+            PrimaryButtonText = "切り替え",
+            CloseButtonText = "キャンセル",
+            DefaultButton = ContentDialogButton.Primary,
+            XamlRoot = Content.XamlRoot,
+        };
+
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary)
+            return;
+        if (listView.SelectedItem is not string target || target == current)
+            return;
+
+        (bool ok, string message) = await Git.CheckoutAsync(openDir, target);
+        if (ok)
+            await UpdateBranchButtonAsync();
+        else
+            Error.Dialog("ブランチ切り替えエラー", message, Content.XamlRoot);
     }
 
     private void MenuChanged(NavigationView sender, NavigationViewItemInvokedEventArgs args)

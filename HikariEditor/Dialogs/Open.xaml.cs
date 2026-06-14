@@ -136,6 +136,9 @@ public sealed partial class Open : Page
         _mainWindow.editorFrame.Navigate(typeof(Editor), _mainWindow);
         _mainWindow.OpenExplorer.IsEnabled = true;
         _mainWindow.SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(360);
+
+        // 開いたディレクトリが git リポジトリならブランチ名ボタンを更新
+        _ = _mainWindow.UpdateBranchButtonAsync();
     }
 
     private void Directories_Tapped(object sender, TappedRoutedEventArgs e)

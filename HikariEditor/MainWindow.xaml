@@ -136,17 +136,18 @@
             </Grid>
         </Grid>
         <Grid Grid.Row="2">
-            <Grid ColumnDefinitions="*, Auto">
-                <TextBlock Grid.Column="0" Text="" x:Name="StatusBar" Margin="8, 0, 0, 0" x:FieldModifier="Public" FontSize="12" VerticalAlignment="Center" />
-                <Button Grid.Column="1" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="56" x:FieldModifier="Public" Background="Transparent" BorderBrush="Transparent">
-                    <Button.Resources>
-                        <!-- 枠線は常に透明、背景はホバー・押下時だけうっすら変化させる -->
-                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#22808080" />
-                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#33808080" />
-                        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
-                        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
-                    </Button.Resources>
-                </Button>
+            <Grid ColumnDefinitions="Auto, *, Auto">
+                <Grid.Resources>
+                    <!-- ステータスバーのボタンは枠線を常に透明にし、背景はホバー・押下時だけうっすら変化させる -->
+                    <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#22808080" />
+                    <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#33808080" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                    <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+                </Grid.Resources>
+                <!-- git リポジトリのときだけ表示。クリックでブランチ切り替えモーダルを開く -->
+                <Button Grid.Column="0" Content="" x:Name="BranchBtn" Click="ClickBranchBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="4, 0, 0, 0" Visibility="Collapsed" x:FieldModifier="Public" Background="Transparent" BorderBrush="Transparent" />
+                <TextBlock Grid.Column="1" Text="" x:Name="StatusBar" Margin="8, 0, 0, 0" x:FieldModifier="Public" FontSize="12" VerticalAlignment="Center" />
+                <Button Grid.Column="2" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="56" x:FieldModifier="Public" Background="Transparent" BorderBrush="Transparent" />
             </Grid>
         </Grid>
     </Grid>
