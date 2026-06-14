@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using OpenAI.Chat;
 
 namespace HikariEditor;
 
@@ -10,14 +9,15 @@ namespace HikariEditor;
 // 作業ディレクトリ（エクスプローラーで開いているフォルダ）を基準に相対パスを解決する。
 internal static class AITools
 {
-    // 公式 OpenAI SDK の ChatTool 定義。ChatClient がリクエストオプションに載せる。
-    // パラメータの JSON スキーマは BinaryData として渡す。
-    public static IReadOnlyList<ChatTool> Definitions() =>
+    // プロバイダ非依存のツール定義。OpenAI（Chat Completions / Responses）と
+    // Anthropic（Messages）の各エンジンが、これを自分の SDK のツール型へ変換する。
+    public readonly record struct ToolSpec(string Name, string Description, string Schema);
+
+    public static IReadOnlyList<ToolSpec> Specs { get; } =
     [
-        ChatTool.CreateFunctionTool(
-            "Read",
+        new("Read",
             "作業ディレクトリ内のファイルを読み取り、内容を返す。",
-            BinaryData.FromString("""
+            """
             {
               "type": "object",
               "properties": {
@@ -25,11 +25,10 @@ internal static class AITools
               },
               "required": ["path"]
             }
-            """)),
-        ChatTool.CreateFunctionTool(
-            "Write",
+            """),
+        new("Write",
             "ファイルを新規作成または上書きする。親ディレクトリが無ければ作成する。",
-            BinaryData.FromString("""
+            """
             {
               "type": "object",
               "properties": {
@@ -38,11 +37,10 @@ internal static class AITools
               },
               "required": ["path", "content"]
             }
-            """)),
-        ChatTool.CreateFunctionTool(
-            "Edit",
+            """),
+        new("Edit",
             "ファイル内の old_string を new_string に置換する。old_string はファイル内で一意である必要がある。",
-            BinaryData.FromString("""
+            """
             {
               "type": "object",
               "properties": {
@@ -52,7 +50,7 @@ internal static class AITools
               },
               "required": ["path", "old_string", "new_string"]
             }
-            """))
+            """)
     ];
 
     // ツール 1 件を実行し、LLM へ返すテキスト結果を得る。

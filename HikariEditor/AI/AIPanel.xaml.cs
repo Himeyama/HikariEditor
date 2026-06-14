@@ -20,7 +20,7 @@ public sealed partial class AIPanel : UserControl
 
     readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
 
-    ChatClient? _client;
+    IChatEngine? _client;
     string? _clientModelId;          // _client がどのモデル設定で作られたか
     ChatMessage? _streaming;         // ストリーミング中のアシスタント発言（断片の追記先）
     CancellationTokenSource? _cts;   // 生成中のリクエストを停止ボタンで中断するため
@@ -118,12 +118,10 @@ public sealed partial class AIPanel : UserControl
 
         if (_client is null || _clientModelId != active.Id)
         {
-            _client = new ChatClient(active, ResolveWorkingDir())
-            {
-                // コールバックは背景の継続から呼ばれ得るため UI スレッドへ載せ替える
-                OnText = chunk => _dispatcher.TryEnqueue(() => AppendAssistantText(chunk)),
-                OnTool = label => _dispatcher.TryEnqueue(() => AddToolMessage(label))
-            };
+            _client = ChatEngine.Create(active, ResolveWorkingDir());
+            // コールバックは背景の継続から呼ばれ得るため UI スレッドへ載せ替える
+            _client.OnText = chunk => _dispatcher.TryEnqueue(() => AppendAssistantText(chunk));
+            _client.OnTool = label => _dispatcher.TryEnqueue(() => AddToolMessage(label));
             _clientModelId = active.Id;
         }
         return true;

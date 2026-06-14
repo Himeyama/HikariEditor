@@ -7,12 +7,14 @@ using System.Text.Json.Serialization;
 
 namespace HikariEditor;
 
-// LLM の API 種別。今は OpenAI 互換の Chat Completions のみ。
-// 将来的に種別が増えても保存済み JSON を壊さないよう文字列で永続化する。
+// LLM の API 種別。OpenAI 互換の Chat Completions / Responses と Anthropic の Messages。
+// 種別が増えても保存済み JSON を壊さないよう文字列で永続化する。
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ApiKind
 {
-    ChatCompletions
+    ChatCompletions,
+    Responses,
+    Messages
 }
 
 // 登録された 1 つの LLM 設定。

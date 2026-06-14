@@ -12,8 +12,8 @@ using OpenAIChatMessage = OpenAI.Chat.ChatMessage;   // 本プロジェクトの
 namespace HikariEditor;
 
 // 公式 OpenAI .NET SDK で Chat Completions をストリーミングし、tool_calls を実行しながら
-// 最終回答までループするエージェントクライアント。会話履歴を内部に保持する。
-internal class ChatClient
+// 最終回答までループするエージェントエンジン。会話履歴を内部に保持する。
+internal class ChatCompletionsClient : IChatEngine
 {
     // ツールが無限に呼ばれ続けるのを防ぐための 1 リクエスト当たりの上限。
     const int MaxTurns = 25;
@@ -23,12 +23,10 @@ internal class ChatClient
     readonly List<OpenAIChatMessage> _messages = [];
     readonly ChatCompletionOptions _options = new();
 
-    // UI スレッドへのマーシャリングは呼び出し側（AIPanel）が担う。
-    // ここでは受け取ったデリゲートをそのまま呼ぶだけにする。
-    public Action<string>? OnText;   // アシスタントのテキスト断片
-    public Action<string>? OnTool;   // ツール実行（表示用ラベル）
+    public Action<string>? OnText { get; set; }
+    public Action<string>? OnTool { get; set; }
 
-    public ChatClient(ModelConfig config, string workingDir)
+    public ChatCompletionsClient(ModelConfig config, string workingDir)
     {
         _workingDir = workingDir;
 
@@ -41,14 +39,10 @@ internal class ChatClient
             clientOptions.Endpoint = new Uri(config.Endpoint);
         _chat = new OpenAIChatClient(config.Model, credential, clientOptions);
 
-        foreach (ChatTool tool in AITools.Definitions())
-            _options.Tools.Add(tool);
+        foreach (AITools.ToolSpec s in AITools.Specs)
+            _options.Tools.Add(ChatTool.CreateFunctionTool(s.Name, s.Description, BinaryData.FromString(s.Schema)));
 
-        _messages.Add(new SystemChatMessage(
-            "あなたはコードエディタに組み込まれた AI コーディングアシスタントです。" +
-            $"作業ディレクトリは {workingDir} です。" +
-            "ファイルの読み書きには Read / Write / Edit ツールを使ってください。" +
-            "パスは作業ディレクトリからの相対パスで指定できます。"));
+        _messages.Add(new SystemChatMessage(ChatEngine.SystemPrompt(workingDir)));
     }
 
     public async Task SendAsync(string userText, CancellationToken ct)

@@ -40,7 +40,9 @@
                 <StackPanel Spacing="4">
                     <TextBlock Text="API 種別" FontSize="12" />
                     <ComboBox x:Name="apiBox" HorizontalAlignment="Stretch" SelectedIndex="0">
-                        <ComboBoxItem Content="Chat Completions" />
+                        <ComboBoxItem Content="Chat Completions (OpenAI 互換)" />
+                        <ComboBoxItem Content="Responses (OpenAI)" />
+                        <ComboBoxItem Content="Messages (Anthropic)" />
                     </ComboBox>
                 </StackPanel>
                 <StackPanel Spacing="4">

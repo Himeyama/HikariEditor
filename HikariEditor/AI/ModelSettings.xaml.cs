@@ -71,7 +71,12 @@ public sealed partial class ModelSettings : UserControl
     {
         if (_current is null) return;
         _current.Name = nameBox.Text;
-        _current.Api = ApiKind.ChatCompletions;      // 現状 Chat Completions のみ
+        _current.Api = apiBox.SelectedIndex switch
+        {
+            1 => ApiKind.Responses,
+            2 => ApiKind.Messages,
+            _ => ApiKind.ChatCompletions,
+        };
         _current.Endpoint = endpointBox.Text.Trim();
         _current.Model = modelBox.Text.Trim();
         _current.ApiKey = keyBox.Password;
@@ -94,7 +99,12 @@ public sealed partial class ModelSettings : UserControl
         endpointBox.Text = _current?.Endpoint ?? "";
         modelBox.Text = _current?.Model ?? "";
         keyBox.Password = _current?.ApiKey ?? "";
-        apiBox.SelectedIndex = 0;
+        apiBox.SelectedIndex = _current?.Api switch
+        {
+            ApiKind.Responses => 1,
+            ApiKind.Messages => 2,
+            _ => 0,
+        };
         _loading = false;
     }
 

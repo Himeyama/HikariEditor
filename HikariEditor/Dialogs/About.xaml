@@ -16,6 +16,7 @@
         <TextBlock Text="xterm-addon-fit: MIT License" />
         <TextBlock Text="Windows App SDK (WinUI 3): MIT License" />
         <TextBlock Text="SharpCompress: MIT License" />
-        <TextBlock Text="OpenAI .NET (公式): MIT License" />
+        <TextBlock Text="OpenAI .NET: MIT License" />
+        <TextBlock Text="Anthropic .NET SDK: MIT License" />
     </StackPanel>
 </Page>
