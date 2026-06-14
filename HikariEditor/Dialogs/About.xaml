@@ -8,9 +8,13 @@
     mc:Ignorable="d">
 
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-        <TextBlock Text="© 2023 MURATA Mitsuharu" Margin="0, 8, 0, 0" />
+        <TextBlock Text="© 2023–2026 MURATA Mitsuharu" Margin="0, 8, 0, 0" />
         <HyperlinkButton Content="リポジトリ" NavigateUri="https://github.com/himeyama/HikariEditor" Margin="0, 8, 0, 0" />
-        <TextBlock Text="monaco-editor: MIT License" />
+        <TextBlock Text="使用しているオープンソースソフトウェア" Margin="0, 8, 0, 0" FontWeight="SemiBold" />
+        <TextBlock Text="Monaco Editor: MIT License" />
         <TextBlock Text="xterm.js: MIT License" />
+        <TextBlock Text="xterm-addon-fit: MIT License" />
+        <TextBlock Text="Windows App SDK (WinUI 3): MIT License" />
+        <TextBlock Text="SharpCompress: MIT License" />
     </StackPanel>
 </Page>
