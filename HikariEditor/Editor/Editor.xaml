@@ -1,4 +1,4 @@
-﻿<Page
+<Page
     x:Class="HikariEditor.Editor"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -8,13 +8,20 @@
     mc:Ignorable="d"
     NavigationCacheMode="Enabled">
 
-    <Grid RowDefinitions="*">
-        <TabView 
+    <!-- タブ列（Auto）と内容領域（*）を分離する。タブの Content は空にし、
+         実際の表示は ContentHost に集約する。テキストタブは単一の WebView2
+         （Monaco）を model 切替で共有し、画像/PDF などは個別コントロールを
+         可視状態の切替で表示する。 -->
+    <Grid RowDefinitions="Auto,*">
+        <TabView
             x:Name="Tabs"
             HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Row="0"
             TabCloseRequested="TabViewCloseTab"
             SelectionChanged="EditorTabChange"
             IsAddTabButtonVisible="False">
         </TabView>
+        <Grid x:Name="ContentHost" Grid.Row="1">
+            <WebView2 x:Name="WebView" x:FieldModifier="Public" Visibility="Collapsed" />
+        </Grid>
     </Grid>
 </Page>

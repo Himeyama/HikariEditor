@@ -38,18 +38,17 @@
     <script src="./min/vs/editor/editor.main.nls.js"></script>
     <script src="./min/vs/editor/editor.main.js"></script>
     <script>
+        // URL クエリから初期テーマを取得する（既定はダーク）
         let param = document.location.search.substring(1);
-        let param_list = param.split('&');
         let params = {};
-        for (let i = 0; i < param_list.length; i++) {
-            let elem = param_list[i].split('=');
-            params[elem[0]] = elem[1];
+        for (const kv of param.split('&')) {
+            const [k, v] = kv.split('=');
+            if (k) params[k] = v;
         }
-        let extension = params["extension"];
-        let lang;
-        let theme = params["theme"];
-        if (theme === undefined) theme = "vs-dark";
-        extensions = {
+        let theme = params["theme"] || "vs-dark";
+
+        // 拡張子 → Monaco の言語 ID。タブごとにファイルが異なるため、model 生成時に都度引く。
+        const extensions = {
             ".rb": "ruby",
             ".py": "python",
             ".txt": "plaintext",
@@ -79,15 +78,15 @@
             ".vb": "vb",
             ".h": "c",
             ".tex": "latex"
+        };
+        function langFor(path) {
+            const dot = path.lastIndexOf('.');
+            const ext = dot >= 0 ? path.substring(dot).toLowerCase() : '';
+            const lang = extensions[ext];
+            return lang === undefined ? null : lang;
         }
-        lang = extensions[extension];
-        if (lang === undefined) lang = null;
-        let editor = monaco.editor.create(document.getElementById('container'), {
-            value: "",
-            language: lang,
-            theme: theme,
-            automaticLayout: true
-        });
+
+        // latex の言語登録は model 生成より前に行う
         monaco.languages.register({ id: 'latex' });
         monaco.languages.setMonarchTokensProvider("latex", {
             /* Apache License, Version 2.0 */
@@ -153,10 +152,23 @@
                 ]
             }
         });
+
+        // 単一の Monaco インスタンスを生成し、タブごとに model を切り替えて共有する。
+        // これによりタブを増やしてもエディタ本体・ワーカーは 1 組で済む。
+        const editor = monaco.editor.create(document.getElementById('container'), {
+            value: "",
+            theme: theme,
+            automaticLayout: true
+        });
+
+        // ファイルパスをキーに model と編集状態を管理する
+        const models = {};      // path -> ITextModel
+        const baselines = {};   // path -> 直近に同期した内容（\n 正規化済み）
+        const dirty = {};       // path -> 前回 tick 以降に変更があったか
+        let currentPath = null; // 現在表示中の model のパス
+
         // ホスト (C#) との通信は WebView2 標準のメッセージングで行う。
         // JS → ホスト: JSON 文字列を postMessage。ホスト → JS: PostWebMessageAsJson。
-        let tmp_src = "";
-
         function post(obj) {
             window.chrome.webview.postMessage(JSON.stringify(obj));
         }
@@ -164,10 +176,14 @@
         window.chrome.webview.addEventListener('message', e => {
             const msg = e.data; // PostWebMessageAsJson はパース済みオブジェクトで届く
             switch (msg.type) {
-                case 'load':
-                    editor.setValue(msg.src);
-                    // 読み込み直後を基準にし、初回の自動保存が走らないようにする
-                    tmp_src = msg.src.replace(/\r\n/g, "\n");
+                case 'open':
+                    openModel(msg.path, msg.src);
+                    break;
+                case 'switch':
+                    switchModel(msg.path);
+                    break;
+                case 'close':
+                    closeModel(msg.path);
                     break;
                 case 'paste':
                     do_paste(msg.text);
@@ -175,44 +191,80 @@
                 case 'copy-request':
                     do_copy();
                     break;
-                case 'save-request':
-                    // 改行コード切替などホスト起点の保存要求。現在の内容を save で返す
-                    post({ type: 'save', src: editor.getValue().replace(/\r\n/g, "\n") });
+                case 'save-request': {
+                    // 改行コード切替などホスト起点の保存要求。対象 model の内容を save で返す
+                    const model = models[msg.path];
+                    if (model) post({ type: 'save', path: msg.path, src: model.getValue().replace(/\r\n/g, "\n") });
                     break;
+                }
             }
         });
 
-        // 初期化完了をホストへ通知。ホストが開いたファイル内容を load で返す
+        // 新規ファイルを model として開く（既存なら内容を差し替える）
+        function openModel(path, src) {
+            let model = models[path];
+            if (!model) {
+                model = monaco.editor.createModel(src, langFor(path));
+                models[path] = model;
+                model.onDidChangeContent(() => { dirty[path] = true; });
+            } else {
+                model.setValue(src);
+            }
+            // 読み込み直後を基準にし、初回の自動保存が走らないようにする
+            baselines[path] = src.replace(/\r\n/g, "\n");
+            dirty[path] = false;
+            currentPath = path;
+            editor.setModel(model);
+        }
+
+        // タブ切替: 既存 model を表示する
+        function switchModel(path) {
+            const model = models[path];
+            if (!model) return;
+            currentPath = path;
+            editor.setModel(model);
+        }
+
+        // タブを閉じる: model を破棄してメモリを解放する
+        function closeModel(path) {
+            const model = models[path];
+            if (model) model.dispose();
+            delete models[path];
+            delete baselines[path];
+            delete dirty[path];
+            if (currentPath === path) currentPath = null;
+        }
+
+        // 初期化完了をホストへ通知。以降ホストが open/switch/close を送ってくる
         post({ type: 'ready' });
 
         // テーマ追従は毎秒ポーリングせず OS の変更イベントでのみ更新する。
-        // setTheme はグローバル操作で再描画を伴うため、タブ数ぶん毎秒呼ぶと重い。
+        // setTheme はグローバル操作で再描画を伴うため、毎秒呼ぶと重い。
         const lightMql = window.matchMedia('(prefers-color-scheme: light)');
         lightMql.addEventListener('change', e => {
             monaco.editor.setTheme(e.matches ? "vs-light" : "vs-dark");
         });
 
-        // 編集があった時だけダーティにし、tick では変更時のみ getValue する。
-        // 毎秒の全文シリアライズ（大きいファイルで重い）を避ける。
-        let dirty = false;
-        editor.onDidChangeModelContent(() => { dirty = true; });
-
+        // 変更のあった model だけを自動保存する。dirty フラグで全文シリアライズを最小化する。
         setInterval(tick, 1000);
         function tick() {
-            if (!dirty) return;
-            dirty = false;
-            let src = editor.getValue().replace(/\r\n/g, "\n");
-            if (tmp_src !== src) {
-                tmp_src = src;
-                post({ type: 'autosave', src });
+            for (const path in models) {
+                if (!dirty[path]) continue;
+                dirty[path] = false;
+                const src = models[path].getValue().replace(/\r\n/g, "\n");
+                if (baselines[path] !== src) {
+                    baselines[path] = src;
+                    post({ type: 'autosave', path, src });
+                }
             }
         }
 
         document.addEventListener("keydown", (event) => {
             if (event.ctrlKey && event.key === 's') {
                 event.preventDefault();
-                let src = editor.getValue().replace(/\r\n/g, "\n");
-                post({ type: 'save', src });
+                if (!currentPath) return;
+                const src = editor.getValue().replace(/\r\n/g, "\n");
+                post({ type: 'save', path: currentPath, src });
             }
         });
 
@@ -227,7 +279,9 @@
         }
 
         function do_copy() {
-            let text = editor.getModel().getValueInRange(editor.getSelection());
+            const model = editor.getModel();
+            if (!model) return;
+            let text = model.getValueInRange(editor.getSelection());
             if (text === "") return;
             text = text.replace(/\r\n/g, "\n");
             post({ type: 'copy', text });
