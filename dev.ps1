@@ -184,7 +184,30 @@ function Invoke-Uninstall {
     Write-LogInfo 'アンインストール完了。'
 }
 
+function Find-MakeNsis {
+    # PATH 上にあればそれを優先、無ければ標準のインストール先を探す
+    $cmd = Get-Command 'makensis.exe' -ErrorAction SilentlyContinue
+    if ($cmd) { return $cmd.Source }
+
+    $candidates = @(
+        "${env:ProgramFiles(x86)}\NSIS\makensis.exe",
+        "$env:ProgramFiles\NSIS\makensis.exe"
+    )
+    foreach ($path in $candidates) {
+        if ($path -and (Test-Path $path)) { return $path }
+    }
+    return $null
+}
+
 function Invoke-Pack {
+    $makensis = Find-MakeNsis
+    if (-not $makensis) {
+        Write-LogError 'makensis.exe が見つかりません。NSIS をインストールするか PATH を確認してください。'
+        Write-LogError '入手先: https://nsis.sourceforge.io/Download （または winget install NSIS.NSIS）'
+        exit 127
+    }
+    Write-LogDebug "makensis: $makensis"
+
     Invoke-Publish
     $size = [Math]::Round(
         (Get-ChildItem $script:PublishDir -Force -Recurse -ErrorAction SilentlyContinue |
@@ -192,19 +215,30 @@ function Invoke-Pack {
         0,
         [MidpointRounding]::AwayFromZero
     )
-    Write-LogInfo "NSIS インストーラーを作成しています (size=${size}KB)..."
-    & 'C:\Program Files (x86)\NSIS\makensis.exe' `
-        /DVERSION="$script:AppVersion" `
-        /DDATE="$script:Date" `
-        /DSIZE="$size" `
-        /DMUI_ICON="$script:MuiIcon" `
-        /DMUI_UNICON="$script:MuiIcon" `
-        /DPUBLISH_DIR="$script:PublishDir" `
-        /DPRODUCT_NAME="$script:AppName" `
-        /DEXEC_FILE="$script:ExecFile" `
-        /DPUBLISHER="$script:Publisher" `
-        installer.nsh
-    Write-LogInfo 'インストーラー作成完了。'
+
+    # Unicode 版 NSIS は BOM が無いとライセンスファイルを ACP として読み文字化けする。
+    # コミット済みの LICENSE は変更せず、BOM 付き UTF-8 の一時コピーを作って渡す。
+    $licenseTmp = Join-Path ([System.IO.Path]::GetTempPath()) "$script:AppName-LICENSE.txt"
+    Set-Content -Path $licenseTmp -Value (Get-Content -Raw -Path 'LICENSE') -Encoding utf8BOM -NoNewline
+
+    try {
+        Write-LogInfo "NSIS インストーラーを作成しています (size=${size}KB)..."
+        & $makensis `
+            /DVERSION="$script:AppVersion" `
+            /DDATE="$script:Date" `
+            /DSIZE="$size" `
+            /DMUI_ICON="$script:MuiIcon" `
+            /DMUI_UNICON="$script:MuiIcon" `
+            /DPUBLISH_DIR="$script:PublishDir" `
+            /DPRODUCT_NAME="$script:AppName" `
+            /DEXEC_FILE="$script:ExecFile" `
+            /DPUBLISHER="$script:Publisher" `
+            /DLICENSE_FILE="$licenseTmp" `
+            installer.nsh
+        Write-LogInfo "インストーラー作成完了: $script:AppName-$script:AppVersion-setup.exe"
+    } finally {
+        Remove-Item -Path $licenseTmp -ErrorAction SilentlyContinue
+    }
 }
 
 # ====================

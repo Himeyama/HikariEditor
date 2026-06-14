@@ -24,6 +24,7 @@ HikariEditor/
 ├── DESIGN/                    # 設計ドキュメント
 │   └── powershell.md          # PowerShell スクリプト設計ガイドライン
 ├── dev.ps1                    # 開発用 PowerShell スクリプト
+├── installer.nsh              # NSIS インストーラースクリプト（dev.ps1 pack が使用）
 └── HikariEditor.sln
 ```
 

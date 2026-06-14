@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <!-- アプリ名 -->
-    <AssemblyName>WinUIExample</AssemblyName>
+    <AssemblyName>HikariEditor</AssemblyName>
     
     <!-- アプリの説明 -->
     <Description>This app is an example of a small WinUI app.</Description>

@@ -365,3 +365,4 @@ FodyWeavers.xsd
 DESIGN/
 .claude/
 memory/
+*.exe
