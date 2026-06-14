@@ -185,15 +185,22 @@
         // 初期化完了をホストへ通知。ホストが開いたファイル内容を load で返す
         post({ type: 'ready' });
 
+        // テーマ追従は毎秒ポーリングせず OS の変更イベントでのみ更新する。
+        // setTheme はグローバル操作で再描画を伴うため、タブ数ぶん毎秒呼ぶと重い。
+        const lightMql = window.matchMedia('(prefers-color-scheme: light)');
+        lightMql.addEventListener('change', e => {
+            monaco.editor.setTheme(e.matches ? "vs-light" : "vs-dark");
+        });
+
+        // 編集があった時だけダーティにし、tick では変更時のみ getValue する。
+        // 毎秒の全文シリアライズ（大きいファイルで重い）を避ける。
+        let dirty = false;
+        editor.onDidChangeModelContent(() => { dirty = true; });
+
         setInterval(tick, 1000);
         function tick() {
-            // テーマ追従
-            if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-                monaco.editor.setTheme("vs-light");
-            } else {
-                monaco.editor.setTheme("vs-dark");
-            }
-            // 変更があれば自動保存
+            if (!dirty) return;
+            dirty = false;
             let src = editor.getValue().replace(/\r\n/g, "\n");
             if (tmp_src !== src) {
                 tmp_src = src;
