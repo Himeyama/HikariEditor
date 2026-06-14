@@ -9,6 +9,8 @@ internal class Settings
     public bool AutoSave { get; set; } = false;
     public string OpenDirPath { get; set; } = string.Empty;
     public bool LogOpen { get; set; } = false;
+    public double TerminalHeight { get; set; } = 300;
+    public double ExplorerWidth { get; set; } = 360;
 
     static string SettingPath => Path.Combine(Path.GetTempPath(), "HikariEditor-settings.json");
 
@@ -33,5 +35,7 @@ internal class Settings
         AutoSave = settings.AutoSave;
         OpenDirPath = settings.OpenDirPath;
         LogOpen = settings.LogOpen;
+        TerminalHeight = settings.TerminalHeight;
+        ExplorerWidth = settings.ExplorerWidth;
     }
 }

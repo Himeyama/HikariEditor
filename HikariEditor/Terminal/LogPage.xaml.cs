@@ -16,7 +16,7 @@ public sealed partial class LogPage : Page
         // 再ナビゲートすると新しいページが生成され、既存のターミナルタブが失われるため。
         if (mainWindow.terminalFrame.Content is not Terminal)
             mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
-        mainWindow.terminalFrame.Height = 300;
+        mainWindow.ShowTerminal();
         mainWindow.OpenLog.IsEnabled = false;
         mainWindow.terminal!.AddNewLogPage(mainWindow.terminal.terminalTabs);
 

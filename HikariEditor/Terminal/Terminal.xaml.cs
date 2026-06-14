@@ -19,7 +19,7 @@ public sealed partial class Terminal : Page
         // 再ナビゲートすると新しいページが生成され、既存のログタブが失われるため。
         if (mainWindow.terminalFrame.Content is not Terminal)
             mainWindow.terminalFrame.Navigate(typeof(Terminal), mainWindow);
-        mainWindow.terminalFrame.Height = 300;
+        mainWindow.ShowTerminal();
 
         // メニューは常に有効。クリックするたびにターミナルタブを増やす。
         // Navigate は同期的に OnNavigatedTo を呼ぶのでこの時点で terminal は有効。
@@ -88,6 +88,6 @@ public sealed partial class Terminal : Page
 
         /* タブが空になった場合はパネルを畳む */
         if (sender.TabItems.Count == 0)
-            _mainWindow.terminalFrame.Height = 0;
+            _mainWindow.HideTerminal();
     }
 }

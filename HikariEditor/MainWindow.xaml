@@ -80,7 +80,7 @@
                 </Grid>
             </Grid>
         </Grid>
-        <Grid Grid.Row="1" x:Name="SideMenuEditorArea" x:FieldModifier="Public" ColumnDefinitions="48, *">
+        <Grid Grid.Row="1" x:Name="SideMenuEditorArea" x:FieldModifier="Public" ColumnDefinitions="48, Auto, *">
             <NavigationView 
                 Grid.Column="0"
                 ItemInvoked="MenuChanged"
@@ -98,12 +98,38 @@
                 </NavigationView.MenuItems>
                 <Frame x:Name="contentFrame" x:FieldModifier="Public" />
             </NavigationView>
-            <Grid Grid.Column="1" RowDefinitions="*, Auto" x:FieldModifier="Public" x:Name="RightSideFrames">
+            <!-- エクスプローラーの横幅を左右にドラッグしてリサイズするハンドル -->
+            <local:ResizeHandle Grid.Column="1" x:Name="explorerSplitter" Width="6"
+                                Orientation="Vertical" Visibility="Collapsed"
+                                HorizontalContentAlignment="Stretch"
+                                VerticalContentAlignment="Stretch"
+                                PointerPressed="ExplorerSplitter_PointerPressed"
+                                PointerMoved="ExplorerSplitter_PointerMoved"
+                                PointerReleased="ExplorerSplitter_PointerReleased"
+                                PointerCaptureLost="ExplorerSplitter_PointerReleased">
+                <!-- Transparent な当たり判定を確保しつつ左端に区切り線を描く -->
+                <Border Background="Transparent" BorderThickness="1,0,0,0"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" />
+            </local:ResizeHandle>
+            <Grid Grid.Column="2" RowDefinitions="*, Auto, Auto" x:FieldModifier="Public" x:Name="RightSideFrames">
                 <Grid ColumnDefinitions="*, 0" x:FieldModifier="Public" Grid.Row="0" x:Name="rightArea">
                     <Frame Grid.Column="0" x:Name="editorFrame" x:FieldModifier="Public" Height="0" />
                     <Frame Grid.Column="1" x:Name="previewFrame" x:FieldModifier="Public" Background="White" />
                 </Grid>
-                <Frame Grid.Row="1" x:Name="terminalFrame" x:FieldModifier="Public" Height="0" />
+                <!-- ターミナル／ログ領域を上下にドラッグしてリサイズするハンドル -->
+                <local:ResizeHandle Grid.Row="1" x:Name="terminalSplitter" Height="6"
+                                    Visibility="Collapsed"
+                                    HorizontalContentAlignment="Stretch"
+                                    VerticalContentAlignment="Stretch"
+                                    PointerPressed="TerminalSplitter_PointerPressed"
+                                    PointerMoved="TerminalSplitter_PointerMoved"
+                                    PointerReleased="TerminalSplitter_PointerReleased"
+                                    PointerCaptureLost="TerminalSplitter_PointerReleased">
+                    <!-- Transparent な当たり判定を確保しつつ上端に区切り線を描く -->
+                    <Border Background="Transparent" BorderThickness="0,1,0,0"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" />
+                </local:ResizeHandle>
+                <Frame Grid.Row="2" x:Name="terminalFrame" x:FieldModifier="Public" Height="0" />
             </Grid>
         </Grid>
         <Grid Grid.Row="2">

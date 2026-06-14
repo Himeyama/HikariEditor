@@ -1,5 +1,6 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -15,6 +16,11 @@ public sealed partial class MainWindow : Window
     public Editor? editor;
     public Terminal? terminal;
     public StackPanel? logTabPanel;
+
+    // 直近のターミナル／ログ領域の高さとエクスプローラーの横幅。
+    // 再オープン時やリサイズ後・次回起動時の復元に使う。
+    double terminalHeight = 300;
+    double explorerWidth = 360;
 
     static string EditorDir => $"{Path.GetTempPath()}HikariEditor";
 
@@ -104,18 +110,21 @@ public sealed partial class MainWindow : Window
         AutoSave.IsChecked = settings.AutoSave;
         ToggleStyle(AutoSave.IsChecked);
 
-        // 前回ログを開いていた場合は復元する。
-        // コンストラクタ段階ではビジュアルツリーが未構築で terminalFrame の
-        // Navigate / 高さ変更が反映されないため、ウィンドウ表示後に一度だけ実行する。
-        if (settings.LogOpen)
+        // 前回のリサイズ結果を復元する
+        terminalHeight = settings.TerminalHeight;
+        explorerWidth = settings.ExplorerWidth;
+        bool restoreLog = settings.LogOpen;
+
+        // ビジュアルツリー構築後に一度だけ復元処理を行う。
+        // コンストラクタ段階ではビジュアルツリーが未構築で Frame の
+        // Navigate / サイズ変更が反映されないため、ウィンドウ表示後に実行する。
+        void Restore(object sender, WindowActivatedEventArgs e)
         {
-            void RestoreLog(object sender, WindowActivatedEventArgs e)
-            {
-                Activated -= RestoreLog;
-                LogPage.ClickOpenLog(this);
-            }
-            Activated += RestoreLog;
+            Activated -= Restore;
+            ShowExplorerPanel();              // エクスプローラーは既定で開いた状態にする
+            if (restoreLog) LogPage.ClickOpenLog(this);
         }
+        Activated += Restore;
     }
 
     void ToggleStyle(bool isOn)
@@ -158,20 +167,11 @@ public sealed partial class MainWindow : Window
         if (sender.SelectedItem is not NavigationViewItem selectedItem) return;
         if ((string)selectedItem.Tag == "Explorer")
         {
-            if (SideMenuEditorArea.ColumnDefinitions[0].Width.Value == 360)
-            {
-                SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(48);
-                ItemExplorer.IsSelected = false;
-                OpenExplorer.IsEnabled = false;
-            }
+            // 開いている（幅がコンパクトレールの 48 より大きい）ときは畳む
+            if (SideMenuEditorArea.ColumnDefinitions[0].Width.Value > 48)
+                HideExplorerPanel();
             else
-            {
-                SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(360);
-                ItemExplorer.IsSelected = true;
-                OpenExplorer.IsEnabled = true;
-            }
-
-            contentFrame.Navigate(typeof(Explorer), this);
+                ShowExplorerPanel();
         }
         else if ((string)selectedItem.Tag == "Search")
         {
@@ -219,5 +219,119 @@ public sealed partial class MainWindow : Window
     private void ClickOpenLog(object sender, RoutedEventArgs e)
     {
         LogPage.ClickOpenLog(this);
+    }
+
+    // ターミナル／ログ領域を表示する。高さは直近のサイズを復元する。
+    public void ShowTerminal()
+    {
+        terminalFrame.Height = terminalHeight;
+        terminalSplitter.Visibility = Visibility.Visible;
+    }
+
+    // ターミナル／ログ領域を畳む。次回表示用に高さは保持しておく。
+    public void HideTerminal()
+    {
+        terminalFrame.Height = 0;
+        terminalSplitter.Visibility = Visibility.Collapsed;
+    }
+
+    // エクスプローラーを表示する。横幅は直近のサイズを復元する。
+    public void ShowExplorerPanel()
+    {
+        SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(explorerWidth);
+        explorerSplitter.Visibility = Visibility.Visible;
+        ItemExplorer.IsSelected = true;
+        OpenExplorer.IsEnabled = true;
+        contentFrame.Navigate(typeof(Explorer), this);
+    }
+
+    // エクスプローラーを畳む（コンパクトレールのみ表示）。次回表示用に横幅は保持しておく。
+    public void HideExplorerPanel()
+    {
+        SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(48);
+        explorerSplitter.Visibility = Visibility.Collapsed;
+        ItemExplorer.IsSelected = false;
+        OpenExplorer.IsEnabled = false;
+    }
+
+    // ハンドルのドラッグでターミナル／ログ領域を上下にリサイズする。
+    // ドラッグ中はハンドル自身が動いて自己相対座標が揺れるため、
+    // 親コンテナ基準の座標で開始位置からの差分を計算する。
+    bool resizingTerminal;
+    double resizeStartY;
+    double resizeStartHeight;
+
+    void TerminalSplitter_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        resizingTerminal = true;
+        resizeStartY = e.GetCurrentPoint(RightSideFrames).Position.Y;
+        resizeStartHeight = terminalFrame.ActualHeight;
+        terminalSplitter.CapturePointer(e.Pointer);
+    }
+
+    void TerminalSplitter_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        if (!resizingTerminal) return;
+
+        double y = e.GetCurrentPoint(RightSideFrames).Position.Y;
+        // 下に動かすと delta が正。ターミナルは上方向に広げるので符号を反転する。
+        double newHeight = resizeStartHeight - (y - resizeStartY);
+
+        // エディタ領域を最低限残しつつ、ターミナルが潰れないようにクランプする
+        double max = Math.Max(80, RightSideFrames.ActualHeight - 120);
+        terminalHeight = Math.Clamp(newHeight, 80, max);
+        terminalFrame.Height = terminalHeight;
+    }
+
+    void TerminalSplitter_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if (!resizingTerminal) return;
+        resizingTerminal = false;
+        terminalSplitter.ReleasePointerCapture(e.Pointer);
+        SaveLayout();
+    }
+
+    // ハンドルのドラッグでエクスプローラーの横幅をリサイズする。
+    bool resizingExplorer;
+    double explorerResizeStartX;
+    double explorerResizeStartWidth;
+
+    void ExplorerSplitter_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        resizingExplorer = true;
+        explorerResizeStartX = e.GetCurrentPoint(SideMenuEditorArea).Position.X;
+        explorerResizeStartWidth = explorerWidth;
+        explorerSplitter.CapturePointer(e.Pointer);
+    }
+
+    void ExplorerSplitter_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        if (!resizingExplorer) return;
+
+        double x = e.GetCurrentPoint(SideMenuEditorArea).Position.X;
+        double newWidth = explorerResizeStartWidth + (x - explorerResizeStartX);
+
+        // エディタ領域を最低限残しつつ、エクスプローラーが潰れないようにクランプする
+        double max = Math.Max(150, SideMenuEditorArea.ActualWidth - 200);
+        explorerWidth = Math.Clamp(newWidth, 150, max);
+        SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(explorerWidth);
+    }
+
+    void ExplorerSplitter_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        if (!resizingExplorer) return;
+        resizingExplorer = false;
+        explorerSplitter.ReleasePointerCapture(e.Pointer);
+        SaveLayout();
+    }
+
+    // リサイズ結果（ターミナル高さ・エクスプローラー幅）を次回起動用に保存する
+    void SaveLayout()
+    {
+        Settings settings = new();
+        settings.LoadSetting();
+        settings.TerminalHeight = terminalHeight;
+        settings.ExplorerWidth = explorerWidth;
+        settings.SaveSetting();
     }
 }
