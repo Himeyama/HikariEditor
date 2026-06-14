@@ -142,9 +142,8 @@ public sealed partial class Explorer : Page
         IList<TreeViewNode> siblings = item.Parent?.Children ?? ExplorerTree.RootNodes;
         int index = siblings.IndexOf(item);
         if (index < 0) return;
-        FileItem newNode = CreateNode(newPath, fileFlag: false);
+        FileItem newNode = CreateNode(newPath);
         siblings[index] = newNode;
-        if (isDirectory) AddChildNode(newNode);
     }
 
     void ClickDeleteItem(object sender, RoutedEventArgs e)
@@ -177,20 +176,34 @@ public sealed partial class Explorer : Page
         }
     }
 
-    // アイコンと色を割り当てたノードを生成する。fileFlag は子展開の遅延フラグ
-    static FileItem CreateNode(string path, bool fileFlag)
+    // アイコンと色を割り当てたノードを生成する。ディレクトリは子を即時展開せず、
+    // 中身があるときだけ HasUnrealizedChildren を立てて展開時に遅延読み込みする
+    // （起動時に全サブフォルダの中身まで列挙してノードを作ると重くなるため）。
+    static FileItem CreateNode(string path)
     {
-        return Directory.Exists(path)
-            ? new FileItem(path) { Icon1 = "\xE188", Icon2 = "\xF12B", Color1 = "#FFCF48", Color2 = "#FFE0B2", Flag = true }
-            : new FileItem(path) { Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5", Flag = fileFlag };
+        if (!Directory.Exists(path))
+            return new FileItem(path) { Icon1 = "\xE132", Icon2 = "\xE130", Color1 = "#9E9E9E", Color2 = "#F5F5F5" };
+
+        return new FileItem(path)
+        {
+            Icon1 = "\xE188",
+            Icon2 = "\xF12B",
+            Color1 = "#FFCF48",
+            Color2 = "#FFE0B2",
+            HasUnrealizedChildren = HasChildren(path)
+        };
     }
 
-    static void AddChildNode(FileItem file)
+    // 子要素の有無だけを最初の 1 件で判定する（全列挙を避けるため）
+    static bool HasChildren(string path)
     {
-        if (!Directory.Exists(file.Path)) return;
-        foreach (string f in ListEntries(file.Path))
+        try
         {
-            file.Children.Add(CreateNode(f, fileFlag: false));
+            return Directory.EnumerateFileSystemEntries(path).Any();
+        }
+        catch
+        {
+            return false;
         }
     }
 
@@ -198,20 +211,18 @@ public sealed partial class Explorer : Page
     {
         foreach (string f in ListEntries(filePath))
         {
-            FileItem file = CreateNode(f, fileFlag: true);
-            ExplorerTree.RootNodes.Add(file);
-            AddChildNode(file);
+            ExplorerTree.RootNodes.Add(CreateNode(f));
         }
     }
 
     private void ExplorerTreeExpanding(TreeView sender, TreeViewExpandingEventArgs args)
     {
         FileItem file = (FileItem)args.Node;
-        foreach (FileItem f in file.Children.Cast<FileItem>())
+        if (!file.HasUnrealizedChildren) return;   // 既に読み込み済み
+        file.HasUnrealizedChildren = false;
+        foreach (string f in ListEntries(file.Path))
         {
-            if (!f.Flag) continue;
-            f.Flag = false;
-            AddChildNode(f);
+            file.Children.Add(CreateNode(f));
         }
     }
 
@@ -244,7 +255,7 @@ public sealed partial class Explorer : Page
         if (!addFile.CreateFile(_mainWindow!))
             return;
 
-        FileItem fileItem = CreateNode(addFile.Path, fileFlag: false);
+        FileItem fileItem = CreateNode(addFile.Path);
         if (ExplorerTree.SelectedItem is FileItem selected)
             selected.Children.Add(fileItem);
         else
@@ -269,7 +280,7 @@ public sealed partial class Explorer : Page
         if (!folder.CreateDirectory(_mainWindow!))
             return;
 
-        FileItem fileItem = CreateNode(folder.Path, fileFlag: true);
+        FileItem fileItem = CreateNode(folder.Path);
         if (ExplorerTree.SelectedItem is FileItem selected)
             selected.Children.Add(fileItem);
         else

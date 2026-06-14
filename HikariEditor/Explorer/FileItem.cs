@@ -18,7 +18,6 @@ class FileItem : TreeViewNode
     public string Icon2 { get; set; } = string.Empty;
     public string Color1 { get; set; } = string.Empty;
     public string Color2 { get; set; } = string.Empty;
-    public bool Flag { get; set; }
 
     // SVG だけ右クリックメニューに「テキストで開く／WebView で開く」を出すための表示制御
     public Visibility SvgVisibility =>
@@ -48,7 +47,6 @@ class FileItem : TreeViewNode
         Extension = System.IO.Path.GetExtension(Path);
         WithoutName = System.IO.Path.GetFileNameWithoutExtension(Path);
         Path = $"{Dirname}\\{WithoutName}{Extension}";
-        Flag = false;
     }
 
     public bool CreateFile(MainWindow mainWindow)
