@@ -65,7 +65,7 @@
             term.open(document.getElementById('terminal'));
             fit.fit();
 
-            // C# 側から受け取った出力をそのまま端末に流す
+            // 端末サイズ（cols/rows）を C# 側（ConPTY）へ通知する
             function postSize() {
                 try {
                     window.chrome.webview.postMessage(JSON.stringify({
@@ -91,22 +91,32 @@
                 } catch (_) { }
             });
 
-            // C# → ターミナル出力
+            // Base64 文字列を Uint8Array に復元する（出力は ConPTY の生バイト列）
+            function b64ToBytes(b64) {
+                const bin = atob(b64);
+                const len = bin.length;
+                const bytes = new Uint8Array(len);
+                for (let i = 0; i < len; i++) bytes[i] = bin.charCodeAt(i);
+                return bytes;
+            }
+
+            // C# → ターミナル出力。バイト列を渡せば xterm.js が UTF-8 を解釈する
             window.chrome.webview.addEventListener('message', (event) => {
                 const msg = event.data;
-                if (typeof msg === 'string') {
-                    term.write(msg);
-                } else if (msg && msg.type === 'write') {
-                    term.write(msg.data);
+                if (msg && msg.type === 'write') {
+                    term.write(b64ToBytes(msg.data));
                 } else if (msg && msg.type === 'clear') {
                     term.clear();
                 }
             });
 
-            // 準備完了を通知し、初期サイズも伝える
+            // 準備完了を初期サイズ付きで通知する（この時点でシェルが起動される）
             try {
-                window.chrome.webview.postMessage(JSON.stringify({ type: 'ready' }));
-                postSize();
+                window.chrome.webview.postMessage(JSON.stringify({
+                    type: 'ready',
+                    cols: term.cols,
+                    rows: term.rows
+                }));
             } catch (_) { }
 
             term.focus();
