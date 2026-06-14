@@ -1,6 +1,6 @@
 # ひかりエディタ
 
-![image](https://github.com/Himeyama/HikariEditor/assets/39254183/2d1c6ef6-0f09-4492-bb13-08f815242f73)
+<img width="2892" height="1534" alt="image" src="https://github.com/user-attachments/assets/bfba27b3-3132-47ba-83a4-bc8d47ca6a3c" />
 
 Windows 向けのモダンなテキスト／コードエディタです。WinUI 3 と Monaco Editor を組み合わせ、VSCode ライクな編集体験を提供します。
 
