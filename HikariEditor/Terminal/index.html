@@ -133,6 +133,10 @@
             } catch (_) { }
 
             term.focus();
+
+            // タブ切り替えで WebView がフォーカスを取り戻したとき、xterm にも
+            // フォーカスを移してキー入力を受け取れるようにする
+            window.addEventListener('focus', () => term.focus());
         })();
     </script>
 </body>

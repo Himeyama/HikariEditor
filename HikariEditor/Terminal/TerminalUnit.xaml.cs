@@ -15,31 +15,45 @@ public sealed partial class TerminalUnit : Page
     ConPtySession? _session;
     readonly DispatcherQueue _dispatcher = DispatcherQueue.GetForCurrentThread();
     bool _webReady;
+    bool _coreInitialized;
 
     public TerminalUnit()
     {
         InitializeComponent();
 
-        // ビジュアルツリーに追加された後に WebView2 を初期化する
+        // TabView は選択中タブのコンテンツだけをビジュアルツリーに保持するため、
+        // タブを切り替えるたびに Loaded/Unloaded が繰り返し発火する。Loaded は
+        // 解除せず、戻ってきたときに毎回キーボードフォーカスを取り戻す。
         Loaded += OnLoaded;
-        Unloaded += OnUnloaded;
     }
 
     async void OnLoaded(object sender, RoutedEventArgs e)
     {
-        Loaded -= OnLoaded;
+        // WebView2 の初期化は最初の表示時だけ行う。タブ切り替えで再ロードされても
+        // CoreWebView2 とシェルは生き続けるので、作り直すと履歴が失われる。
+        if (!_coreInitialized)
+        {
+            _coreInitialized = true;
 
-        await WebViewTerminal.EnsureCoreWebView2Async();
-        WebViewTerminal.CoreWebView2.WebMessageReceived += OnWebMessage;
+            await WebViewTerminal.EnsureCoreWebView2Async();
+            WebViewTerminal.CoreWebView2.WebMessageReceived += OnWebMessage;
 
-        string htmlPath = Path.Combine(AppContext.BaseDirectory, "Terminal", "index.html");
-        string theme = ActualTheme == ElementTheme.Dark ? "dark" : "light";
-        WebViewTerminal.Source = new Uri($"{htmlPath}?theme={theme}");
+            string htmlPath = Path.Combine(AppContext.BaseDirectory, "Terminal", "index.html");
+            string theme = ActualTheme == ElementTheme.Dark ? "dark" : "light";
+            WebViewTerminal.Source = new Uri($"{htmlPath}?theme={theme}");
 
-        // シェルの起動は端末サイズが分かる 'ready' 受信時まで遅延する
+            // シェルの起動は端末サイズが分かる 'ready' 受信時まで遅延する
+        }
+
+        // タブを切り替えて戻ってきた直後はキーボードフォーカスが外れているため、
+        // WebView へフォーカスを戻して入力できるようにする（JS 側で term.focus() が走る）。
+        // レイアウト確定後にフォーカスを当てたいので一拍遅らせる。
+        _dispatcher.TryEnqueue(() => WebViewTerminal.Focus(FocusState.Programmatic));
     }
 
-    void OnUnloaded(object sender, RoutedEventArgs e)
+    // タブが実際に閉じられたときにだけシェルを終了する。タブ切り替え（Unloaded）では
+    // 破棄しない。破棄するとセッションが失われ、戻ったときに入力できなくなるため。
+    public void DisposeSession()
     {
         try { _session?.Dispose(); }
         catch { /* 解放失敗は無視 */ }

@@ -78,6 +78,10 @@ public sealed partial class Terminal : Page
             settings.SaveSetting();
         }
 
+        /* ターミナルタブを閉じる場合はぶら下がっているシェルを終了させる */
+        if (args.Tab.Content is TerminalUnit unit)
+            unit.DisposeSession();
+
         /* 該当するタブを削除 */
         sender.TabItems.Remove(args.Tab);
 
