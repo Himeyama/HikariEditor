@@ -54,6 +54,10 @@
     <Content Include="Terminal\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- ms-appx:///Assets/Editor.html として取得し一時フォルダの editor\index.html にコピーするため Content に含める -->
+    <Content Include="Assets\Editor.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

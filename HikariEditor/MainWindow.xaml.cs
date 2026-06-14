@@ -6,7 +6,6 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.DataTransfer;
-using Windows.Storage;
 
 namespace HikariEditor
 {
@@ -47,7 +46,7 @@ namespace HikariEditor
         {
             StatusBar.Text = "エディタの初期設定中...";
             await EditorSetupAsync();
-            _ = CopyEditorFile();
+            CopyEditorFile();
             StatusBar.Text = "エディタの初期設定、完了";
             await Task.Delay(2000);
             StatusBar.Text = "";
@@ -85,16 +84,14 @@ namespace HikariEditor
             }
         }
 
-        static async Task CopyEditorFile()
+        static void CopyEditorFile()
         {
-            StorageFile htmlFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Assets/Editor.html"));
+            // 未パッケージ実行では ms-appx が解決できないため、出力ディレクトリから直接コピーする
+            string htmlPath = Path.Combine(AppContext.BaseDirectory, "Assets", "Editor.html");
             string tempDirectory = Path.GetTempPath();
             string editorDir = $"{tempDirectory}HikariEditor";
-            if (File.Exists(htmlFile.Path))
-            {
-                if (Directory.Exists($"{editorDir}\\editor"))
-                    File.Copy(htmlFile.Path, $"{editorDir}\\editor\\index.html", true);
-            }
+            if (File.Exists(htmlPath) && Directory.Exists($"{editorDir}\\editor"))
+                File.Copy(htmlPath, $"{editorDir}\\editor\\index.html", true);
         }
 
         // 開くをクリック

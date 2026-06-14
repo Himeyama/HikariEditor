@@ -123,7 +123,15 @@ namespace HikariEditor
         {
             while (true)
             {
-                await Server();
+                // 1 件の不正リクエストでサーバーループ（async void）を落とさない
+                try
+                {
+                    await Server();
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"サーバー処理でエラー: {e.Message}");
+                }
             }
         }
 
@@ -232,13 +240,16 @@ namespace HikariEditor
                 top = stringReader.ReadLine();
                 int nLine = 0;
                 string? line = stringReader.ReadLine();
-                while (line != string.Empty)
+                // 空行（ヘッダとボディの区切り）まで読み飛ばす。
+                // ボディ無しリクエストでは行が尽きて null になるのでそれも終了条件にする。
+                while (line is not null && line != string.Empty)
                 {
                     line = stringReader.ReadLine();
                     nLine++;
                     if (nLine == 64) break;
                 }
-                body = stringReader.ReadLine()!.TrimEnd('\0');
+                // ファイルを開く要求などボディが無い POST では null になるため空文字に丸める
+                body = stringReader.ReadLine()?.TrimEnd('\0') ?? string.Empty;
             }
             postInfo.Top = top!;
             postInfo.Body = body;
