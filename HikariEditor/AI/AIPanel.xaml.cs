@@ -70,6 +70,14 @@ public sealed partial class AIPanel : UserControl
         string text = inputBox.Text.Trim();
         if (text.Length == 0) return;
 
+        // スラッシュコマンド: /clear で会話をクリアする（LLM へは送らない）
+        if (text.Equals("/clear", StringComparison.OrdinalIgnoreCase))
+        {
+            ClearConversation();
+            inputBox.Text = "";
+            return;
+        }
+
         if (!EnsureClient())
         {
             Messages.Add(new ChatMessage(ChatRole.Assistant,
@@ -106,6 +114,16 @@ public sealed partial class AIPanel : UserControl
             SetBusy(false);
             ScrollToBottom();
         }
+    }
+
+    // 会話をクリアする。表示と、エンジン内部に保持された会話履歴の両方をリセットする。
+    // エンジンは履歴を内部に抱えるため、破棄して次回送信時に作り直すことで履歴を引き継がせない。
+    void ClearConversation()
+    {
+        Messages.Clear();
+        _streaming = null;
+        _client = null;
+        _clientModelId = null;
     }
 
     // アクティブモデルに対応するクライアントを用意する。未登録なら false。
