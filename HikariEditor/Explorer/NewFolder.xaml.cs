@@ -1,12 +1,11 @@
 using Microsoft.UI.Xaml.Controls;
 
-namespace HikariEditor
+namespace HikariEditor;
+
+public sealed partial class NewFolder : Page
 {
-    public sealed partial class NewFolder : Page
+    public NewFolder()
     {
-        public NewFolder()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

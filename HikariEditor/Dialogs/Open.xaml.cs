@@ -6,152 +6,147 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 
+namespace HikariEditor;
 
-namespace HikariEditor
+public sealed partial class Open : Page
 {
-    public sealed partial class Open : Page
+    List<Directories>? _items;
+    Frame? _explorerFrame;
+    MainWindow? _mainWindow;
+    string? _currentDir;
+
+    public Open()
     {
-        List<Directories>? items;
-        Frame? explorerFrame;
-        MainWindow? mainWindow;
-        string? currentDir;
+        InitializeComponent();
+        DirOpenHome();
+    }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        if (e.Parameter is MainWindow mainWindow)
         {
-            if (e != null && e.Parameter != null)
-                mainWindow = (MainWindow)e.Parameter;
-
-            if (mainWindow != null)
-                explorerFrame = mainWindow.contentFrame;
-
-            base.OnNavigatedTo(e);
+            _mainWindow = mainWindow;
+            _explorerFrame = mainWindow.contentFrame;
         }
 
-        public Open()
-        {
-            InitializeComponent();
-            DirOpenHome();
-        }
+        base.OnNavigatedTo(e);
+    }
 
-        private void Directories_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    private void Directories_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+    {
+        if ((Directories)Directories.SelectedValue == null)
+            return;
+        DirOpenParentBtn.IsEnabled = true;
+        string? dir = ((Directories)Directories.SelectedValue).Path;
+        _currentDir = dir;
+        DirPath.Text = dir;
+        _items = [];
+        foreach (string d in Directory.GetDirectories(dir!))
         {
-            if ((Directories)Directories.SelectedValue == null)
-                return;
-            DirOpenParentBtn.IsEnabled = true;
-            string? dir = ((Directories)Directories.SelectedValue).Path;
-            currentDir = dir;
-            DirPath.Text = dir;
-            string[] dirs = Directory.GetDirectories(dir!);
-            items = new();
-            foreach (string d in dirs)
-            {
-                items.Add(new Directories { Path = d, Name = Path.GetFileName(d) });
-            }
-            Directories.ItemsSource = items;
-            OpenBtn.IsEnabled = true;
+            _items.Add(new Directories { Path = d, Name = Path.GetFileName(d) });
         }
+        Directories.ItemsSource = _items;
+        OpenBtn.IsEnabled = true;
+    }
 
-        private void DirOpenHomeBtnClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void DirOpenHomeBtnClick(object sender, RoutedEventArgs e)
+    {
+        DirOpenHome();
+    }
+
+    void DirOpenHome()
+    {
+        DirOpenParentBtn.IsEnabled = true;
+        _items = [];
+        string? homeDir = Environment.GetEnvironmentVariable("userprofile");
+        _currentDir = homeDir;
+        if (homeDir == null)
         {
-            DirOpenHome();
+            Error.Dialog("環境変数未定義エラー", "環境変数が未定義です。", _mainWindow!.Content.XamlRoot);
+            return;
         }
-
-        void DirOpenHome()
+        foreach (string dir in Directory.GetDirectories(homeDir))
         {
-            DirOpenParentBtn.IsEnabled = true;
-            items = new();
-            string? homeDir = Environment.GetEnvironmentVariable("userprofile");
-            currentDir = homeDir;
-            if (homeDir == null)
-            {
-                Error.Dialog("���ϐ�����`�G���[", "���ϐ�������`�ł��B", mainWindow!.Content.XamlRoot);
-                return;
-            };
-            string[] homeDirs = Directory.GetDirectories(homeDir);
-            foreach (string dir in homeDirs)
-            {
-                items.Add(new Directories { Path = dir, Name = Path.GetFileName(dir) });
-            }
-            DirPath.Text = homeDir;
-            Directories.ItemsSource = items;
-            OpenBtn.IsEnabled = true;
+            _items.Add(new Directories { Path = dir, Name = Path.GetFileName(dir) });
         }
+        DirPath.Text = homeDir;
+        Directories.ItemsSource = _items;
+        OpenBtn.IsEnabled = true;
+    }
 
-        void DirOpenComputer()
+    void DirOpenComputer()
+    {
+        DirOpenParentBtn.IsEnabled = false;
+        _items = [];
+        foreach (string drive in Directory.GetLogicalDrives())
         {
-            DirOpenParentBtn.IsEnabled = false;
-            items = new();
-            foreach (string drive in Directory.GetLogicalDrives())
-            {
-                items.Add(new Directories { Path = drive, Name = drive });
-            }
-            DirPath.Text = "";
-            currentDir = "";
-            Directories.ItemsSource = items;
-            OpenBtn.IsEnabled = true;
+            _items.Add(new Directories { Path = drive, Name = drive });
         }
+        DirPath.Text = "";
+        _currentDir = "";
+        Directories.ItemsSource = _items;
+        OpenBtn.IsEnabled = true;
+    }
 
-        void DirOpenComputerClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    void DirOpenComputerClick(object sender, RoutedEventArgs e)
+    {
+        DirOpenComputer();
+    }
+
+    void DirOpenParentClick(object sender, RoutedEventArgs e)
+    {
+        _items = [];
+        string dir = DirPath.Text;
+        if (string.IsNullOrEmpty(dir))
+            return;
+        if (_currentDir == null)
+        {
+            Error.Dialog("変数未定義エラー", "現在のディレクトリが未定義です。", _mainWindow!.Content.XamlRoot);
+            return;
+        }
+        DirectoryInfo? parentDirInfo = Directory.GetParent(_currentDir);
+        if (parentDirInfo == null)
         {
             DirOpenComputer();
+            return;
         }
-
-        void DirOpenParentClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+        string parentDir = parentDirInfo.FullName;
+        foreach (string d in Directory.GetDirectories(parentDir))
         {
-            items = new();
-            string dir = DirPath.Text;
-            if (string.IsNullOrEmpty(dir))
-                return;
-            if (currentDir == null)
-            {
-                Error.Dialog("�ϐ�����`�G���[", "���݂̃f�B���N�g��������`�ł��B", mainWindow!.Content.XamlRoot);
-                return;
-            }
-            DirectoryInfo? parentDirInfo = Directory.GetParent(currentDir);
-            if (parentDirInfo == null)
-            {
-                DirOpenComputer();
-                return;
-            }
-            string parentDir = parentDirInfo.FullName;
-            string[] parentDirs = Directory.GetDirectories(parentDir);
-            foreach (string d in parentDirs)
-            {
-                items.Add(new Directories { Path = d, Name = Path.GetFileName(d) });
-            }
-            DirPath.Text = parentDir;
-            currentDir = parentDir;
-            Directories.ItemsSource = items;
-            if (currentDir == "")
-                OpenBtn.IsEnabled = false;
+            _items.Add(new Directories { Path = d, Name = Path.GetFileName(d) });
         }
+        DirPath.Text = parentDir;
+        _currentDir = parentDir;
+        Directories.ItemsSource = _items;
+        if (_currentDir == "")
+            OpenBtn.IsEnabled = false;
+    }
 
-        // �J���{�^���̃N���b�N
-        private void OpenBtn_Click(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            Settings settings = new();
-            // 既存設定を読み込んでから更新する。LoadSetting を挟まないと
-            // LogOpen や AutoSave などが既定値で丸ごと上書きされてしまう。
-            settings.LoadSetting();
-            settings.OpenDirPath = DirPath.Text;
-            settings.SaveSetting();
-            explorerFrame!.Navigate(typeof(Explorer), mainWindow);
-            mainWindow!.Menu.SelectedItem = mainWindow.ItemExplorer;
-            mainWindow.editorFrame.Navigate(typeof(Editor), mainWindow);
-            mainWindow.OpenExplorer.IsEnabled = true;
-            mainWindow.SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(360);
-        }
+    // 開くボタンのクリック
+    private void OpenBtn_Click(object sender, RoutedEventArgs e)
+    {
+        // 既存設定を読み込んでから更新する。LoadSetting を挟まないと
+        // LogOpen や AutoSave などが既定値で丸ごと上書きされてしまう。
+        Settings settings = new();
+        settings.LoadSetting();
+        settings.OpenDirPath = DirPath.Text;
+        settings.SaveSetting();
+        _explorerFrame!.Navigate(typeof(Explorer), _mainWindow);
+        _mainWindow!.Menu.SelectedItem = _mainWindow.ItemExplorer;
+        _mainWindow.editorFrame.Navigate(typeof(Editor), _mainWindow);
+        _mainWindow.OpenExplorer.IsEnabled = true;
+        _mainWindow.SideMenuEditorArea.ColumnDefinitions[0].Width = new GridLength(360);
+    }
 
-        private void Directories_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            if ((Directories)Directories.SelectedValue == null)
-                return;
-            DirPath.Text = ((Directories)Directories.SelectedValue).Path;
-        }
+    private void Directories_Tapped(object sender, TappedRoutedEventArgs e)
+    {
+        if ((Directories)Directories.SelectedValue == null)
+            return;
+        DirPath.Text = ((Directories)Directories.SelectedValue).Path;
+    }
 
-        private void OpenCloseButtonClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-        {
-            mainWindow!.editorFrame.Navigate(typeof(Editor), mainWindow);
-        }
+    private void OpenCloseButtonClick(object sender, RoutedEventArgs e)
+    {
+        _mainWindow!.editorFrame.Navigate(typeof(Editor), _mainWindow);
     }
 }

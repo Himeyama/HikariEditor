@@ -1,20 +1,19 @@
-﻿using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml;
 
-namespace HikariEditor
+namespace HikariEditor;
+
+public partial class App : Application
 {
-    public partial class App : Application
+    private Window? _window;
+
+    public App()
     {
-        public App()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
-        {
-            m_window = new MainWindow();
-            m_window.Activate();
-        }
-
-        private Window? m_window;
+    protected override void OnLaunched(LaunchActivatedEventArgs args)
+    {
+        _window = new MainWindow();
+        _window.Activate();
     }
 }

@@ -1,8 +1,3 @@
-﻿namespace HikariEditor
-{
-    internal class PDFPageInfo
-    {
-        public MainWindow? mainWindow;
-        public FileItem? fileItem;
-    }
-}
+namespace HikariEditor;
+
+internal record PDFPageInfo(MainWindow MainWindow, FileItem FileItem);

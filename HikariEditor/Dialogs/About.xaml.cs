@@ -1,12 +1,11 @@
 using Microsoft.UI.Xaml.Controls;
 
-namespace HikariEditor
+namespace HikariEditor;
+
+public sealed partial class About : Page
 {
-    public sealed partial class About : Page
+    public About()
     {
-        public About()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

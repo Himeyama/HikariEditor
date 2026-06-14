@@ -1,27 +1,28 @@
+using System;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using System;
 
-namespace HikariEditor
+namespace HikariEditor;
+
+public sealed partial class Error : Page
 {
-    public sealed partial class Error : Page
+    public Error()
     {
-        public Error()
-        {
-            this.InitializeComponent();
-        }
+        InitializeComponent();
+    }
 
-        async public static void Dialog(string title, string text, XamlRoot XamlRoot)
+    public static async void Dialog(string title, string text, XamlRoot xamlRoot)
+    {
+        Error content = new();
+        content.errorText.Text = text;
+        ContentDialog dialog = new()
         {
-            ContentDialog dialog = new();
-            dialog.XamlRoot = XamlRoot;
-            dialog.Title = title;
-            dialog.PrimaryButtonText = "ÇÌÇ©Ç¡ÇΩ!";
-            dialog.DefaultButton = ContentDialogButton.Primary;
-            Error content = new();
-            dialog.Content = content;
-            content.errorText.Text = text;
-            await dialog.ShowAsync();
-        }
+            XamlRoot = xamlRoot,
+            Title = title,
+            PrimaryButtonText = "„Çè„Åã„Çä„Åæ„Åó„Åü",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = content
+        };
+        await dialog.ShowAsync();
     }
 }

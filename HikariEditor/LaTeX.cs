@@ -1,61 +1,55 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-namespace HikariEditor
+namespace HikariEditor;
+
+internal class LaTeX
 {
-    internal class LaTeX
+    public static async Task<bool> Compile(MainWindow mainWindow, FileItem fileItem, Editor editor)
     {
-        async public static Task<bool> Compile(MainWindow mainWindow, FileItem fileItem, Editor editor)
+        try
         {
-            bool tex_compile_error = false;
-            try
+            bool compileError;
+            using (Process process = new())
             {
-                using (Process process = new())
+                process.StartInfo.UseShellExecute = false;
+                // ptex2pdf.exe は PATH 上にある前提（CLAUDE.md のビルド要件を参照）
+                process.StartInfo.FileName = "ptex2pdf.exe";
+                process.StartInfo.CreateNoWindow = true;
+                process.StartInfo.Arguments = $"-l -ot -interaction=nonstopmode -halt-on-error -kanji=utf8 -output-directory=\"{fileItem.Dirname}\" \"{fileItem.Path}\"";
+                process.StartInfo.RedirectStandardOutput = true;
+                process.Start();
+                string stdout = process.StandardOutput.ReadToEnd();
+                await process.WaitForExitAsync();
+
+                compileError = process.ExitCode != 0;
+                if (compileError)
                 {
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.FileName = "C:\\texlive\\2022\\bin\\win32\\ptex2pdf.exe";
-                    process.StartInfo.CreateNoWindow = true;
-                    process.StartInfo.Arguments = $"-l -ot -interaction=nonstopmode -halt-on-error -kanji=utf8 -output-directory=\"{fileItem.Dirname}\" \"{fileItem.Path}\"";
-                    process.StartInfo.RedirectStandardOutput = true;
-                    process.Start();
-                    string stdout = process.StandardOutput.ReadToEnd();
-                    await process.WaitForExitAsync();
-
-                    //Debug.WriteLine(stdout);
-                    if (process.ExitCode == 0)
-                    {
-                        mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに成功しました。";
-                        LogPage.AddLog(mainWindow, $"{fileItem.Name} のコンパイルに成功しました。");
-                    }
-                    else
-                    {
-                        mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに失敗しました。";
-                        LogPage.AddLog(mainWindow, $"{fileItem.Name} のコンパイルに失敗しました。");
-                        Error.Dialog("LaTeX コンパイルエラー", stdout, mainWindow.Content.XamlRoot);
-                        tex_compile_error = true;
-                    }
-                    editor.Counter++;
-                    editor.DelayResetStatusBar(1000);
+                    mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに失敗しました。";
+                    LogPage.AddLog(mainWindow, $"{fileItem.Name} のコンパイルに失敗しました。");
+                    Error.Dialog("LaTeX コンパイルエラー", stdout, mainWindow.Content.XamlRoot);
                 }
-
-                if (!tex_compile_error)
+                else
                 {
-                    FileItem pdfFileItem = new(fileItem.Dirname, $"{fileItem.WithoutName}.pdf");
-                    PDFPageInfo pdfPageInfo = new()
-                    {
-                        mainWindow = mainWindow,
-                        fileItem = pdfFileItem
-                    };
-                    mainWindow.previewFrame.Navigate(typeof(PDF), pdfPageInfo);
+                    mainWindow.StatusBar.Text = $"{fileItem.Name} のコンパイルに成功しました。";
+                    LogPage.AddLog(mainWindow, $"{fileItem.Name} のコンパイルに成功しました。");
                 }
+                editor.Counter++;
+                editor.DelayResetStatusBar(1000);
+            }
 
-            }
-            catch (Exception e)
-            {
-                Debug.WriteLine(e.Message);
-            }
-            return !tex_compile_error;
+            if (compileError)
+                return false;
+
+            FileItem pdfFileItem = new(fileItem.Dirname, $"{fileItem.WithoutName}.pdf");
+            mainWindow.previewFrame.Navigate(typeof(PDF), new PDFPageInfo(mainWindow, pdfFileItem));
+            return true;
+        }
+        catch (Exception e)
+        {
+            Debug.WriteLine(e.Message);
+            return false;
         }
     }
 }

@@ -2,29 +2,20 @@ using System;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 
-namespace HikariEditor
+namespace HikariEditor;
+
+public sealed partial class PDF : Page
 {
-    public sealed partial class PDF : Page
+    public PDF()
     {
-        MainWindow? mainWindow;
-        FileItem? fileItem;
+        InitializeComponent();
+    }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            PDFPageInfo? pdfPageInfo = e.Parameter as PDFPageInfo;
-            mainWindow = pdfPageInfo!.mainWindow;
-            fileItem = pdfPageInfo!.fileItem;
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        if (e.Parameter is PDFPageInfo pdfPageInfo)
+            WebView.Source = new Uri(pdfPageInfo.FileItem.Path);
 
-            WebView.Source = new Uri(fileItem!.Path);
-
-            base.OnNavigatedTo(e);
-        }
-
-        public PDF()
-        {
-            InitializeComponent();
-        }
-
-
+        base.OnNavigatedTo(e);
     }
 }

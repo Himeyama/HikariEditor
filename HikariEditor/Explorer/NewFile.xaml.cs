@@ -1,12 +1,11 @@
 using Microsoft.UI.Xaml.Controls;
 
-namespace HikariEditor
+namespace HikariEditor;
+
+public sealed partial class NewFile : Page
 {
-    public sealed partial class NewFile : Page
+    public NewFile()
     {
-        public NewFile()
-        {
-            this.InitializeComponent();
-        }
+        InitializeComponent();
     }
 }

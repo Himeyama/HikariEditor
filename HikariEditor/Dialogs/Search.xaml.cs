@@ -1,13 +1,11 @@
 using Microsoft.UI.Xaml.Controls;
 
+namespace HikariEditor;
 
-namespace HikariEditor
+public sealed partial class Search : Page
 {
-    public sealed partial class Search : Page
+    public Search()
     {
-        public Search()
-        {
-            this.InitializeComponent();
-        }
+        InitializeComponent();
     }
 }
