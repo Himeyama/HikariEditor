@@ -149,6 +149,8 @@ public sealed partial class MainWindow : Window
     private void ClickNLBtn(object sender, RoutedEventArgs e)
     {
         NLBtn.Content = (string)NLBtn.Content == "LF" ? "CRLF" : "LF";
+        // 選択中タブの改行コードを切り替え、新しいコードで保存し直す
+        editor?.ApplyNewline((string)NLBtn.Content);
     }
 
     private void MenuChanged(NavigationView sender, NavigationViewItemInvokedEventArgs args)

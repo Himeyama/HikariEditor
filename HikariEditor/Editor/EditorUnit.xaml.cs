@@ -12,6 +12,10 @@ public sealed partial class EditorUnit : UserControl
     readonly string _fileName;
     readonly Editor _editor;
 
+    // このタブが開いているファイルの改行コード（"LF" / "CRLF"）。
+    // タブ切替時にステータスバーのボタンへ反映するため保持する。
+    public string Newline { get; private set; } = "LF";
+
     public EditorUnit(string fileName, Editor editor)
     {
         InitializeComponent();
@@ -53,10 +57,10 @@ public sealed partial class EditorUnit : UserControl
                     SendFileContent();
                     break;
                 case "save":
-                    _editor.OnSave(_fileName, ReadString(doc, "src"));
+                    _editor.OnSave(_fileName, ReadString(doc, "src"), Newline);
                     break;
                 case "autosave":
-                    _editor.OnAutoSave(_fileName, ReadString(doc, "src"));
+                    _editor.OnAutoSave(_fileName, ReadString(doc, "src"), Newline);
                     break;
                 case "copy":
                     Editor.OnCopy(ReadString(doc, "text"));
@@ -78,6 +82,10 @@ public sealed partial class EditorUnit : UserControl
             // 読み込み失敗時は空のまま編集できる状態にする
             return;
         }
+        // 開いたファイルの改行コードを判定し、ステータスバーのボタンへ反映する
+        Newline = src.Contains("\r\n") ? "CRLF" : "LF";
+        if (_editor.MainWindow is { } mainWindow)
+            mainWindow.NLBtn.Content = Newline;
         string json = JsonSerializer.Serialize(new { type = "load", src });
         WebView.CoreWebView2.PostWebMessageAsJson(json);
     }
@@ -95,6 +103,16 @@ public sealed partial class EditorUnit : UserControl
     {
         if (WebView.CoreWebView2 == null) return;
         string json = JsonSerializer.Serialize(new { type = "copy-request" });
+        WebView.CoreWebView2.PostWebMessageAsJson(json);
+    }
+
+    // 改行コードを切り替え、その場で保存し直す（結果は save メッセージで返り、
+    // 新しい Newline を使って書き込まれる）
+    public void SetNewline(string newline)
+    {
+        Newline = newline;
+        if (WebView.CoreWebView2 == null) return;
+        string json = JsonSerializer.Serialize(new { type = "save-request" });
         WebView.CoreWebView2.PostWebMessageAsJson(json);
     }
 

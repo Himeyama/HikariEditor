@@ -175,6 +175,10 @@
                 case 'copy-request':
                     do_copy();
                     break;
+                case 'save-request':
+                    // 改行コード切替などホスト起点の保存要求。現在の内容を save で返す
+                    post({ type: 'save', src: editor.getValue().replace(/\r\n/g, "\n") });
+                    break;
             }
         });
 

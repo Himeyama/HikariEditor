@@ -78,11 +78,11 @@ public sealed partial class Editor : Page
     }
 
     // Monaco からの保存メッセージを処理する
-    public void OnSave(string fileName, string src)
+    public void OnSave(string fileName, string src, string newline)
     {
         FileItem fileItem = new(fileName);
-        fileItem.Save(src, MainWindow!.NLBtn.Content.ToString());
-        MainWindow.StatusBar.Text = $"{fileItem.Name} を保存しました。";
+        fileItem.Save(src, newline);
+        MainWindow!.StatusBar.Text = $"{fileItem.Name} を保存しました。";
         LogPage.AddLog(MainWindow, $"{fileItem.Name} を保存しました。");
         Counter++;
         DelayResetStatusBar(1000);
@@ -97,12 +97,12 @@ public sealed partial class Editor : Page
     }
 
     // Monaco からの自動保存メッセージを処理する
-    public void OnAutoSave(string fileName, string src)
+    public void OnAutoSave(string fileName, string src, string newline)
     {
         if (!MainWindow!.AutoSave.IsChecked)
             return;
         FileItem fileItem = new(fileName);
-        fileItem.Save(src, MainWindow.NLBtn.Content.ToString());
+        fileItem.Save(src, newline);
         MainWindow.StatusBar.Text = $"{fileItem.Name} を自動保存しました。";
         LogPage.AddLog(MainWindow, $"{fileItem.Name} を自動保存しました。");
         Counter++;
@@ -129,10 +129,20 @@ public sealed partial class Editor : Page
 
     private void EditorTabChange(object sender, SelectionChangedEventArgs e)
     {
-        if (((TabView)sender).SelectedItem is not FrameworkElement selectedItem) return;
+        if (((TabView)sender).SelectedItem is not TabViewItem selectedItem) return;
         string extension = Path.GetExtension(selectedItem.Name);
         MainWindow!.rightArea.ColumnDefinitions[1].Width = extension == ".tex"
             ? new GridLength(1, GridUnitType.Star)
             : new GridLength(0);
+        // 選択中タブのファイルの改行コードをステータスバーへ反映する
+        if (selectedItem.Content is EditorUnit unit)
+            MainWindow.NLBtn.Content = unit.Newline;
+    }
+
+    // ステータスバーの LF/CRLF ボタンが切り替えられたとき、選択中タブへ適用して保存する
+    public void ApplyNewline(string newline)
+    {
+        if (Tabs.SelectedItem is not TabViewItem tab) return;
+        (tab.Content as EditorUnit)?.SetNewline(newline);
     }
 }

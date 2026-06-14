@@ -109,7 +109,15 @@
         <Grid Grid.Row="2">
             <Grid ColumnDefinitions="*, Auto">
                 <TextBlock Grid.Column="0" Text="" x:Name="StatusBar" Margin="8, 0, 0, 0" x:FieldModifier="Public" FontSize="12" VerticalAlignment="Center" />
-                <Button Grid.Column="1" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="40" x:FieldModifier="Public" />
+                <Button Grid.Column="1" Content="LF" x:Name="NLBtn" Click="ClickNLBtn" FontSize="12" Padding="6, 2, 6, 2" Margin="8, 0, 8, 0" Width="56" x:FieldModifier="Public" Background="Transparent" BorderBrush="Transparent">
+                    <Button.Resources>
+                        <!-- 枠線は常に透明、背景はホバー・押下時だけうっすら変化させる -->
+                        <SolidColorBrush x:Key="ButtonBackgroundPointerOver" Color="#22808080" />
+                        <SolidColorBrush x:Key="ButtonBackgroundPressed" Color="#33808080" />
+                        <SolidColorBrush x:Key="ButtonBorderBrushPointerOver" Color="Transparent" />
+                        <SolidColorBrush x:Key="ButtonBorderBrushPressed" Color="Transparent" />
+                    </Button.Resources>
+                </Button>
             </Grid>
         </Grid>
     </Grid>
