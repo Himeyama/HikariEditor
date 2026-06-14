@@ -45,8 +45,21 @@ public sealed partial class Editor : Page
 
     private void TabViewCloseTab(TabView sender, TabViewTabCloseRequestedEventArgs args)
     {
-        TabPaths.Remove(args.Tab.Name);
-        sender.TabItems.Remove(args.Tab);
+        CloseTab(args.Tab);
+    }
+
+    // 指定したファイルのタブが開いていれば閉じる（エクスプローラーからの削除時に使用）
+    public void CloseTabByPath(string fileName)
+    {
+        if (!TabPaths.Contains(fileName)) return;
+        if (Tabs.FindName(fileName) is TabViewItem tab)
+            CloseTab(tab);
+    }
+
+    private void CloseTab(TabViewItem tab)
+    {
+        TabPaths.Remove(tab.Name);
+        Tabs.TabItems.Remove(tab);
         if (TabPaths.Count == 0)
         {
             MainWindow!.editorFrame.Height = 0;

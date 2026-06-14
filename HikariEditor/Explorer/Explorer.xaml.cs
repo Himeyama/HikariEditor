@@ -218,6 +218,7 @@ public sealed partial class Explorer : Page
             {
                 File.Delete(file);
                 fileItem!.Parent.Children.Remove(fileItem);
+                _mainWindow!.editor?.CloseTabByPath(file);
             }
             catch (IOException err)
             {
