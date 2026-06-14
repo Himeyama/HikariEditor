@@ -74,7 +74,8 @@ public sealed partial class ModelSettings : UserControl
         _current.Api = apiBox.SelectedIndex switch
         {
             1 => ApiKind.Responses,
-            2 => ApiKind.Messages,
+            2 => ApiKind.AzureOpenAI,
+            3 => ApiKind.Messages,
             _ => ApiKind.ChatCompletions,
         };
         _current.Endpoint = endpointBox.Text.Trim();
@@ -105,7 +106,8 @@ public sealed partial class ModelSettings : UserControl
         apiBox.SelectedIndex = _current?.Api switch
         {
             ApiKind.Responses => 1,
-            ApiKind.Messages => 2,
+            ApiKind.AzureOpenAI => 2,
+            ApiKind.Messages => 3,
             _ => 0,
         };
         _loading = false;

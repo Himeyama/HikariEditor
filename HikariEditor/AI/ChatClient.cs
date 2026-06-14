@@ -2,7 +2,10 @@ using System;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 using OpenAI;
@@ -27,7 +30,7 @@ internal class ChatCompletionsClient : IChatEngine
     public Action<string>? OnText { get; set; }
     public Action<string>? OnTool { get; set; }
 
-    public ChatCompletionsClient(ModelConfig config, string workingDir)
+    public ChatCompletionsClient(ModelConfig config, string workingDir, bool rewriteMaxTokens = false)
     {
         _workingDir = workingDir;
 
@@ -40,8 +43,13 @@ internal class ChatCompletionsClient : IChatEngine
             clientOptions.Endpoint = new Uri(config.Endpoint);
         // Azure OpenAI 互換 API は Authorization ではなく api-key ヘッダーで認証する。
         // 認証ヘッダー付与後（PerCall）に api-key を載せる。
-        if (config.UseApiKeyHeader)
+        // Azure OpenAI は api-key が既定なので、トグルに関わらず常に api-key ヘッダーで送る。
+        if (config.UseApiKeyHeader || config.Api == ApiKind.AzureOpenAI)
             clientOptions.AddPolicy(new ApiKeyHeaderPolicy(config.ApiKey), PipelinePosition.PerCall);
+        // Azure OpenAI は max_tokens を受け付けず max_completion_tokens を要求するため、
+        // リクエストボディに max_tokens があれば送信直前に置き換える。
+        if (rewriteMaxTokens)
+            clientOptions.AddPolicy(new MaxTokensRewritePolicy(), PipelinePosition.PerCall);
         _chat = new OpenAIChatClient(config.Model, credential, clientOptions);
 
         foreach (AITools.ToolSpec s in AITools.Specs)
@@ -144,5 +152,53 @@ internal sealed class ApiKeyHeaderPolicy(string apiKey) : PipelinePolicy
     {
         message.Request.Headers.Set("api-key", apiKey);
         return ProcessNextAsync(message, pipeline, currentIndex);
+    }
+}
+
+// リクエストボディ（JSON）に max_tokens があれば max_completion_tokens へ置き換える
+// パイプラインポリシー。Azure OpenAI は max_tokens を受け付けず max_completion_tokens を
+// 要求するため、OpenAI SDK が出力する max_tokens を送信直前に書き換える。
+internal sealed class MaxTokensRewritePolicy : PipelinePolicy
+{
+    public override void Process(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
+    {
+        Rewrite(message);
+        ProcessNext(message, pipeline, currentIndex);
+    }
+
+    public override ValueTask ProcessAsync(PipelineMessage message, IReadOnlyList<PipelinePolicy> pipeline, int currentIndex)
+    {
+        Rewrite(message);
+        return ProcessNextAsync(message, pipeline, currentIndex);
+    }
+
+    static void Rewrite(PipelineMessage message)
+    {
+        BinaryContent? content = message.Request.Content;
+        if (content is null)
+            return;
+
+        using MemoryStream buffer = new();
+        content.WriteTo(buffer, default);
+
+        // JSON 以外（マルチパート等）はそのまま通す。パースに失敗しても送信は妨げない。
+        JsonNode? root;
+        try
+        {
+            root = JsonNode.Parse(buffer.ToArray());
+        }
+        catch (JsonException)
+        {
+            return;
+        }
+
+        if (root is not JsonObject obj || obj["max_tokens"] is not JsonNode value)
+            return;
+
+        // JsonNode は単一の親しか持てないため、付け替え前に切り離す。
+        obj.Remove("max_tokens");
+        obj["max_completion_tokens"] = value.DeepClone();
+
+        message.Request.Content = BinaryContent.Create(BinaryData.FromBytes(JsonSerializer.SerializeToUtf8Bytes(obj)));
     }
 }

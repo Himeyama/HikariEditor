@@ -42,6 +42,7 @@
                     <ComboBox x:Name="apiBox" HorizontalAlignment="Stretch" SelectedIndex="0">
                         <ComboBoxItem Content="Chat Completions (OpenAI 互換)" />
                         <ComboBoxItem Content="Responses (OpenAI)" />
+                        <ComboBoxItem Content="Azure OpenAI" />
                         <ComboBoxItem Content="Messages (Anthropic)" />
                     </ComboBox>
                 </StackPanel>

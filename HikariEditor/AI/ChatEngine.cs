@@ -21,6 +21,10 @@ internal static class ChatEngine
     public static IChatEngine Create(ModelConfig config, string workingDir) => config.Api switch
     {
         ApiKind.Responses => new ChatCompletionsClient(config, workingDir),
+        // Azure OpenAI は OpenAI ライブラリの Chat Completions をそのまま使う（URL を柔軟に
+        // 差し替えられるため）。ただしリクエストボディの max_tokens は受け付けないため、
+        // max_completion_tokens へ書き換える。
+        ApiKind.AzureOpenAI => new ChatCompletionsClient(config, workingDir, rewriteMaxTokens: true),
         ApiKind.Messages => new MessagesClient(config, workingDir),
         _ => new ChatCompletionsClient(config, workingDir),
     };
