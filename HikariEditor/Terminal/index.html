@@ -9,12 +9,9 @@
             margin: 0;
             padding: 0;
             height: 100%;
-            background: #1e1e1e;
+            /* ターミナルの背景は UI テーマに関わらず常に黒 */
+            background: #000000;
             overflow: hidden;
-        }
-
-        body.light {
-            background: #f9f9f9;
         }
 
         #terminal {
@@ -62,13 +59,14 @@
                 convertEol: false,
                 allowProposedApi: true,
                 theme: isLight ? {
-                    background: '#f9f9f9',
-                    foreground: '#1a1a1a',
-                    cursor: '#1a1a1a',
-                    selectionBackground: '#cfe8ff',
+                    // 背景は常に黒。前景・カーソルは light でも視認できる明色を使う
+                    background: '#000000',
+                    foreground: '#f0f0f0',
+                    cursor: '#f0f0f0',
+                    selectionBackground: '#264f78',
                     ...ansiPalette
                 } : {
-                    background: '#1e1e1e',
+                    background: '#000000',
                     foreground: '#f0f0f0',
                     cursor: '#f0f0f0',
                     selectionBackground: '#264f78',
