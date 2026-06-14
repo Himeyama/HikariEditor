@@ -3,10 +3,8 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Navigation;
 using System;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace HikariEditor;
 
@@ -32,10 +30,6 @@ public sealed partial class Explorer : Page
             _fullFile = settings.OpenDirPath;
         }
         settings.SaveSetting();
-
-        SetIcon(@"C:\Windows\System32\imageres.dll", 265, ExplorerIcon);
-        SetIcon(@"C:\Windows\System32\imageres.dll", 229, ReloadIcon);
-        SetIcon(@"C:\Windows\System32\imageres.dll", 50, DeleteIcon);
 
         AddTreeViewFiles(_fullFile);
         ExplorerTree.ItemInvoked += FileClick;
@@ -125,32 +119,6 @@ public sealed partial class Explorer : Page
     {
         _mainWindow!.contentFrame.Navigate(typeof(Explorer), _mainWindow);
         _mainWindow.OpenExplorer.IsEnabled = true;
-    }
-
-    [DllImport("shell32.dll")]
-    public static extern int ExtractIconEx(
-        string file,
-        int index,
-        out IntPtr largeIconHandle,
-        out IntPtr smallIconHandle,
-        int icons
-    );
-
-    void SetIcon(string iconPath, int iconIndex, BitmapIcon img)
-    {
-        ExtractIconEx(iconPath, iconIndex, out IntPtr largeIconHandle, out _, 1);
-        Icon icon = (Icon)Icon.FromHandle(largeIconHandle).Clone();
-        string tmpDir = $"{Path.GetTempPath()}HikariEditor\\";
-        if (!Directory.Exists(tmpDir))
-            Directory.CreateDirectory(tmpDir);
-        string iconFileName = Path.GetFileNameWithoutExtension(iconPath);
-        string iconResource = $"{tmpDir}{iconFileName}-{iconIndex}.png";
-        if (!File.Exists(iconResource))
-        {
-            using Bitmap bmp = icon.ToBitmap();
-            bmp.Save(iconResource);
-        }
-        img.UriSource = new Uri(iconResource);
     }
 
     private void ClickOpenExplorer(object sender, RoutedEventArgs e)
