@@ -66,7 +66,7 @@ public sealed partial class TerminalUnit : Page
         // ConPTY 上ではシェルが対話モードで動くので、プロンプトもエコーもシェル任せ。
         // 余計な起動メッセージだけ抑制する。
         string commandLine = $"\"{exe}\" -NoLogo";
-        string workingDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        string workingDir = ResolveWorkingDir();
 
         _session = new ConPtySession();
         _session.Exited += () => QueueWrite("\r\n[プロセスが終了しました]\r\n");
@@ -83,6 +83,17 @@ public sealed partial class TerminalUnit : Page
 
         // 擬似コンソールの出力（ANSI エスケープ込みのバイト列）を読み取って端末へ流す
         new Thread(PumpOutput) { IsBackground = true }.Start();
+    }
+
+    // ターミナルの作業ディレクトリはエクスプローラーで開いているフォルダに合わせる。
+    // 未設定（フォルダ未オープン）や存在しないパスはホームにフォールバックする。
+    static string ResolveWorkingDir()
+    {
+        Settings settings = new();
+        settings.LoadSetting();
+        if (settings.OpenDirPath != string.Empty && Directory.Exists(settings.OpenDirPath))
+            return settings.OpenDirPath;
+        return Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     }
 
     static string ResolvePwsh()
