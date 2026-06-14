@@ -10,6 +10,13 @@
             </ResourceDictionary.MergedDictionaries>
             <SolidColorBrush x:Key="WindowCaptionBackground">Transparent</SolidColorBrush>
             <SolidColorBrush x:Key="WindowCaptionBackgroundDisabled">Transparent</SolidColorBrush>
+            <!-- アプリ全体の既定フォント。未インストール環境では Segoe UI Variable にフォールバックする -->
+            <FontFamily x:Key="ContentControlThemeFontFamily">Segoe UI, Noto Sans JP, Segoe UI Variable</FontFamily>
+            <!-- ContentControlThemeFontFamily は TextBlock には効かないため暗黙スタイルで補う。
+                 暗黙スタイルはメニュー等テンプレート内で生成される TextBlock にも適用される。 -->
+            <Style TargetType="TextBlock">
+                <Setter Property="FontFamily" Value="{StaticResource ContentControlThemeFontFamily}" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

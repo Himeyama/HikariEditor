@@ -34,18 +34,18 @@
             <TextBlock Text="Explorer" x:Uid="Explorer" FontSize="12"/>
             <StackPanel Orientation="Horizontal" Spacing="4">
                 <Button Style="{StaticResource ExplorerToolButton}" Click="ClickOpenExplorer">
-                    <FontIcon FontSize="14" FontFamily="Segoe Fluent Icons" Glyph="&#xE197;" Foreground="#FFD54F" />
+                    <FontIcon FontSize="14" FontFamily="Segoe Fluent Icons" Glyph="&#xE197;" Foreground="#FFA000" />
                 </Button>
                 <Button Style="{StaticResource ExplorerToolButton}">
                     <FontIcon FontSize="14" FontFamily="Segoe Fluent Icons" Glyph="&#xE109;" Foreground="#2196F3" />
                     <Button.Flyout>
                         <MenuFlyout Placement="Bottom">
-                            <MenuFlyoutItem Text="Add New File" x:Uid="AddNewFile" Click="ClickAddNewFile">
+                            <MenuFlyoutItem Text="Add New File" x:Uid="AddNewFile" Click="ClickAddNewFile" FontFamily="{StaticResource ContentControlThemeFontFamily}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE130;" Foreground="#FFFFFF" />
                                 </MenuFlyoutItem.Icon>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem Text="Add New Folder" x:Uid="AddNewFolder" Click="ClickAddNewFolder">
+                            <MenuFlyoutItem Text="Add New Folder" x:Uid="AddNewFolder" Click="ClickAddNewFolder" FontFamily="{StaticResource ContentControlThemeFontFamily}">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8B7;" Foreground="#FFD54F" />
                                 </MenuFlyoutItem.Icon>

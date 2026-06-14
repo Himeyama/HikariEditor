@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -133,11 +134,15 @@ public sealed partial class MainWindow : Window
         {
             AutoSaveToggleSwitchText.Text = "オン";
             AutoSaveToggleSwitchText.Margin = new Thickness(5, 12.5, 0, 0);
+            // オン時はトグルがアクセント色で塗られるため白文字で視認性を確保する
+            AutoSaveToggleSwitchText.Foreground = new SolidColorBrush(Microsoft.UI.Colors.White);
         }
         else
         {
             AutoSaveToggleSwitchText.Text = "オフ";
             AutoSaveToggleSwitchText.Margin = new Thickness(19, 12.5, 0, 0);
+            // オフ時は既定のテーマ色に戻す
+            AutoSaveToggleSwitchText.ClearValue(TextBlock.ForegroundProperty);
         }
     }
 

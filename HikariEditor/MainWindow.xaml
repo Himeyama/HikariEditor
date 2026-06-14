@@ -22,31 +22,34 @@
                               IsOn="{x:Bind AutoSave.IsChecked, Mode=TwoWay}"
                               Toggled="ToggleSwitch_Toggled"
                               x:Name="AutoSaveToggleSwitch" />
-                        <TextBlock FontSize="10" x:Name="AutoSaveToggleSwitchText" IsHitTestVisible="False" />
+                        <!-- オン/オフ表示はマージンが元フォントの字形に合わせ調整済みのため既定フォントに戻す -->
+                        <TextBlock FontSize="10" x:Name="AutoSaveToggleSwitchText" IsHitTestVisible="False" FontFamily="XamlAutoFontFamily" />
                     </Grid>
                 </StackPanel>
                 
-                <MenuBar Grid.Column="1">
+                <!-- メニュー項目の既定スタイルは FontFamily を継承既定のままにするため、
+                     ここで明示指定して配下の項目まで Noto Sans JP を伝播させる -->
+                <MenuBar Grid.Column="1" FontFamily="{StaticResource ContentControlThemeFontFamily}">
                     <MenuBarItem Title="File" x:Uid="File">
-                        <MenuFlyoutItem Text="Open Directory..." x:Uid="Open" x:Name="Open" Click="OpenClick">
+                        <MenuFlyoutItem Text="Open Directory..." x:Uid="Open" x:Name="Open" Click="OpenClick" FontFamily="{StaticResource ContentControlThemeFontFamily}">
                             <MenuFlyoutItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Control" Key="O"/>
                             </MenuFlyoutItem.KeyboardAccelerators>
                         </MenuFlyoutItem>
-                        <MenuFlyoutItem x:FieldModifier="Public" Text="Open Explorer" x:Name="OpenExplorer" x:Uid="OpenExplorer" Click="ClickOpenExplorer"/>
+                        <MenuFlyoutItem x:FieldModifier="Public" Text="Open Explorer" x:Name="OpenExplorer" x:Uid="OpenExplorer" Click="ClickOpenExplorer" FontFamily="{StaticResource ContentControlThemeFontFamily}"/>
                         <MenuFlyoutSeparator />
-                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" x:FieldModifier="Public" />
+                        <ToggleMenuFlyoutItem Text="Auto Save" x:Uid="AutoSave" x:Name="AutoSave" x:FieldModifier="Public" FontFamily="{StaticResource ContentControlThemeFontFamily}" />
                         <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="Exit" x:Uid="Exit" Click="ExitClick"/>
+                        <MenuFlyoutItem Text="Exit" x:Uid="Exit" Click="ExitClick" FontFamily="{StaticResource ContentControlThemeFontFamily}"/>
                     </MenuBarItem>
 
                     <MenuBarItem Title="Edit" x:Uid="Edit">
-                        <MenuFlyoutItem x:Uid="Copy" Text="Copy" Click="ClickCopyText">
+                        <MenuFlyoutItem x:Uid="Copy" Text="Copy" Click="ClickCopyText" FontFamily="{StaticResource ContentControlThemeFontFamily}">
                             <MenuFlyoutItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Control" Key="C"/>
                             </MenuFlyoutItem.KeyboardAccelerators>
                         </MenuFlyoutItem>
-                        <MenuFlyoutItem x:Uid="Paste" Text="Paste" Click="ClickPasteText">
+                        <MenuFlyoutItem x:Uid="Paste" Text="Paste" Click="ClickPasteText" FontFamily="{StaticResource ContentControlThemeFontFamily}">
                             <MenuFlyoutItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Control" Key="V"/>
                             </MenuFlyoutItem.KeyboardAccelerators>
@@ -54,12 +57,12 @@
                     </MenuBarItem>
 
                     <MenuBarItem Title="Terminal" x:Uid="Terminal">
-                        <MenuFlyoutItem Name="OpenTerminal"  x:FieldModifier="Public" x:Uid="OpenTerminal" Text="Open Terminal" Click="ClickOpenTerminal">
+                        <MenuFlyoutItem Name="OpenTerminal"  x:FieldModifier="Public" x:Uid="OpenTerminal" Text="Open Terminal" Click="ClickOpenTerminal" FontFamily="{StaticResource ContentControlThemeFontFamily}">
                             <MenuFlyoutItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Control" Key="T"/>
                             </MenuFlyoutItem.KeyboardAccelerators>
                         </MenuFlyoutItem>
-                        <MenuFlyoutItem Name="OpenLog"  x:FieldModifier="Public" x:Uid="OpenLog" Text="Open Log" Click="ClickOpenLog">
+                        <MenuFlyoutItem Name="OpenLog"  x:FieldModifier="Public" x:Uid="OpenLog" Text="Open Log" Click="ClickOpenLog" FontFamily="{StaticResource ContentControlThemeFontFamily}">
                             <MenuFlyoutItem.KeyboardAccelerators>
                                 <KeyboardAccelerator Modifiers="Control" Key="U"/>
                             </MenuFlyoutItem.KeyboardAccelerators>
@@ -67,7 +70,7 @@
                     </MenuBarItem>
 
                     <MenuBarItem Title="Help" x:Uid="Help">
-                        <MenuFlyoutItem Text="About Hikari Editor" Click="ClickAboutDialog" x:Uid="About"/>
+                        <MenuFlyoutItem Text="About Hikari Editor" Click="ClickAboutDialog" x:Uid="About" FontFamily="{StaticResource ContentControlThemeFontFamily}"/>
                     </MenuBarItem>
                 </MenuBar>
 
