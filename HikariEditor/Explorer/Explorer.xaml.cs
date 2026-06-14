@@ -1,10 +1,13 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Navigation;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Windows.ApplicationModel.DataTransfer;
 
 namespace HikariEditor;
 
@@ -12,6 +15,9 @@ public sealed partial class Explorer : Page
 {
     string _fullFile;
     MainWindow? _mainWindow;
+
+    // 直近に右クリックされたツリー項目。コンテキストメニューの各操作が対象にする。
+    FileItem? _contextItem;
 
     public Explorer()
     {
@@ -57,11 +63,105 @@ public sealed partial class Explorer : Page
             settings.ExplorerDir = Path.GetDirectoryName(file.Path)!;
         }
         settings.SaveSetting();
-        _mainWindow!.editor!.AddTab(file.Path, file.Name);
-        _mainWindow.editorFrame.Height = double.NaN;
+        _mainWindow!.editor!.OpenFile(file);
 
         _mainWindow.rightArea.ColumnDefinitions[1].Width =
             file.Extension == ".tex" ? new GridLength(1, GridUnitType.Star) : new GridLength(0);
+    }
+
+    // 右クリックされた項目を記録しておく（ContextFlyout が開く前に発火する）
+    void OnItemRightTapped(object sender, RightTappedRoutedEventArgs e)
+    {
+        _contextItem = (sender as FrameworkElement)?.DataContext as FileItem;
+    }
+
+    // エクスプローラーでファイルの場所を開き、その項目を選択状態にする
+    void ClickOpenLocation(object sender, RoutedEventArgs e)
+    {
+        if (_contextItem is not FileItem item) return;
+        Process.Start("explorer.exe", $"/select,\"{item.Path}\"");
+    }
+
+    void ClickCopyAbsolutePath(object sender, RoutedEventArgs e)
+    {
+        if (_contextItem is FileItem item) CopyToClipboard(item.Path);
+    }
+
+    void ClickCopyRelativePath(object sender, RoutedEventArgs e)
+    {
+        if (_contextItem is FileItem item)
+            CopyToClipboard(Path.GetRelativePath(_fullFile, item.Path));
+    }
+
+    static void CopyToClipboard(string text)
+    {
+        DataPackage dataPackage = new();
+        dataPackage.SetText(text);
+        Clipboard.SetContent(dataPackage);
+    }
+
+    async void ClickRename(object sender, RoutedEventArgs e)
+    {
+        if (_contextItem is not FileItem item) return;
+
+        Rename content = new();
+        content.newName.Text = item.Name;
+        ContentDialog dialog = new()
+        {
+            XamlRoot = Content.XamlRoot,
+            Title = "名前の変更",
+            PrimaryButtonText = "OK",
+            CloseButtonText = "キャンセル",
+            DefaultButton = ContentDialogButton.Primary,
+            Content = content
+        };
+        if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+        string newName = content.newName.Text.Trim();
+        if (newName == string.Empty || newName == item.Name) return;
+
+        string newPath = Path.Combine(item.Dirname, newName);
+        bool isDirectory = Directory.Exists(item.Path);
+        try
+        {
+            if (isDirectory)
+                Directory.Move(item.Path, newPath);
+            else
+                File.Move(item.Path, newPath);
+        }
+        catch (IOException err)
+        {
+            Error.Dialog("名前の変更に失敗しました", err.Message, Content.XamlRoot);
+            return;
+        }
+
+        // 名前変更前のパスで開いていたタブは閉じる（パスが変わり追従できないため）
+        _mainWindow!.editor?.CloseTabByPath(item.Path);
+
+        // x:Bind は OneTime のため、ノードを作り直して差し替える
+        IList<TreeViewNode> siblings = item.Parent?.Children ?? ExplorerTree.RootNodes;
+        int index = siblings.IndexOf(item);
+        if (index < 0) return;
+        FileItem newNode = CreateNode(newPath, fileFlag: false);
+        siblings[index] = newNode;
+        if (isDirectory) AddChildNode(newNode);
+    }
+
+    void ClickDeleteItem(object sender, RoutedEventArgs e)
+    {
+        if (_contextItem is FileItem item) DeleteFileItem(item);
+    }
+
+    // SVG をエディタ（テキスト）で開く
+    void ClickOpenAsText(object sender, RoutedEventArgs e)
+    {
+        if (_contextItem is FileItem item) _mainWindow!.editor?.OpenFile(item, FileKind.Text);
+    }
+
+    // SVG を WebView で開く
+    void ClickOpenAsWebView(object sender, RoutedEventArgs e)
+    {
+        if (_contextItem is FileItem item) _mainWindow!.editor?.OpenFile(item, FileKind.Svg);
     }
 
     // ディレクトリ・ファイルを名前順ではなくディレクトリ優先で列挙する
@@ -178,14 +278,18 @@ public sealed partial class Explorer : Page
 
     private void DeleteFileButtonClick(object sender, RoutedEventArgs e)
     {
-        FileItem? fileItem = ExplorerTree.SelectedItem as FileItem;
-        string file = fileItem?.Path ?? _fullFile;
+        if (ExplorerTree.SelectedItem is FileItem fileItem) DeleteFileItem(fileItem);
+    }
+
+    void DeleteFileItem(FileItem fileItem)
+    {
+        string file = fileItem.Path;
         if (File.Exists(file))
         {
             try
             {
                 File.Delete(file);
-                fileItem!.Parent.Children.Remove(fileItem);
+                RemoveNode(fileItem);
                 _mainWindow!.editor?.CloseTabByPath(file);
             }
             catch (IOException err)
@@ -198,12 +302,22 @@ public sealed partial class Explorer : Page
         {
             try
             {
-                Directory.Delete(file);
+                Directory.Delete(file, recursive: true);
+                RemoveNode(fileItem);
             }
             catch (IOException err)
             {
                 Error.Dialog("例外: 入出力エラー", err.Message, _mainWindow!.Content.XamlRoot);
             }
         }
+    }
+
+    // ルート直下の項目は Parent が無いため RootNodes 側から取り除く
+    void RemoveNode(FileItem fileItem)
+    {
+        if (fileItem.Parent is { } parent)
+            parent.Children.Remove(fileItem);
+        else
+            ExplorerTree.RootNodes.Remove(fileItem);
     }
 }

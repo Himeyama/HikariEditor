@@ -20,7 +20,48 @@
             <Setter Property="Padding" Value="6"/>
         </Style>
         <DataTemplate x:Key="ExplorerListViewTemplate" x:DataType="local:FileItem">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" RightTapped="OnItemRightTapped">
+                <StackPanel.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="場所を開く" Click="ClickOpenLocation" FontFamily="{StaticResource ContentControlThemeFontFamily}">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE838;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="絶対パスのコピー" Click="ClickCopyAbsolutePath" FontFamily="{StaticResource ContentControlThemeFontFamily}">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8C8;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="相対パスのコピー" Click="ClickCopyRelativePath" FontFamily="{StaticResource ContentControlThemeFontFamily}">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8C8;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem Text="名前の変更" Click="ClickRename" FontFamily="{StaticResource ContentControlThemeFontFamily}">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE8AC;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="削除" Click="ClickDeleteItem" FontFamily="{StaticResource ContentControlThemeFontFamily}">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE74D;" Foreground="#EF5350" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutSeparator Visibility="{x:Bind SvgVisibility}" />
+                        <MenuFlyoutItem Text="テキストで開く" Click="ClickOpenAsText" Visibility="{x:Bind SvgVisibility}" FontFamily="{StaticResource ContentControlThemeFontFamily}">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE130;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                        <MenuFlyoutItem Text="WebView で開く" Click="ClickOpenAsWebView" Visibility="{x:Bind SvgVisibility}" FontFamily="{StaticResource ContentControlThemeFontFamily}">
+                            <MenuFlyoutItem.Icon>
+                                <FontIcon FontFamily="Segoe Fluent Icons" Glyph="&#xE774;" />
+                            </MenuFlyoutItem.Icon>
+                        </MenuFlyoutItem>
+                    </MenuFlyout>
+                </StackPanel.ContextFlyout>
                 <Grid>
                     <FontIcon Glyph="{x:Bind Icon1}" FontFamily="Segoe Fluent Icons" Foreground="{x:Bind Color1}" />
                     <FontIcon Glyph="{x:Bind Icon2}" FontFamily="Segoe Fluent Icons" Foreground="{x:Bind Color2}" />

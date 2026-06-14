@@ -33,6 +33,9 @@ HikariEditor/
 PowerShell 7 以上が必要。
 
 ```powershell
+# Debug ビルド（コンパイルエラーの確認用）
+.\dev.ps1 build
+
 # 開発モードで起動（dotnet run）
 .\dev.ps1 run
 

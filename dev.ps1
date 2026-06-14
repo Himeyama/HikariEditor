@@ -10,7 +10,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Position = 0)]
-    [ValidateSet('run', 'publish', 'zip', 'install', 'uninstall', 'pack')]
+    [ValidateSet('build', 'run', 'publish', 'zip', 'install', 'uninstall', 'pack')]
     [string]$Command,
 
     [Alias('h')]
@@ -103,6 +103,7 @@ function Show-Help {
     Write-Output "  $script:Cyan--verbose$script:Nc                    Enable verbose output"
     Write-Output ''
     Write-Output "${script:Green}Commands:$script:Nc"
+    Write-Output "  ${script:Cyan}build${script:Nc}                      Build the project (Debug) to check for errors"
     Write-Output "  ${script:Cyan}run${script:Nc}                        Run the app in development mode"
     Write-Output "  ${script:Cyan}publish${script:Nc}                    Build a Release publish"
     Write-Output "  ${script:Cyan}zip${script:Nc}                        Publish and create a zip archive"
@@ -118,6 +119,14 @@ function Show-Version {
 # ====================
 # Commands
 # ====================
+
+function Invoke-Build {
+    Write-LogInfo 'Building HikariEditor (Debug)...'
+    # 出力はそのまま流し、警告・エラーを確認できるようにする。
+    # 非ゼロ終了は $PSNativeCommandUseErrorActionPreference により例外化され trap で捕捉される。
+    dotnet build $script:Csproj -c Debug
+    Write-LogInfo 'Build complete.'
+}
 
 function Invoke-Run {
     Write-LogInfo 'Starting HikariEditor...'
@@ -270,6 +279,7 @@ try {
     Write-LogDebug "Command=$Command, Verbose=$script:Verbose"
 
     switch ($Command) {
+        'build'     { Invoke-Build }
         'run'       { Invoke-Run }
         'publish'   { Invoke-Publish }
         'zip'       { Invoke-Zip }

@@ -67,28 +67,53 @@ public sealed partial class Editor : Page
         }
     }
 
-    public void AddTab(string fileName, string shortFileName)
+    // 拡張子に応じて開き方を変える。forceKind を渡すと分類を上書きできる
+    // （SVG をテキスト／WebView のどちらで開くか、右クリックメニューから選ぶ用途）。
+    internal void OpenFile(FileItem file, FileKind? forceKind = null)
     {
-        // タブが存在する場合は選択して終わり
-        if (TabPaths.Contains(fileName))
+        if (!File.Exists(file.Path)) return;
+
+        // 既に開いている場合、通常クリック（forceKind なし）は選択するだけ。
+        // 開き方を指定したときは一旦閉じてから開き直し、別モードで表示できるようにする。
+        if (TabPaths.Contains(file.Path) && Tabs.FindName(file.Path) is TabViewItem existing)
         {
-            if (Tabs.FindName(fileName) is TabViewItem tab)
-                tab.IsSelected = true;
-            return;
+            if (forceKind is null)
+            {
+                existing.IsSelected = true;
+                return;
+            }
+            CloseTab(existing);
         }
-        if (!File.Exists(fileName)) return;
-        TabPaths.Add(fileName);
-        EditorUnit frame = new(fileName, this);
+
+        FileKind kind = forceKind ?? FileKinds.Classify(file.Path);
+        UIElement content = kind switch
+        {
+            FileKind.Text => new EditorUnit(file.Path, this),
+            FileKind.Binary => new HexView(file.Path),
+            _ => new MediaUnit(file.Path)   // Image / Video / Pdf / Svg
+        };
+
+        TabPaths.Add(file.Path);
         TabViewItem newTab = new()
         {
-            IconSource = new SymbolIconSource() { Symbol = Symbol.Document },
-            Header = shortFileName,
-            Content = frame,
-            Name = fileName,
+            IconSource = new SymbolIconSource() { Symbol = IconFor(kind) },
+            Header = file.Name,
+            Content = content,
+            Name = file.Path,
             IsSelected = true
         };
         Tabs.TabItems.Add(newTab);
+        MainWindow!.editorFrame.Height = double.NaN;
     }
+
+    static Symbol IconFor(FileKind kind) => kind switch
+    {
+        FileKind.Image or FileKind.Svg => Symbol.Pictures,
+        FileKind.Video => Symbol.Video,
+        FileKind.Pdf => Symbol.Page2,
+        FileKind.Binary => Symbol.Calculator,
+        _ => Symbol.Document
+    };
 
     // Monaco からの保存メッセージを処理する
     public void OnSave(string fileName, string src, string newline)

@@ -1,6 +1,8 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SharpCompress.Common;
 using SharpCompress.Readers;
+using System;
 using System.IO;
 
 namespace HikariEditor;
@@ -17,6 +19,10 @@ class FileItem : TreeViewNode
     public string Color1 { get; set; } = string.Empty;
     public string Color2 { get; set; } = string.Empty;
     public bool Flag { get; set; }
+
+    // SVG だけ右クリックメニューに「テキストで開く／WebView で開く」を出すための表示制御
+    public Visibility SvgVisibility =>
+        Extension.Equals(".svg", StringComparison.OrdinalIgnoreCase) ? Visibility.Visible : Visibility.Collapsed;
 
     public FileItem(string dirName, string fileName)
     {
