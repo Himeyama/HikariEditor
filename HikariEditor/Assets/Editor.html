@@ -45,8 +45,6 @@
             let elem = param_list[i].split('=');
             params[elem[0]] = elem[1];
         }
-        let b64file = params["file"];
-        let b64src = params["src"];
         let extension = params["extension"];
         let lang;
         let theme = params["theme"];
@@ -155,86 +153,59 @@
                 ]
             }
         });
+        // ホスト (C#) との通信は WebView2 標準のメッセージングで行う。
+        // JS → ホスト: JSON 文字列を postMessage。ホスト → JS: PostWebMessageAsJson。
         let tmp_src = "";
-        open_file(b64file);
 
-        setInterval(autosave, 1000);
-        function file_load(b64src) {
-            let src = atob(b64src);
-            editor.setValue(src);
+        function post(obj) {
+            window.chrome.webview.postMessage(JSON.stringify(obj));
         }
 
-        function autosave() {
-            let src = editor.getValue();
+        window.chrome.webview.addEventListener('message', e => {
+            const msg = e.data; // PostWebMessageAsJson はパース済みオブジェクトで届く
+            switch (msg.type) {
+                case 'load':
+                    editor.setValue(msg.src);
+                    // 読み込み直後を基準にし、初回の自動保存が走らないようにする
+                    tmp_src = msg.src.replace(/\r\n/g, "\n");
+                    break;
+                case 'paste':
+                    do_paste(msg.text);
+                    break;
+                case 'copy-request':
+                    do_copy();
+                    break;
+            }
+        });
+
+        // 初期化完了をホストへ通知。ホストが開いたファイル内容を load で返す
+        post({ type: 'ready' });
+
+        setInterval(tick, 1000);
+        function tick() {
+            // テーマ追従
             if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-                monaco.editor.setTheme("vs-light")
+                monaco.editor.setTheme("vs-light");
             } else {
-                monaco.editor.setTheme("vs-dark")
+                monaco.editor.setTheme("vs-dark");
             }
-            src = src.replace(/\r\n/g, "\n");
-            if (tmp_src != src) {
-                if (tmp_src == "") {
-                    tmp_src = src;
-                    return;
-                }
+            // 変更があれば自動保存
+            let src = editor.getValue().replace(/\r\n/g, "\n");
+            if (tmp_src !== src) {
                 tmp_src = src;
-                let b64src = btoa(src);
-                const xhr = new XMLHttpRequest();
-                let data = btoa(`autosave ${b64file}`);
-                xhr.open('POST', `http://127.0.0.1:8086?data=${data}`, true);
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        console.log(xhr.responseText);
-                    } else {
-                        console.log('Request failed.  Returned status of ' + xhr.status);
-                    }
-                };
-                xhr.send(b64src);
+                post({ type: 'autosave', src });
             }
         }
 
-        function open_file(b64file) {
-            let xhr = new XMLHttpRequest();
-            xhr.open('POST', `http://127.0.0.1:8086?open=${b64file}`);
-            xhr.onload = () => {
-                a = xhr;
-                if (xhr.status === 200) {
-                    let b64src = xhr.responseText
-                    log = "=== READ ===\n"
-                    log += atob(b64src);
-                    log += "\n============"
-                    console.log(log)
-                    file_load(b64src);
-                } else {
-                    console.log('Request failed.  Returned status of ' + xhr.status);
-                }
-            }
-            xhr.send();
-        }
-
-        document.addEventListener("keydown", () => {
-            let src = editor.getValue();
-            src = src.replace(/\r\n/g, "\n");
-            let b64src = btoa(src);
+        document.addEventListener("keydown", (event) => {
             if (event.ctrlKey && event.key === 's') {
                 event.preventDefault();
-                const xhr = new XMLHttpRequest();
-                let data = btoa(`save ${b64file}`);
-                console.log(b64src);
-                xhr.open('POST', `http://127.0.0.1:8086?data=${data}`, true);
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        console.log(xhr.responseText);
-                    } else {
-                        console.log('Request failed.  Returned status of ' + xhr.status);
-                    }
-                };
-                xhr.send(b64src);
+                let src = editor.getValue().replace(/\r\n/g, "\n");
+                post({ type: 'save', src });
             }
-        })
+        });
 
-        paste_text = (base64_text) => {
-            let text = atob(base64_text);
+        function do_paste(text) {
             const selection = editor.getSelection();
             if (!selection) return;
             editor.executeEdits("clipboard", [{
@@ -242,25 +213,13 @@
                 text: text,
                 forceMoveMarkers: true,
             }]);
-            console.log(text);
         }
 
-        copy_text = () => {
+        function do_copy() {
             let text = editor.getModel().getValueInRange(editor.getSelection());
-            if (text == "") return;
+            if (text === "") return;
             text = text.replace(/\r\n/g, "\n");
-            console.log(text);
-            const xhr = new XMLHttpRequest();
-            let data = btoa(`copy-clipboard ${b64file}\n${text}`);
-            xhr.open('POST', `http://127.0.0.1:8086?data=${data}`, true);
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    console.log(xhr.responseText);
-                } else {
-                    console.log('Request failed.  Returned status of ' + xhr.status);
-                }
-            };
-            xhr.send();
+            post({ type: 'copy', text });
         }
     </script>
 </body>
